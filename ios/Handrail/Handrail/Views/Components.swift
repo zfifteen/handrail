@@ -1,0 +1,73 @@
+import SwiftUI
+
+struct Card<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        content
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
+            )
+    }
+}
+
+struct StatusBadge: View {
+    let status: SessionStatus
+
+    var body: some View {
+        Label(status.title, systemImage: icon)
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(color.opacity(0.18), in: Capsule())
+            .foregroundStyle(color)
+    }
+
+    private var color: Color {
+        switch status {
+        case .running: .green
+        case .waitingForApproval: .purple
+        case .completed: .blue
+        case .failed: .red
+        case .stopped: .orange
+        case .idle: .secondary
+        }
+    }
+
+    private var icon: String {
+        switch status {
+        case .running: "play.fill"
+        case .waitingForApproval: "exclamationmark.triangle.fill"
+        case .completed: "checkmark.circle.fill"
+        case .failed: "xmark.octagon.fill"
+        case .stopped: "stop.fill"
+        case .idle: "pause.circle"
+        }
+    }
+}
+
+struct EmptyState: View {
+    let title: String
+    let detail: String
+    let systemImage: String
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Image(systemName: systemImage)
+                .font(.system(size: 42, weight: .semibold))
+                .foregroundStyle(.purple)
+            Text(title)
+                .font(.title3.weight(.semibold))
+            Text(detail)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+    }
+}
