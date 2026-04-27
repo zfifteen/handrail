@@ -34,6 +34,7 @@ interface CodexSessionLine {
 
 export async function listCodexSessions(): Promise<SessionRecord[]> {
   const index = await readSessionIndex();
+  const pinnedThreadIds = await readDesktopPinnedThreadIds();
   const paths = await listLiveSessionFiles();
   const records: SessionRecord[] = [];
   for (const entry of index.sort((left, right) => timestampValue(right.updated_at) - timestampValue(left.updated_at))) {
@@ -41,7 +42,7 @@ export async function listCodexSessions(): Promise<SessionRecord[]> {
     if (!path) {
       continue;
     }
-    const record = await readCodexSession(path, entry);
+    const record = await readCodexSession(path, entry, pinnedThreadIds);
     if (record) {
       records.push(record);
     }
@@ -74,6 +75,30 @@ async function readSessionIndex(): Promise<CodexSessionIndexEntry[]> {
   return Array.from(entries.values());
 }
 
+async function readDesktopPinnedThreadIds(): Promise<Map<string, number>> {
+  const path = join(homedir(), ".codex", ".codex-global-state.json");
+  try {
+    return parseDesktopPinnedThreadIds(await readFile(path, "utf8"));
+  } catch {
+    return new Map();
+  }
+}
+
+export function parseDesktopPinnedThreadIds(raw: string): Map<string, number> {
+  const parsed = JSON.parse(raw) as { "pinned-thread-ids"?: unknown };
+  const ids = parsed["pinned-thread-ids"];
+  if (!Array.isArray(ids)) {
+    return new Map();
+  }
+  const pinned = new Map<string, number>();
+  ids.forEach((id, index) => {
+    if (typeof id === "string" && id.trim().length > 0) {
+      pinned.set(id, index);
+    }
+  });
+  return pinned;
+}
+
 async function listLiveSessionFiles(): Promise<Map<string, string>> {
   const root = join(homedir(), ".codex", "sessions");
   const paths = new Map<string, string>();
@@ -102,7 +127,7 @@ async function collectSessionFiles(dir: string, paths: Map<string, string>): Pro
   }
 }
 
-async function readCodexSession(path: string, indexEntry: CodexSessionIndexEntry): Promise<SessionRecord | null> {
+async function readCodexSession(path: string, indexEntry: CodexSessionIndexEntry, pinnedThreadIds: Map<string, number>): Promise<SessionRecord | null> {
   const raw = await readFile(path, "utf8");
   const lines = raw.split("\n").filter(Boolean);
   const firstLine = lines[0];
@@ -124,7 +149,9 @@ async function readCodexSession(path: string, indexEntry: CodexSessionIndexEntry
     startedAt: parsed.payload.timestamp,
     updatedAt: indexEntry.updated_at || extractUpdatedAt(lines) || parsed.payload.timestamp,
     source: "codex",
-    transcript: extractTranscript(lines.slice(1))
+    transcript: extractTranscript(lines.slice(1)),
+    isPinned: pinnedThreadIds.has(parsed.payload.id),
+    pinnedOrder: pinnedThreadIds.get(parsed.payload.id)
   };
 }
 
@@ -153,8 +180,7 @@ function extractTitle(lines: string[]): string | null {
 }
 
 function extractTranscript(lines: string[]): string[] {
-  const transcript: string[] = [];
-  let usedChars = 0;
+  const entries: string[] = [];
 
   for (const line of lines) {
     const parsed = JSON.parse(line) as CodexSessionLine;
@@ -179,16 +205,18 @@ function extractTranscript(lines: string[]): string[] {
       text.length > MAX_TRANSCRIPT_ENTRY_CHARS
         ? `${text.slice(0, MAX_TRANSCRIPT_ENTRY_CHARS)}\n[truncated]`
         : text;
-    const entry = formatCodexTranscriptEntry(payload.role, visibleText);
-    if (usedChars + entry.length > MAX_TRANSCRIPT_CHARS) {
-      break;
-    }
+    entries.push(formatCodexTranscriptEntry(payload.role, visibleText));
+  }
 
-    transcript.push(entry);
-    usedChars += entry.length;
-    if (transcript.length >= MAX_TRANSCRIPT_LINES) {
+  const transcript: string[] = [];
+  let usedChars = 0;
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index];
+    if (usedChars + entry.length > MAX_TRANSCRIPT_CHARS || transcript.length >= MAX_TRANSCRIPT_LINES) {
       break;
     }
+    transcript.unshift(entry);
+    usedChars += entry.length;
   }
 
   return transcript;

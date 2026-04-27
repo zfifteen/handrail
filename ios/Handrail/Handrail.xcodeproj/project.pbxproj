@@ -23,6 +23,9 @@
 		10000000000000000000010E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000E /* SettingsView.swift */; };
 		10000000000000000000010F /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000F /* QRScannerView.swift */; };
 		100000000000000000000110 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000010 /* PreviewData.swift */; };
+		100000000000000000000111 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000011 /* DashboardView.swift */; };
+		100000000000000000000112 /* AttentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000012 /* AttentionView.swift */; };
+		100000000000000000000113 /* NotificationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* NotificationCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +45,9 @@
 		10000000000000000000000E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/SettingsView.swift; sourceTree = "<group>"; };
 		10000000000000000000000F /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/QRScannerView.swift; sourceTree = "<group>"; };
 		100000000000000000000010 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/PreviewData.swift; sourceTree = "<group>"; };
+		100000000000000000000011 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/DashboardView.swift; sourceTree = "<group>"; };
+		100000000000000000000012 /* AttentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/AttentionView.swift; sourceTree = "<group>"; };
+		100000000000000000000013 /* NotificationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Utilities/NotificationCoordinator.swift; sourceTree = "<group>"; };
 		100000000000000000000201 /* Handrail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Handrail.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -65,7 +71,10 @@
 				100000000000000000000004 /* HandrailWebSocketClient.swift */,
 				100000000000000000000005 /* HandrailStore.swift */,
 				100000000000000000000006 /* Formatters.swift */,
+				100000000000000000000013 /* NotificationCoordinator.swift */,
 				100000000000000000000007 /* RootView.swift */,
+				100000000000000000000011 /* DashboardView.swift */,
+				100000000000000000000012 /* AttentionView.swift */,
 				100000000000000000000008 /* Components.swift */,
 				100000000000000000000009 /* SessionsView.swift */,
 				10000000000000000000000A /* SessionDetailView.swift */,
@@ -160,6 +169,9 @@
 				10000000000000000000010E /* SettingsView.swift in Sources */,
 				10000000000000000000010F /* QRScannerView.swift in Sources */,
 				100000000000000000000110 /* PreviewData.swift in Sources */,
+				100000000000000000000111 /* DashboardView.swift in Sources */,
+				100000000000000000000112 /* AttentionView.swift in Sources */,
+				100000000000000000000113 /* NotificationCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

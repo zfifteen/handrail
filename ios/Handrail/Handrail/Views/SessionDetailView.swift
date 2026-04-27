@@ -4,19 +4,12 @@ struct SessionDetailView: View {
     @Environment(HandrailStore.self) private var store
     let sessionId: String
     @State private var input = ""
+    @State private var showJumpToLatest = false
+    @State private var pendingContinuePrompt: String?
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(spacing: 14) {
-                    if let session = store.session(id: sessionId) {
-                        header(session)
-                        files(session.files ?? [])
-                    }
-                    transcript
-                }
-                .padding()
-            }
+            chatSurface
             if canControlSession {
                 if canSendInput {
                     composer(placeholder: "Send input") { text in
@@ -26,31 +19,97 @@ struct SessionDetailView: View {
                     readOnlyNotice("This session is running without live text input.")
                 }
             } else if canContinueArchivedChat {
-                composer(placeholder: "Continue chat") { text in
-                    store.continueSession(sessionId: sessionId, prompt: text)
-                }
+                continueComposer
             } else if store.session(id: sessionId)?.source == "codex" {
-                readOnlyNotice("Archived Codex chat")
+                readOnlyNotice(store.pairedMachine?.isOnline == true ? "Archived Codex chat" : "Connect to your Mac to continue this chat.")
             }
         }
         .background(Color.black.ignoresSafeArea())
         .navigationTitle(displayTitle(store.session(id: sessionId)?.title ?? "Session"))
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if canControlSession {
-                Button(role: .destructive) {
-                    store.stop(sessionId: sessionId)
-                } label: {
-                    Image(systemName: "stop.fill")
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                if canDismissAttention {
+                    Button {
+                        store.dismissAttention(sessionId: sessionId)
+                    } label: {
+                        Image(systemName: "xmark.circle")
+                    }
+                    .accessibilityLabel("Dismiss attention item")
+                }
+                if canControlSession {
+                    Button(role: .destructive) {
+                        store.stop(sessionId: sessionId)
+                    } label: {
+                        Image(systemName: "stop.fill")
+                    }
+                }
+            }
+        }
+    }
+
+    private var chatSurface: some View {
+        ScrollViewReader { proxy in
+            ZStack(alignment: .bottomTrailing) {
+                ScrollView {
+                    VStack(spacing: 14) {
+                        if let session = store.session(id: sessionId) {
+                            chatHeader(session)
+                            attentionSummary(session)
+                            files(session.files ?? [])
+                        }
+                        chatMessages
+                        Color.clear
+                            .frame(height: 1)
+                            .id(bottomId)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 18)
+                }
+                .onAppear {
+                    scrollToLatest(proxy, animated: false)
+                }
+                .onChange(of: transcriptText) { _, _ in
+                    clearCompletedContinuePromptIfNeeded()
+                    scrollToLatest(proxy, animated: true)
+                }
+                .onChange(of: store.lastError) { _, error in
+                    if error != nil {
+                        pendingContinuePrompt = nil
+                    }
+                }
+                .simultaneousGesture(
+                    DragGesture().onChanged { value in
+                        if value.translation.height < -12 {
+                            showJumpToLatest = true
+                        }
+                    }
+                )
+
+                if showJumpToLatest {
+                    Button {
+                        scrollToLatest(proxy, animated: true)
+                    } label: {
+                        Image(systemName: "arrow.down")
+                            .font(.body.weight(.bold))
+                            .frame(width: 44, height: 44)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.circle)
+                    .tint(.purple)
+                    .padding(.trailing, 18)
+                    .padding(.bottom, 12)
+                    .accessibilityLabel("Jump to latest message")
                 }
             }
         }
     }
 
     private var canControlSession: Bool {
-        guard let session = store.session(id: sessionId), session.source != "codex" else {
-            return false
-        }
-        return session.status == .running || session.status == .waitingForApproval
+        guard let session = store.session(id: sessionId) else { return false }
+        return store.pairedMachine?.isOnline == true &&
+            (session.status == .running || session.status == .waitingForApproval)
     }
 
     private var canSendInput: Bool {
@@ -59,33 +118,34 @@ struct SessionDetailView: View {
 
     private var canContinueArchivedChat: Bool {
         guard let session = store.session(id: sessionId) else { return false }
-        return session.source == "codex" && store.pairedMachine?.isOnline == true
+        return session.source == "codex" &&
+            store.pairedMachine?.isOnline == true &&
+            session.status != .running &&
+            session.status != .waitingForApproval
     }
 
-    private func header(_ session: HandrailSession) -> some View {
-        Card {
-            VStack(alignment: .leading, spacing: 10) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(displayTitle(session.title))
-                        .font(.title3.weight(.semibold))
-                        .lineLimit(2)
-                    Text(store.pairedMachine?.machineName ?? "Mac")
+    private var canDismissAttention: Bool {
+        guard let session = store.session(id: sessionId) else { return false }
+        return store.needsAttention(session) && !store.isAttentionDismissed(sessionId: sessionId)
+    }
+
+    private func chatHeader(_ session: HandrailSession) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
+                StatusBadge(status: session.status)
+                if session.source == "codex" && session.status != .running && session.status != .waitingForApproval {
+                    Text("Can continue")
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
-                HStack {
-                    StatusBadge(status: session.status)
-                    if session.source == "codex" {
-                        Text("Can continue")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                }
-                Text(session.repo)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
+            Text(session.repo)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 4)
     }
 
     private func files(_ files: [String]) -> some View {
@@ -106,24 +166,58 @@ struct SessionDetailView: View {
         }
     }
 
-    private var transcript: some View {
-        Card {
-            VStack(alignment: .leading, spacing: 10) {
-                Label("Transcript", systemImage: "terminal")
-                    .font(.headline)
-                let lines = store.transcripts[sessionId] ?? []
-                if lines.isEmpty {
-                    Text(emptyTranscriptText)
-                        .foregroundStyle(.secondary)
-                    if let error = store.lastError {
-                        Text(error)
-                            .font(.caption)
-                            .foregroundStyle(.red)
+    private func attentionSummary(_ session: HandrailSession) -> some View {
+        Group {
+            if store.needsAttention(session) {
+                Card {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label(session.status == .failed ? "Needs attention" : "Approval required", systemImage: session.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill")
+                            .font(.headline)
+                            .foregroundStyle(session.status == .failed ? .red : .orange)
+                        Text(attentionDetail(for: session))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                             .textSelection(.enabled)
                     }
-                } else {
-                    MarkdownTranscript(text: lines.joined())
                 }
+            }
+        }
+    }
+
+    private func attentionDetail(for session: HandrailSession) -> String {
+        if session.status == .waitingForApproval {
+            return "Codex is waiting for a decision before it can continue."
+        }
+        let text = transcriptText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            return "This session failed before Handrail received readable output."
+        }
+        return ChatBlock.failureSummary(from: text)
+    }
+
+    private var chatMessages: some View {
+        VStack(spacing: 14) {
+            if chatBlocks.isEmpty {
+                Text(emptyTranscriptText)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 48)
+                if let error = store.lastError {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                ForEach(Array(chatBlocks.enumerated()), id: \.offset) { index, block in
+                    if block.startsRound {
+                        roundDivider(block.round)
+                    }
+                    ChatMessageBubble(block: block, isLatest: index == chatBlocks.count - 1)
+                }
+                sessionErrorView
             }
         }
     }
@@ -142,6 +236,28 @@ struct SessionDetailView: View {
             .buttonStyle(.borderedProminent)
             .tint(.purple)
             .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }
+        .padding()
+        .background(Color.black)
+    }
+
+    private var continueComposer: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            TextField("Continue this Codex chat", text: $input, axis: .vertical)
+                .lineLimit(2...5)
+                .textFieldStyle(.roundedBorder)
+            Button {
+                let prompt = input.trimmingCharacters(in: .whitespacesAndNewlines)
+                pendingContinuePrompt = prompt
+                store.continueSession(sessionId: sessionId, prompt: prompt)
+            } label: {
+                Label(pendingContinuePrompt == nil ? "Continue Chat" : "Sending to Desktop", systemImage: "arrow.turn.down.right")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.purple)
+            .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || pendingContinuePrompt != nil)
+            sessionErrorView
         }
         .padding()
         .background(Color.black)
@@ -176,6 +292,67 @@ struct SessionDetailView: View {
         }
     }
 
+    private var transcriptText: String {
+        (store.transcripts[sessionId] ?? []).joined()
+    }
+
+    private var chatBlocks: [ChatBlock] {
+        ChatBlock.parse(transcriptText)
+    }
+
+    private var bottomId: String {
+        "bottom-\(sessionId)"
+    }
+
+    private func scrollToLatest(_ proxy: ScrollViewProxy, animated: Bool) {
+        let action = {
+            proxy.scrollTo(bottomId, anchor: .bottom)
+            showJumpToLatest = false
+        }
+        if animated {
+            withAnimation(.easeOut(duration: 0.22), action)
+        } else {
+            DispatchQueue.main.async(execute: action)
+        }
+    }
+
+    private func clearCompletedContinuePromptIfNeeded() {
+        guard let pendingContinuePrompt else { return }
+        if transcriptText.contains(pendingContinuePrompt) {
+            input = ""
+            self.pendingContinuePrompt = nil
+        }
+    }
+
+    private var sessionErrorView: some View {
+        Group {
+            if let error = store.lastError {
+                Label(error, systemImage: "exclamationmark.triangle.fill")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(10)
+                    .background(Color.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+        }
+    }
+
+    private func roundDivider(_ round: Int) -> some View {
+        HStack(spacing: 10) {
+            Rectangle()
+                .fill(Color.white.opacity(0.12))
+                .frame(height: 1)
+            Text("Round \(round)")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Rectangle()
+                .fill(Color.white.opacity(0.12))
+                .frame(height: 1)
+        }
+        .padding(.vertical, 2)
+    }
+
     private func displayTitle(_ title: String) -> String {
         if title.hasPrefix("Codex: ") {
             return String(title.dropFirst("Codex: ".count))
@@ -184,29 +361,63 @@ struct SessionDetailView: View {
     }
 }
 
-private struct MarkdownTranscript: View {
-    let text: String
+private struct ChatMessageBubble: View {
+    let block: ChatBlock
+    let isLatest: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
-                VStack(alignment: .leading, spacing: 6) {
-                    if let role = block.role {
-                        Text(role)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(role == "User" ? .purple : .secondary)
+        HStack(alignment: .bottom) {
+            if block.role == .user {
+                Spacer(minLength: 42)
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Text(block.role.title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(block.role == .user ? .white.opacity(0.82) : .secondary)
+                    if isLatest {
+                        Text("Latest")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
                     }
+                }
+                if block.isRawMarkupNoise {
+                    RawOutputNotice(text: block.body)
+                } else {
                     MarkdownBody(text: block.body)
                 }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(block.role.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(block.role.stroke, lineWidth: 1)
+            )
+            .frame(maxWidth: block.role == .user ? 330 : .infinity, alignment: block.role == .user ? .trailing : .leading)
+            if block.role != .user {
+                Spacer(minLength: 26)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+}
 
-    private var blocks: [TranscriptBlock] {
+private struct ChatBlock {
+    let role: ChatRole
+    let body: String
+    let round: Int
+    let startsRound: Bool
+
+    var isRawMarkupNoise: Bool {
+        ChatBlock.isRawMarkupNoise(body)
+    }
+
+    static func parse(_ text: String) -> [ChatBlock] {
         var result: [TranscriptBlock] = []
-        var role: String?
+        var role: ChatRole = .codex
         var lines: [String] = []
+        var round = 0
 
         func flush() {
             let body = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -220,6 +431,11 @@ private struct MarkdownTranscript: View {
             if let parsed = parseRole(line) {
                 flush()
                 role = parsed.role
+                if role == .user {
+                    round += 1
+                } else if round == 0 {
+                    round = 1
+                }
                 if !parsed.body.isEmpty {
                     lines.append(parsed.body)
                 }
@@ -229,15 +445,31 @@ private struct MarkdownTranscript: View {
         }
         flush()
 
-        if result.isEmpty {
-            return [TranscriptBlock(role: nil, body: text)]
+        if result.isEmpty && !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return [ChatBlock(role: .codex, body: text, round: 1, startsRound: true)]
         }
-        return result
+
+        var rendered: [ChatBlock] = []
+        var currentRound = 0
+        for block in result {
+            if block.role == .user {
+                currentRound += 1
+            } else if currentRound == 0 {
+                currentRound = 1
+            }
+            rendered.append(ChatBlock(
+                role: block.role,
+                body: block.body,
+                round: currentRound,
+                startsRound: block.role == .user || rendered.isEmpty
+            ))
+        }
+        return rendered
     }
 
-    private func parseRole(_ line: String) -> (role: String, body: String)? {
-        for role in ["User", "Codex"] {
-            let prefix = "\(role):"
+    private static func parseRole(_ line: String) -> (role: ChatRole, body: String)? {
+        for role in ChatRole.allCases {
+            let prefix = "\(role.rawValue):"
             if line == prefix {
                 return (role, "")
             }
@@ -248,11 +480,97 @@ private struct MarkdownTranscript: View {
         return nil
     }
 
+    static func failureSummary(from text: String) -> String {
+        let lines = text
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .components(separatedBy: "\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        if lines.contains(where: { $0.localizedCaseInsensitiveContains("Enable JavaScript and cookies to continue") }) {
+            return "Codex received a browser challenge page instead of readable content."
+        }
+        if isRawMarkupNoise(text) {
+            return "Codex produced raw markup output. The full raw response is contained below."
+        }
+        return lines.last ?? "This session failed."
+    }
+
+    private static func isRawMarkupNoise(_ text: String) -> Bool {
+        let lowercased = text.lowercased()
+        return lowercased.contains("<!doctype")
+            || lowercased.contains("<html")
+            || lowercased.contains("<svg")
+            || lowercased.contains("</svg>")
+            || lowercased.contains("<div class=")
+            || lowercased.contains("window._cf_chl_opt")
+            || lowercased.contains("enable javascript and cookies to continue")
+    }
 }
 
 private struct TranscriptBlock {
-    let role: String?
+    let role: ChatRole
     let body: String
+}
+
+private enum ChatRole: String, CaseIterable {
+    case user = "User"
+    case codex = "Codex"
+
+    var title: String {
+        rawValue
+    }
+
+    var background: Color {
+        switch self {
+        case .user:
+            Color.purple.opacity(0.52)
+        case .codex:
+            Color.white.opacity(0.075)
+        }
+    }
+
+    var stroke: Color {
+        switch self {
+        case .user:
+            Color.purple.opacity(0.35)
+        case .codex:
+            Color.white.opacity(0.08)
+        }
+    }
+}
+
+private struct RawOutputNotice: View {
+    let text: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Raw browser response", systemImage: "doc.text.magnifyingglass")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.orange)
+            Text("Handrail kept this output readable instead of rendering the embedded HTML/SVG as chat.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(preview)
+                .font(.caption.monospaced())
+                .foregroundStyle(.secondary)
+                .lineLimit(8)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(10)
+                .background(Color.black.opacity(0.28), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        }
+    }
+
+    private var preview: String {
+        let compact = text
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if compact.count <= 900 {
+            return compact
+        }
+        return "\(String(compact.prefix(900)))\n..."
+    }
 }
 
 private struct MarkdownBody: View {

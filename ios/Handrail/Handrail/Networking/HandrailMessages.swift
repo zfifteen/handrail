@@ -3,6 +3,7 @@ import Foundation
 enum ClientMessage: Encodable {
     case hello(token: String)
     case startSession(repo: String, title: String, prompt: String)
+    case startChat(StartChatPayload)
     case continueSession(sessionId: String, prompt: String)
     case sendInput(sessionId: String, text: String)
     case approve(sessionId: String, approvalId: String)
@@ -19,6 +20,14 @@ enum ClientMessage: Encodable {
         case text
         case approvalId
         case reason
+        case projectId
+        case projectPath
+        case workMode
+        case branch
+        case newBranch
+        case accessPreset
+        case model
+        case reasoningEffort
     }
 
     func encode(to encoder: Encoder) throws {
@@ -32,6 +41,17 @@ enum ClientMessage: Encodable {
             try container.encode(repo, forKey: .repo)
             try container.encode(title, forKey: .title)
             try container.encode(prompt, forKey: .prompt)
+        case .startChat(let payload):
+            try container.encode("start_chat", forKey: .type)
+            try container.encode(payload.prompt, forKey: .prompt)
+            try container.encode(payload.projectId, forKey: .projectId)
+            try container.encodeIfPresent(payload.projectPath, forKey: .projectPath)
+            try container.encode(payload.workMode, forKey: .workMode)
+            try container.encode(payload.branch, forKey: .branch)
+            try container.encodeIfPresent(payload.newBranch, forKey: .newBranch)
+            try container.encode(payload.accessPreset, forKey: .accessPreset)
+            try container.encode(payload.model, forKey: .model)
+            try container.encode(payload.reasoningEffort, forKey: .reasoningEffort)
         case .continueSession(let sessionId, let prompt):
             try container.encode("continue_session", forKey: .type)
             try container.encode(sessionId, forKey: .sessionId)
@@ -58,6 +78,7 @@ enum ClientMessage: Encodable {
 
 enum ServerMessage: Decodable {
     case machineStatus(machineName: String, online: Bool, defaultRepo: String?)
+    case newChatOptions(NewChatOptions)
     case sessionList([HandrailSession])
     case sessionStarted(HandrailSession)
     case sessionEvent(sessionId: String, event: SessionEvent)
@@ -80,6 +101,7 @@ enum ServerMessage: Decodable {
         case diff
         case message
         case defaultRepo
+        case options
     }
 
     init(from decoder: Decoder) throws {
@@ -92,6 +114,8 @@ enum ServerMessage: Decodable {
                 online: try container.decode(Bool.self, forKey: .online),
                 defaultRepo: try container.decodeIfPresent(String.self, forKey: .defaultRepo)
             )
+        case "new_chat_options":
+            self = .newChatOptions(try container.decode(NewChatOptions.self, forKey: .options))
         case "session_list":
             self = .sessionList(try container.decode([HandrailSession].self, forKey: .sessions))
         case "session_started":

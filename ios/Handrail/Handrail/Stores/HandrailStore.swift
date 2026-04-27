@@ -12,18 +12,26 @@ final class HandrailStore {
     var notifications: [HandrailNotification] = []
     var connectionText = "Offline"
     var defaultRepo = ""
+    var newChatOptions: NewChatOptions?
     var lastError: String?
     var lastStartedSessionId: String?
+    var notificationSessionId: String?
+    var showsApprovalFromNotification = false
     var pinnedSessionIds: Set<String> = []
+    var dismissedAttentionSessionIds: Set<String> = []
+    var isRefreshingSessions = false
+    var lastSessionRefreshAt: Date?
 
     private let storageKey = "handrail.pairedMachine"
     private let pinnedStorageKey = "handrail.pinnedSessionIds"
+    private let dismissedAttentionStorageKey = "handrail.dismissedAttentionSessionIds"
     private let client = HandrailWebSocketClient()
     private var awaitingStartedSession = false
 
     init(enableNetworking: Bool = true) {
         loadPairing()
         loadPinnedSessions()
+        loadDismissedAttentionSessions()
         client.onMessage = { [weak self] message in
             Task { @MainActor in self?.handle(message) }
         }
@@ -65,6 +73,16 @@ final class HandrailStore {
         client.send(.startSession(repo: repo, title: title, prompt: prompt))
     }
 
+    func startChat(_ payload: StartChatPayload) {
+        guard pairedMachine?.isOnline == true else {
+            reportError("Mac is offline. Start the Handrail server and reconnect before starting a chat.")
+            return
+        }
+        lastError = nil
+        awaitingStartedSession = true
+        client.send(.startChat(payload))
+    }
+
     func continueSession(sessionId: String, prompt: String) {
         guard pairedMachine?.isOnline == true else {
             reportError("Mac is offline. Start the Handrail server and reconnect before continuing a chat.")
@@ -76,8 +94,26 @@ final class HandrailStore {
     }
 
     func refreshSessions() {
-        guard let token = pairedMachine?.token else { return }
+        if pairedMachine?.isOnline != true {
+            reconnect()
+            return
+        }
+        guard let token = pairedMachine?.token else {
+            isRefreshingSessions = false
+            return
+        }
+        isRefreshingSessions = true
         client.send(.hello(token: token))
+    }
+
+    func reconnect() {
+        guard let pairedMachine else {
+            isRefreshingSessions = false
+            return
+        }
+        connectionText = "Reconnecting"
+        isRefreshingSessions = true
+        client.connect(to: pairedMachine)
     }
 
     func sendInput(sessionId: String, text: String) {
@@ -103,10 +139,16 @@ final class HandrailStore {
     }
 
     func isPinned(sessionId: String) -> Bool {
-        pinnedSessionIds.contains(sessionId)
+        if let session = session(id: sessionId), session.source == "codex" {
+            return session.isPinned == true
+        }
+        return pinnedSessionIds.contains(sessionId)
     }
 
     func togglePin(sessionId: String) {
+        if let session = session(id: sessionId), session.source == "codex" {
+            return
+        }
         if pinnedSessionIds.contains(sessionId) {
             pinnedSessionIds.remove(sessionId)
         } else {
@@ -115,8 +157,77 @@ final class HandrailStore {
         savePinnedSessions()
     }
 
+    func isAttentionDismissed(sessionId: String) -> Bool {
+        dismissedAttentionSessionIds.contains(sessionId)
+    }
+
+    func dismissAttention(sessionId: String) {
+        dismissedAttentionSessionIds.insert(sessionId)
+        saveDismissedAttentionSessions()
+    }
+
+    func dismissAllAttention() {
+        dismissedAttentionSessionIds.formUnion(sessions.filter(needsAttention).map(\.id))
+        saveDismissedAttentionSessions()
+    }
+
+    func restoreAttention(sessionId: String) {
+        dismissedAttentionSessionIds.remove(sessionId)
+        saveDismissedAttentionSessions()
+    }
+
+    func needsAttention(_ session: HandrailSession) -> Bool {
+        session.status == .waitingForApproval || session.status == .failed
+    }
+
     func consumeLastStartedSessionId() {
         lastStartedSessionId = nil
+    }
+
+    func consumeNotificationSessionId() {
+        notificationSessionId = nil
+    }
+
+    func approveFromNotification(sessionId: String, approvalId: String) {
+        guard pairedMachine?.isOnline == true else {
+            reportError("Mac is offline. Reconnect before approving from a notification.")
+            return
+        }
+        client.send(.approve(sessionId: sessionId, approvalId: approvalId))
+        if latestApproval?.approvalId == approvalId {
+            latestApproval = nil
+        }
+    }
+
+    func denyFromNotification(sessionId: String, approvalId: String) {
+        guard pairedMachine?.isOnline == true else {
+            reportError("Mac is offline. Reconnect before denying from a notification.")
+            return
+        }
+        client.send(.deny(sessionId: sessionId, approvalId: approvalId, reason: "Denied from Handrail notification."))
+        if latestApproval?.approvalId == approvalId {
+            latestApproval = nil
+        }
+    }
+
+    func replyFromNotification(sessionId: String, text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        guard pairedMachine?.isOnline == true else {
+            reportError("Mac is offline. Reconnect before replying from a notification.")
+            return
+        }
+        client.send(.sendInput(sessionId: sessionId, text: trimmed))
+        notificationSessionId = sessionId
+    }
+
+    func openSessionFromNotification(sessionId: String) {
+        notificationSessionId = sessionId
+    }
+
+    func openApprovalFromNotification(sessionId: String) {
+        notificationSessionId = sessionId
+        showsApprovalFromNotification = latestApproval?.sessionId == sessionId
     }
 
     private func handle(_ message: ServerMessage) {
@@ -131,8 +242,13 @@ final class HandrailStore {
                 pairedMachine = machine
             }
             addActivity("Machine online", machineName)
+        case .newChatOptions(let options):
+            newChatOptions = options
         case .sessionList(let sessions):
             self.sessions = sessions
+            pruneDismissedAttentionSessions(against: sessions)
+            isRefreshingSessions = false
+            lastSessionRefreshAt = Date()
             for session in sessions {
                 if let transcript = session.transcript, !transcript.isEmpty {
                     transcripts[session.id] = transcript
@@ -156,8 +272,13 @@ final class HandrailStore {
                 addActivity("Files detected", approval.files.joined(separator: ", "), sessionId: approval.sessionId)
             }
             notifications.insert(HandrailNotification(title: "Approval required", detail: approval.summary, date: Date(), sessionId: approval.sessionId), at: 0)
+            HandrailNotificationCoordinator.shared.notifyApproval(
+                approval,
+                sessionTitle: session(id: approval.sessionId)?.title ?? approval.title
+            )
         case .error(let message):
             awaitingStartedSession = false
+            isRefreshingSessions = false
             reportError(message)
         case .ignored:
             break
@@ -176,11 +297,13 @@ final class HandrailStore {
             appendTranscript(sessionId: sessionId, text: event.text)
             addActivity("Session completed", event.text ?? sessionId, date: date, sessionId: sessionId)
             notifications.insert(HandrailNotification(title: "Task completed", detail: event.text ?? sessionId, date: date, sessionId: sessionId), at: 0)
+            HandrailNotificationCoordinator.shared.notifySessionCompleted(sessionId: sessionId, text: event.text ?? sessionId)
         case "session_failed":
             updateStatus(sessionId: sessionId, status: .failed)
             appendTranscript(sessionId: sessionId, text: event.text)
             addActivity("Session failed", event.text ?? sessionId, date: date, sessionId: sessionId)
             notifications.insert(HandrailNotification(title: "Task failed", detail: event.text ?? sessionId, date: date, sessionId: sessionId), at: 0)
+            HandrailNotificationCoordinator.shared.notifySessionFailed(sessionId: sessionId, text: event.text ?? sessionId)
         case "session_stopped":
             updateStatus(sessionId: sessionId, status: .stopped)
             appendTranscript(sessionId: sessionId, text: event.text)
@@ -211,6 +334,7 @@ final class HandrailStore {
     }
 
     private func markWaiting(sessionId: String, files: [String]) {
+        restoreAttention(sessionId: sessionId)
         if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
             sessions[index].status = .waitingForApproval
             sessions[index].files = files
@@ -221,6 +345,7 @@ final class HandrailStore {
         let lowercased = text.lowercased()
         if lowercased.contains("input required") {
             notifications.insert(HandrailNotification(title: "Input required", detail: text, date: date, sessionId: sessionId), at: 0)
+            HandrailNotificationCoordinator.shared.notifyInputRequired(sessionId: sessionId, text: text)
         }
         if lowercased.contains("test failed") || lowercased.contains("tests failed") {
             notifications.insert(HandrailNotification(title: "Tests failed", detail: text, date: date, sessionId: sessionId), at: 0)
@@ -261,5 +386,20 @@ final class HandrailStore {
 
     private func savePinnedSessions() {
         UserDefaults.standard.set(Array(pinnedSessionIds).sorted(), forKey: pinnedStorageKey)
+    }
+
+    private func loadDismissedAttentionSessions() {
+        let ids = UserDefaults.standard.stringArray(forKey: dismissedAttentionStorageKey) ?? []
+        dismissedAttentionSessionIds = Set(ids)
+    }
+
+    private func saveDismissedAttentionSessions() {
+        UserDefaults.standard.set(Array(dismissedAttentionSessionIds).sorted(), forKey: dismissedAttentionStorageKey)
+    }
+
+    private func pruneDismissedAttentionSessions(against sessions: [HandrailSession]) {
+        let activeAttentionIds = Set(sessions.filter(needsAttention).map(\.id))
+        dismissedAttentionSessionIds = dismissedAttentionSessionIds.intersection(activeAttentionIds)
+        saveDismissedAttentionSessions()
     }
 }

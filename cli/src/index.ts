@@ -58,10 +58,10 @@ program.command("start")
   });
 
 program.command("sessions")
-  .description("List known Handrail sessions.")
+  .description("List known Codex Desktop chats.")
   .action(async () => {
-    const state = await loadState();
-    for (const session of state.sessions) {
+    const sessions = await fetchLocalSessions();
+    for (const session of sessions) {
       console.log(`${session.id}\t${session.status}\t${session.title}\t${session.repo}`);
     }
   });
@@ -122,6 +122,39 @@ async function sendLocalServerMessage(message: object, expectedType: ServerMessa
     ws.once("close", () => {
       if (!resolved) {
         reject(new Error("Handrail server closed before confirming the command."));
+      }
+    });
+  });
+}
+
+async function fetchLocalSessions(): Promise<Extract<ServerMessage, { type: "session_list" }>["sessions"]> {
+  const state = await loadState();
+  if (!state.pairingToken) {
+    throw new Error("No pairing token. Run `handrail pair` first.");
+  }
+
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://127.0.0.1:${state.port}`);
+    let resolved = false;
+
+    ws.once("error", (error) => reject(error));
+    ws.once("open", () => {
+      ws.send(JSON.stringify({ type: "hello", token: state.pairingToken }));
+    });
+    ws.on("message", (data) => {
+      const serverMessage = JSON.parse(data.toString()) as ServerMessage;
+      if (serverMessage.type === "session_list") {
+        resolved = true;
+        ws.close();
+        resolve(serverMessage.sessions);
+      }
+      if (serverMessage.type === "error") {
+        reject(new Error(serverMessage.message));
+      }
+    });
+    ws.once("close", () => {
+      if (!resolved) {
+        reject(new Error("Handrail server closed before sending sessions."));
       }
     });
   });

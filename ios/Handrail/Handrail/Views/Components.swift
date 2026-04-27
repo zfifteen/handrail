@@ -71,3 +71,56 @@ struct EmptyState: View {
         .padding(.vertical, 40)
     }
 }
+
+struct SyncStatusRow: View {
+    let isRefreshing: Bool
+    let lastRefreshAt: Date?
+    let isOnline: Bool
+    let reconnect: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(isRefreshing ? .purple : iconColor)
+            Text(statusText)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button(isOnline ? "Refresh" : "Reconnect") {
+                reconnect()
+            }
+            .font(.caption.weight(.semibold))
+            .buttonStyle(.bordered)
+            .tint(.purple)
+        }
+        .accessibilityLabel(statusText)
+    }
+
+    private var statusText: String {
+        if isRefreshing {
+            return "Refreshing from Mac..."
+        }
+        if !isOnline {
+            guard let lastRefreshAt else {
+                return "Offline. Not synced yet"
+            }
+            return "Offline. Last synced \(HandrailFormatters.time.string(from: lastRefreshAt))"
+        }
+        guard let lastRefreshAt else {
+            return "Not synced yet"
+        }
+        return "Synced \(HandrailFormatters.time.string(from: lastRefreshAt))"
+    }
+
+    private var icon: String {
+        if isRefreshing {
+            return "arrow.triangle.2.circlepath"
+        }
+        return isOnline ? "checkmark.circle" : "wifi.slash"
+    }
+
+    private var iconColor: Color {
+        isOnline ? .secondary : .orange
+    }
+}

@@ -5,6 +5,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import type { ClientMessage, PairingPayload, ServerMessage } from "./types.js";
 import { ensurePairingToken, loadState } from "./state.js";
 import { SessionManager } from "./sessions.js";
+import { getNewChatOptions } from "./newChatOptions.js";
 
 interface AuthedSocket extends WebSocket {
   isAuthed?: boolean;
@@ -74,6 +75,7 @@ export async function startServer(): Promise<void> {
   });
 
   console.log(`Handrail server listening on ws://0.0.0.0:${state.port}`);
+  await new Promise<void>(() => {});
 }
 
 async function handleMessage(
@@ -104,6 +106,7 @@ async function handleMessage(
       online: true,
       defaultRepo: state.defaultRepo
     } satisfies ServerMessage));
+    socket.send(JSON.stringify({ type: "new_chat_options", options: await getNewChatOptions(state.defaultRepo) } satisfies ServerMessage));
     socket.send(JSON.stringify({ type: "session_list", sessions: await sessions.list() } satisfies ServerMessage));
     return;
   }
@@ -111,10 +114,14 @@ async function handleMessage(
   try {
     switch (message.type) {
       case "hello":
+        socket.send(JSON.stringify({ type: "new_chat_options", options: await getNewChatOptions() } satisfies ServerMessage));
         socket.send(JSON.stringify({ type: "session_list", sessions: await sessions.list() } satisfies ServerMessage));
         break;
       case "start_session":
         await sessions.start(message.repo, message.title, message.prompt);
+        break;
+      case "start_chat":
+        await sessions.startChat(message);
         break;
       case "continue_session":
         await sessions.continue(message.sessionId, message.prompt);
@@ -131,7 +138,7 @@ async function handleMessage(
         broadcast({ type: "session_list", sessions: await sessions.list() });
         break;
       case "stop_session":
-        sessions.stop(message.sessionId);
+        await sessions.stop(message.sessionId);
         socket.send(JSON.stringify({ type: "command_result", ok: true, message: "Session stop requested." } satisfies ServerMessage));
         break;
     }

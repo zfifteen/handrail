@@ -1,11 +1,20 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
+import type { NewChatAccessPreset, NewChatReasoning } from "./types.js";
+import { codexAccessArgs } from "./newChatOptions.js";
 
 export interface AgentProcess {
   child: ChildProcessWithoutNullStreams;
   acceptsInput: boolean;
   send(text: string): void;
   stop(): void;
+}
+
+export interface AgentOptions {
+  model?: string;
+  reasoningEffort?: NewChatReasoning;
+  accessPreset?: NewChatAccessPreset;
+  skipGitRepoCheck?: boolean;
 }
 
 function parseAgentCommand(): { command: string; args: string[] } {
@@ -34,10 +43,14 @@ export function formatAgentOutput(text: string): string {
     .join("\n");
 }
 
-export function startAgent(repo: string, prompt?: string, resumeSessionId?: string): AgentProcess {
+export function startAgent(repo: string, prompt?: string, resumeSessionId?: string, options: AgentOptions = {}): AgentProcess {
   const { command, args } = parseAgentCommand();
   const promptText = prompt?.trim();
-  const childArgs = resumeSessionId ? resumeArgs(command, args, resumeSessionId, promptText) : promptText ? [...args, promptText] : args;
+  const childArgs = resumeSessionId
+    ? resumeArgs(command, args, resumeSessionId, promptText)
+    : promptText
+      ? [...chatArgs(args, options), promptText]
+      : chatArgs(args, options);
   const child = spawn(command, childArgs, {
     cwd: repo,
     env: {
@@ -65,6 +78,23 @@ export function startAgent(repo: string, prompt?: string, resumeSessionId?: stri
       child.kill("SIGTERM");
     }
   };
+}
+
+export function chatArgs(args: string[], options: AgentOptions): string[] {
+  const next = [...args];
+  if (options.skipGitRepoCheck) {
+    next.push("--skip-git-repo-check");
+  }
+  if (options.model?.trim()) {
+    next.push("-m", options.model.trim());
+  }
+  if (options.reasoningEffort) {
+    next.push("-c", `model_reasoning_effort="${options.reasoningEffort}"`);
+  }
+  if (options.accessPreset) {
+    next.push(...codexAccessArgs(options.accessPreset));
+  }
+  return next;
 }
 
 function resumeArgs(command: string, args: string[], sessionId: string, prompt?: string): string[] {

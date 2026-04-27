@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120">
+  <rect width="1600" height="1120" fill="#080808"/>
+  <style>
+    .label { font: 700 28px -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; fill: #f5f5f7; }
+    .caption { font: 500 18px -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; fill: #a5a5ad; }
+    .phone { fill: #000; stroke: #25252a; stroke-width: 2; rx: 42; }
+    .title { font: 800 48px -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; fill: #fff; }
+    .section { font: 800 32px -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; fill: #9b9ba3; }
+    .row { font: 800 32px -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; fill: #fff; }
+    .sub { font: 500 24px -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; fill: #8d8d95; }
+    .time { font: 700 30px -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; fill: #8d8d95; }
+  </style>
+
+  <text x="60" y="58" class="label">Dashboard Divider Options</text>
+  <text x="60" y="88" class="caption">Same dashboard structure. Only the horizontal rules between sections change.</text>
+
+  <g transform="translate(60 130)">
+    <text x="0" y="-26" class="label">A. Bright hairline</text>
+    <rect class="phone" x="0" y="0" width="340" height="900"/>
+    <text x="28" y="76" class="title">Dashboard</text>
+    <rect x="28" y="118" width="284" height="118" rx="14" fill="#141416" stroke="#242428"/>
+    <text x="52" y="168" class="row" font-size="28">Today</text>
+    <text x="52" y="205" class="sub">0 running · 0 waiting</text>
+    <text x="28" y="310" class="section">Needs attention</text>
+    <text x="40" y="362" class="sub">No approvals or failures</text>
+    <line x1="28" x2="312" y1="410" y2="410" stroke="#ffffff" stroke-opacity="0.82" stroke-width="1"/>
+    <text x="28" y="476" class="section">Running now</text>
+    <text x="40" y="528" class="sub">No live Handrail sessions</text>
+    <line x1="28" x2="312" y1="576" y2="576" stroke="#ffffff" stroke-opacity="0.82" stroke-width="1"/>
+    <text x="28" y="642" class="section">Pinned</text>
+    <text x="56" y="700" class="row">Build Handrail MVP</text>
+    <text x="56" y="734" class="sub">handrail</text>
+    <text x="260" y="715" class="time">1d</text>
+    <line x1="28" x2="312" y1="780" y2="780" stroke="#ffffff" stroke-opacity="0.82" stroke-width="1"/>
+    <text x="28" y="846" class="section">All chats</text>
+  </g>
+
+  <g transform="translate(440 130)">
+    <text x="0" y="-26" class="label">B. Soft white rule</text>
+    <rect class="phone" x="0" y="0" width="340" height="900"/>
+    <text x="28" y="76" class="title">Dashboard</text>
+    <rect x="28" y="118" width="284" height="118" rx="14" fill="#141416" stroke="#242428"/>
+    <text x="52" y="168" class="row" font-size="28">Today</text>
+    <text x="52" y="205" class="sub">0 running · 0 waiting</text>
+    <text x="28" y="310" class="section">Needs attention</text>
+    <text x="40" y="362" class="sub">No approvals or failures</text>
+    <line x1="28" x2="312" y1="410" y2="410" stroke="#ffffff" stroke-opacity="0.42" stroke-width="1"/>
+    <text x="28" y="476" class="section">Running now</text>
+    <text x="40" y="528" class="sub">No live Handrail sessions</text>
+    <line x1="28" x2="312" y1="576" y2="576" stroke="#ffffff" stroke-opacity="0.42" stroke-width="1"/>
+    <text x="28" y="642" class="section">Pinned</text>
+    <text x="56" y="700" class="row">Build Handrail MVP</text>
+    <text x="56" y="734" class="sub">handrail</text>
+    <text x="260" y="715" class="time">1d</text>
+    <line x1="28" x2="312" y1="780" y2="780" stroke="#ffffff" stroke-opacity="0.42" stroke-width="1"/>
+    <text x="28" y="846" class="section">All chats</text>
+  </g>
+
+  <g transform="translate(820 130)">
+    <text x="0" y="-26" class="label">C. Purple accent</text>
+    <rect class="phone" x="0" y="0" width="340" height="900"/>
+    <text x="28" y="76" class="title">Dashboard</text>
+    <rect x="28" y="118" width="284" height="118" rx="14" fill="#141416" stroke="#242428"/>
+    <text x="52" y="168" class="row" font-size="28">Today</text>
+    <text x="52" y="205" class="sub">0 running · 0 waiting</text>
+    <text x="28" y="310" class="section">Needs attention</text>
+    <text x="40" y="362" class="sub">No approvals or failures</text>
+    <line x1="28" x2="312" y1="410" y2="410" stroke="#c83df3" stroke-opacity="0.72" stroke-width="1"/>
+    <text x="28" y="476" class="section">Running now</text>
+    <text x="40" y="528" class="sub">No live Handrail sessions</text>
+    <line x1="28" x2="312" y1="576" y2="576" stroke="#c83df3" stroke-opacity="0.72" stroke-width="1"/>
+    <text x="28" y="642" class="section">Pinned</text>
+    <text x="56" y="700" class="row">Build Handrail MVP</text>
+    <text x="56" y="734" class="sub">handrail</text>
+    <text x="260" y="715" class="time">1d</text>
+    <line x1="28" x2="312" y1="780" y2="780" stroke="#c83df3" stroke-opacity="0.72" stroke-width="1"/>
+    <text x="28" y="846" class="section">All chats</text>
+  </g>
+
+  <g transform="translate(1200 130)">
+    <text x="0" y="-26" class="label">D. Inset white rule</text>
+    <rect class="phone" x="0" y="0" width="340" height="900"/>
+    <text x="28" y="76" class="title">Dashboard</text>
+    <rect x="28" y="118" width="284" height="118" rx="14" fill="#141416" stroke="#242428"/>
+    <text x="52" y="168" class="row" font-size="28">Today</text>
+    <text x="52" y="205" class="sub">0 running · 0 waiting</text>
+    <text x="28" y="310" class="section">Needs attention</text>
+    <text x="40" y="362" class="sub">No approvals or failures</text>
+    <line x1="72" x2="312" y1="410" y2="410" stroke="#ffffff" stroke-opacity="0.62" stroke-width="1"/>
+    <text x="28" y="476" class="section">Running now</text>
+    <text x="40" y="528" class="sub">No live Handrail sessions</text>
+    <line x1="72" x2="312" y1="576" y2="576" stroke="#ffffff" stroke-opacity="0.62" stroke-width="1"/>
+    <text x="28" y="642" class="section">Pinned</text>
+    <text x="56" y="700" class="row">Build Handrail MVP</text>
+    <text x="56" y="734" class="sub">handrail</text>
+    <text x="260" y="715" class="time">1d</text>
+    <line x1="72" x2="312" y1="780" y2="780" stroke="#ffffff" stroke-opacity="0.62" stroke-width="1"/>
+    <text x="28" y="846" class="section">All chats</text>
+  </g>
+</svg>

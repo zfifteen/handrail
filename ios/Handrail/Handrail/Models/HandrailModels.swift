@@ -51,6 +51,8 @@ struct HandrailSession: Codable, Identifiable, Hashable {
     var source: String? = nil
     var transcript: [String]? = nil
     var acceptsInput: Bool? = nil
+    var isPinned: Bool? = nil
+    var pinnedOrder: Int? = nil
 }
 
 struct SessionEvent: Codable, Hashable {
@@ -91,4 +93,41 @@ struct HandrailNotification: Identifiable, Hashable {
     let detail: String
     let date: Date
     let sessionId: String?
+}
+
+struct NewChatProject: Codable, Identifiable, Hashable {
+    let id: String
+    let name: String
+    let path: String?
+}
+
+struct NewChatBranch: Codable, Hashable {
+    let name: String
+    let isCurrent: Bool
+}
+
+struct NewChatOptions: Codable, Hashable {
+    let projects: [NewChatProject]
+    let defaultProjectId: String
+    let branches: [NewChatBranch]
+    let defaultBranch: String
+    let workModes: [String]
+    let accessPresets: [String]
+    let defaultAccessPreset: String
+    let models: [String]
+    let defaultModel: String
+    let reasoningEfforts: [String]
+    let defaultReasoningEffort: String
+}
+
+struct StartChatPayload: Hashable {
+    let prompt: String
+    let projectId: String
+    let projectPath: String?
+    let workMode: String
+    let branch: String
+    let newBranch: String?
+    let accessPreset: String
+    let model: String
+    let reasoningEffort: String
 }
