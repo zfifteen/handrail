@@ -6,12 +6,12 @@ struct ActivityView: View {
     var body: some View {
         List {
             if store.activity.isEmpty {
-                EmptyState(title: "No activity yet", detail: "Session events will build a timeline here.", systemImage: "waveform.path.ecg")
+                EmptyState(title: "No activity yet", detail: "Chat events will build a timeline here.", systemImage: "waveform.path.ecg")
                     .listRowBackground(Color.clear)
             } else {
                 ForEach(store.activity) { item in
-                    if let sessionId = item.sessionId {
-                        NavigationLink(value: sessionId) {
+                    if let chatId = item.chatId {
+                        NavigationLink(value: chatId) {
                             activityContent(item)
                         }
                     } else {
@@ -23,8 +23,8 @@ struct ActivityView: View {
         .scrollContentBackground(.hidden)
         .background(Color.black.ignoresSafeArea())
         .navigationTitle("Activity")
-        .navigationDestination(for: String.self) { sessionId in
-            SessionDetailView(sessionId: sessionId)
+        .navigationDestination(for: String.self) { chatId in
+            ChatDetailView(chatId: chatId)
         }
     }
 

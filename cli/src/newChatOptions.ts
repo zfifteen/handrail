@@ -11,8 +11,7 @@ const defaultProjectRoot = join(homedir(), "Documents", "Codex");
 
 export async function getNewChatOptions(projectPath?: string): Promise<NewChatOptions> {
   const config = await readText(join(homedir(), ".codex", "config.toml"));
-  const globalState = await readJson(join(homedir(), ".codex", ".codex-global-state.json"));
-  const projects = discoverProjects(config, globalState);
+  const projects = await discoverDesktopProjects();
   const defaultProjectId = projectPath && projects.some((project) => project.path === projectPath) ? projectPath : projects[0]?.id ?? noProjectId;
   const selectedProject = projects.find((project) => project.id === defaultProjectId);
   const branchRoot = selectedProject?.path ?? projectPath;
@@ -30,6 +29,12 @@ export async function getNewChatOptions(projectPath?: string): Promise<NewChatOp
     reasoningEfforts: ["low", "medium", "high", "xhigh"],
     defaultReasoningEffort: defaultReasoning(config)
   };
+}
+
+export async function discoverDesktopProjects(): Promise<NewChatProject[]> {
+  const config = await readText(join(homedir(), ".codex", "config.toml"));
+  const globalState = await readJson(join(homedir(), ".codex", ".codex-global-state.json"));
+  return discoverProjects(config, globalState);
 }
 
 export function discoverProjects(config: string, globalState: unknown): NewChatProject[] {
@@ -71,11 +76,11 @@ export async function prepareChatWorkspace(options: { projectPath?: string | nul
 export function codexAccessArgs(preset: NewChatAccessPreset): string[] {
   switch (preset) {
     case "full_access":
-      return ["-s", "danger-full-access", "-a", "never"];
+      return ["-s", "danger-full-access", "-c", "approval_policy=\"never\""];
     case "read_only":
-      return ["-s", "read-only", "-a", "on-request"];
+      return ["-s", "read-only", "-c", "approval_policy=\"on-request\""];
     case "on_request":
-      return ["-s", "workspace-write", "-a", "on-request"];
+      return ["-s", "workspace-write", "-c", "approval_policy=\"on-request\""];
   }
 }
 

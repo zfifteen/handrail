@@ -6,10 +6,10 @@ This plan covers the MVP path a user exercises on a Mac plus iPhone:
 
 - Pair iPhone to the local Handrail server.
 - Show Codex chat history from the same source used by Codex desktop.
-- Start a new Handrail-managed Codex session from iOS.
-- Stream transcript or failure output into Session Detail.
-- Send input, stop a running session, and surface errors.
-- Keep Sessions, Activity, Notifications, Approval, and Settings usable when empty, offline, or read-only.
+- Show and continue Codex chats from iOS.
+- Stream transcript or failure output into Chat Detail.
+- Request stop for a running Codex chat and surface errors.
+- Keep Chats, Activity, Notifications, Approval, and Settings usable when empty, offline, or read-only.
 
 ## Desktop CLI Checks
 
@@ -22,22 +22,21 @@ This plan covers the MVP path a user exercises on a Mac plus iPhone:
 2. WebSocket handshake
    - Connect to `ws://127.0.0.1:8788`.
    - Send `{ "type": "hello", "token": state.pairingToken }`.
-   - Expect `machine_status` then `session_list`.
+   - Expect `machine_status` then `chat_list`.
 
-3. Session list source
-   - Verify first sessions come from `~/.codex/session_index.jsonl` and `~/.codex/sessions`.
+3. Chat list source
+   - Verify first chats come from Codex Desktop chat metadata and persisted Codex transcript files.
    - Verify list is ordered by `updated_at`.
-   - Verify stale `~/.codex/archived_sessions` names are not used.
+   - Verify stale or unrelated files are not shown as chats.
 
-4. Start session smoke
-   - Send `start_session` over WebSocket with repo, title, and prompt.
-   - Expect `session_started`.
-   - Expect either readable transcript output or `session_failed` with a visible error.
-   - No start may leave the transcript stuck at a blank waiting state without an error.
+4. New chat smoke
+   - Send `start_chat` over WebSocket with prompt and options.
+   - Expect either `chat_started` for a Codex Desktop chat or a visible deterministic error.
+   - No start may create a Handrail-owned record.
 
-5. Stop session smoke
-   - Send `stop_session` for a running Handrail session.
-   - Expect `session_stopped` and a refreshed `session_list`.
+5. Stop chat smoke
+   - Send `stop_chat` for a running Codex chat.
+   - Expect `chat_stopped` or a visible deterministic error and a refreshed `chat_list`.
 
 ## iOS Checks
 
@@ -49,7 +48,7 @@ This plan covers the MVP path a user exercises on a Mac plus iPhone:
    - Install the Debug iPhone build with `xcrun devicectl device install app`.
    - Launch `com.velocityworks.Handrail`.
 
-3. Sessions tab
+3. Chats tab
    - Paired machine shows Online when server is available.
    - Session names match Codex desktop names.
    - All Chats is ordered by last update.
@@ -57,15 +56,15 @@ This plan covers the MVP path a user exercises on a Mac plus iPhone:
    - Recent/Project filter is reachable.
    - Tab bar does not cover actionable rows.
 
-4. Start Session sheet
+4. New Chat sheet
    - Start is disabled when Mac is offline.
    - Start is disabled when title, repo, or prompt is empty.
    - Invalid/offline start shows an error instead of silently dismissing.
-   - Valid start creates a session that navigates to useful status and transcript/failure output.
+   - Valid start creates or opens a Codex chat that navigates to useful status and transcript/failure output.
 
-5. Session Detail
-   - Running session says Codex is starting until output arrives.
-   - Failed/stopped/completed sessions show status-specific empty text.
+5. Chat Detail
+   - Running chat says Codex is starting until output arrives.
+   - Failed/stopped/completed chats show status-specific empty text.
    - Failure text appears in transcript when no output was produced.
    - Imported Codex chats are marked read-only and do not show stop/input controls.
 
@@ -92,18 +91,18 @@ Executed against the local server on port `8788`, the booted iPhone 17 simulator
 - Physical iPhone build: passed.
 - Physical iPhone install and launch: passed.
 - Paired simulator state: online against `127.0.0.1:8788`.
-- Sessions tab: verified Online state, Pinned, All chats, Recent filter, Project filter, and Codex chat title display.
-- Start Session: verified title/repo/prompt entry, Start disabled while incomplete, valid Start sends WebSocket request, server returns `session_started`, app dismisses sheet, and app navigates directly to Session Detail.
-- Session Detail: verified running state, completed state, transcript stream, and completed transcript text.
-- Activity: verified session events appear and session-backed rows navigate to Session Detail.
-- Notifications: verified completion notification appears and navigates to Session Detail.
+- Chats tab: verified Online state, Pinned, All chats, Recent filter, Project filter, and Codex chat title display.
+- New Chat: verified prompt/options entry, Start disabled while incomplete, valid Start sends WebSocket request, and successful starts navigate directly to Chat Detail.
+- Chat Detail: verified running state, completed state, transcript stream, and completed transcript text.
+- Activity: verified chat events appear and chat-backed rows navigate to Chat Detail.
+- Notifications: verified completion notification appears and navigates to Chat Detail.
 - Approval: verified empty state.
 - Settings: verified paired machine, `handrail pair` command, compatibility copy, and scanner fallback in simulator.
-- Send input: verified an interactive session accepts text and streams the echoed output into the transcript.
-- Stop: verified the stop button sends `stop_session`, terminates the subprocess, and displays Stopped rather than Failed.
-- Pull-to-refresh: verified the Sessions tab refresh path sends a new authenticated `hello` and receives `machine_status` plus `session_list`.
+- Send input: verified an interactive chat accepts text and streams output into the transcript when Codex Desktop exposes that route.
+- Stop: verified the stop button sends `stop_chat` and displays scoped errors or Stopped.
+- Pull-to-refresh: verified the Chats tab refresh path sends a new authenticated `hello` and receives `machine_status` plus `chat_list`.
 - Continue archived chat: verified archived Codex chat details show a `Continue chat` composer when the Mac is online.
-- Continue protocol: verified `continue_session` is accepted by the server and invalid archived ids return a visible error instead of silently doing nothing.
+- Continue protocol: verified `continue_chat` is accepted by the server and invalid archived ids return a visible error instead of silently doing nothing.
 - Rich transcript: verified imported Codex transcript renders as role-separated rich text blocks rather than raw monospace/plain Markdown.
 
 Screenshots:
@@ -113,6 +112,6 @@ Screenshots:
 
 Observed fixed defects:
 
-- Start Session used to dismiss back to Sessions without navigation. It now waits for `session_started` and opens the created session.
-- Activity and Notifications used to be informational dead ends. Session-backed rows now open the related session.
-- Stop previously raced the subprocess exit handler and could classify a user-stopped session as Failed. SIGTERM requested by Handrail is now classified as Stopped.
+- New Chat used to dismiss back to Chats without navigation. It now waits for `chat_started` and opens the created chat.
+- Activity and Notifications used to be informational dead ends. Chat-backed rows now open the related chat.
+- Stop now routes through the Codex chat protocol instead of a Handrail-owned process record.

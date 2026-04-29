@@ -1,13 +1,18 @@
-import { readdir, readFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { access, open, readFile, stat } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { homedir } from "node:os";
-import type { SessionRecord } from "./types.js";
+import { promisify } from "node:util";
+import type { ChatRecord } from "./types.js";
+import { discoverDesktopProjects } from "./newChatOptions.js";
 
 const MAX_CODEX_SESSIONS = 50;
 const MAX_TRANSCRIPT_LINES = 40;
 const MAX_TRANSCRIPT_CHARS = 12_000;
 const MAX_TRANSCRIPT_ENTRY_CHARS = 2_500;
-const SESSION_ID_PATTERN = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jsonl$/;
+const ROLLOUT_HEAD_BYTES = 64 * 1024;
+const ROLLOUT_TAIL_BYTES = 2 * 1024 * 1024;
+const execFileAsync = promisify(execFile);
 
 interface CodexSessionMeta {
   id?: string;
@@ -15,10 +20,19 @@ interface CodexSessionMeta {
   cwd?: string;
 }
 
-interface CodexSessionIndexEntry {
+export interface CodexDesktopThread {
   id: string;
-  thread_name?: string;
-  updated_at?: string;
+  rollout_path: string;
+  cwd: string;
+  title: string;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface CodexDesktopThreadRow extends CodexDesktopThread {
+  archived: number;
+  source: string;
+  first_user_message: string;
 }
 
 interface CodexSessionLine {
@@ -32,17 +46,17 @@ interface CodexSessionLine {
   };
 }
 
-export async function listCodexSessions(): Promise<SessionRecord[]> {
-  const index = await readSessionIndex();
+export async function listCodexChats(): Promise<ChatRecord[]> {
+  const desktopThreads = await readDesktopThreads();
   const pinnedThreadIds = await readDesktopPinnedThreadIds();
-  const paths = await listLiveSessionFiles();
-  const records: SessionRecord[] = [];
-  for (const entry of index.sort((left, right) => timestampValue(right.updated_at) - timestampValue(left.updated_at))) {
-    const path = paths.get(entry.id);
-    if (!path) {
-      continue;
-    }
-    const record = await readCodexSession(path, entry, pinnedThreadIds);
+  const projectNames = new Map(
+    (await discoverDesktopProjects())
+      .filter((project) => project.path)
+      .map((project) => [project.path!, project.name])
+  );
+  const records: ChatRecord[] = [];
+  for (const thread of desktopThreads) {
+    const record = await readCodexSession(thread, pinnedThreadIds, projectNames);
     if (record) {
       records.push(record);
     }
@@ -53,26 +67,40 @@ export async function listCodexSessions(): Promise<SessionRecord[]> {
   return records;
 }
 
-async function readSessionIndex(): Promise<CodexSessionIndexEntry[]> {
-  const path = join(homedir(), ".codex", "session_index.jsonl");
-  let raw: string;
+async function readDesktopThreads(): Promise<CodexDesktopThread[]> {
+  const databasePath = join(homedir(), ".codex", "state_5.sqlite");
   try {
-    raw = await readFile(path, "utf8");
+    await access(databasePath);
   } catch {
     return [];
   }
+  const sql = [
+    "SELECT id, rollout_path, cwd, title, created_at, updated_at, archived, source, first_user_message",
+    "FROM threads",
+    "ORDER BY updated_at DESC, id DESC"
+  ].join(" ");
+  const { stdout } = await execFileAsync("sqlite3", ["-json", databasePath, sql], { maxBuffer: 5_000_000 });
+  return visibleDesktopThreads(JSON.parse(stdout || "[]") as CodexDesktopThreadRow[]);
+}
 
-  const entries = new Map<string, CodexSessionIndexEntry>();
-  for (const line of raw.split("\n")) {
-    if (!line.trim()) {
-      continue;
-    }
-    const entry = JSON.parse(line) as CodexSessionIndexEntry;
-    if (entry.id) {
-      entries.set(entry.id, entry);
-    }
-  }
-  return Array.from(entries.values());
+export function visibleDesktopThreads(rows: CodexDesktopThreadRow[]): CodexDesktopThread[] {
+  return rows
+    .filter((row) =>
+      row.archived === 0 &&
+      row.source === "vscode" &&
+      typeof row.first_user_message === "string" &&
+      row.first_user_message.trim().length > 0
+    )
+    .sort((left, right) => right.updated_at - left.updated_at)
+    .slice(0, MAX_CODEX_SESSIONS)
+    .map(({ id, rollout_path, cwd, title, created_at, updated_at }) => ({
+      id,
+      rollout_path,
+      cwd,
+      title,
+      created_at,
+      updated_at
+    }));
 }
 
 async function readDesktopPinnedThreadIds(): Promise<Map<string, number>> {
@@ -99,65 +127,71 @@ export function parseDesktopPinnedThreadIds(raw: string): Map<string, number> {
   return pinned;
 }
 
-async function listLiveSessionFiles(): Promise<Map<string, string>> {
-  const root = join(homedir(), ".codex", "sessions");
-  const paths = new Map<string, string>();
-  await collectSessionFiles(root, paths);
-  return paths;
-}
-
-async function collectSessionFiles(dir: string, paths: Map<string, string>): Promise<void> {
-  let entries;
-  try {
-    entries = await readdir(dir, { withFileTypes: true });
-  } catch {
-    return;
-  }
-
-  for (const entry of entries) {
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      await collectSessionFiles(path, paths);
-      continue;
-    }
-    const match = entry.name.match(SESSION_ID_PATTERN);
-    if (match) {
-      paths.set(match[1], path);
-    }
-  }
-}
-
-async function readCodexSession(path: string, indexEntry: CodexSessionIndexEntry, pinnedThreadIds: Map<string, number>): Promise<SessionRecord | null> {
-  const raw = await readFile(path, "utf8");
-  const lines = raw.split("\n").filter(Boolean);
+async function readCodexSession(thread: CodexDesktopThread, pinnedThreadIds: Map<string, number>, projectNames: Map<string, string>): Promise<ChatRecord | null> {
+  const lines = await readRolloutLines(thread.rollout_path);
   const firstLine = lines[0];
   if (!firstLine) {
     return null;
   }
 
-  const parsed = JSON.parse(firstLine) as { type?: string; payload?: CodexSessionMeta };
+  const parsed = parseLine<{ type?: string; payload?: CodexSessionMeta }>(firstLine);
   if (parsed.type !== "session_meta" || !parsed.payload?.id || !parsed.payload.timestamp) {
     return null;
   }
 
-  const repo = parsed.payload.cwd || homedir();
+  const repo = thread.cwd || parsed.payload.cwd || homedir();
   return {
     id: `codex:${parsed.payload.id}`,
     repo,
-    title: indexEntry.thread_name?.trim() || extractTitle(lines.slice(1)) || basename(repo),
+    title: thread.title.trim() || extractTitle(lines.slice(1)) || basename(repo),
+    projectName: desktopProjectName(repo, projectNames),
     status: "idle",
-    startedAt: parsed.payload.timestamp,
-    updatedAt: indexEntry.updated_at || extractUpdatedAt(lines) || parsed.payload.timestamp,
-    source: "codex",
+    startedAt: unixSecondsToIso(thread.created_at) || parsed.payload.timestamp,
+    updatedAt: unixSecondsToIso(thread.updated_at) || extractUpdatedAt(lines) || parsed.payload.timestamp,
     transcript: extractTranscript(lines.slice(1)),
     isPinned: pinnedThreadIds.has(parsed.payload.id),
     pinnedOrder: pinnedThreadIds.get(parsed.payload.id)
   };
 }
 
+export async function readRolloutLines(path: string): Promise<string[]> {
+  const info = await stat(path);
+  if (info.size <= ROLLOUT_HEAD_BYTES + ROLLOUT_TAIL_BYTES) {
+    return (await readFile(path, "utf8")).split("\n").filter(Boolean);
+  }
+
+  const file = await open(path, "r");
+  try {
+    const headBuffer = Buffer.alloc(ROLLOUT_HEAD_BYTES);
+    const tailBuffer = Buffer.alloc(ROLLOUT_TAIL_BYTES);
+    const head = await file.read(headBuffer, 0, ROLLOUT_HEAD_BYTES, 0);
+    const tailStart = Math.max(0, info.size - ROLLOUT_TAIL_BYTES);
+    const tail = await file.read(tailBuffer, 0, ROLLOUT_TAIL_BYTES, tailStart);
+    const headLines = headBuffer.subarray(0, head.bytesRead).toString("utf8").split("\n");
+    const tailLines = tailBuffer.subarray(0, tail.bytesRead).toString("utf8").split("\n");
+    return [
+      ...headLines.slice(0, 1),
+      ...tailLines.slice(1)
+    ].filter(Boolean);
+  } finally {
+    await file.close();
+  }
+}
+
+export function desktopProjectName(repo: string, projectNames: Map<string, string>): string {
+  return projectNames.get(repo) ?? basename(repo);
+}
+
+function unixSecondsToIso(value: number): string | null {
+  if (!Number.isFinite(value) || value <= 0) {
+    return null;
+  }
+  return new Date(value * 1000).toISOString();
+}
+
 function extractUpdatedAt(lines: string[]): string | null {
   for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const parsed = JSON.parse(lines[index]) as CodexSessionLine;
+    const parsed = parseLine<CodexSessionLine>(lines[index]);
     if (parsed.timestamp) {
       return parsed.timestamp;
     }
@@ -165,13 +199,9 @@ function extractUpdatedAt(lines: string[]): string | null {
   return null;
 }
 
-function timestampValue(value?: string): number {
-  return value ? new Date(value).getTime() : 0;
-}
-
 function extractTitle(lines: string[]): string | null {
   for (const line of lines) {
-    const parsed = JSON.parse(line) as CodexSessionLine;
+    const parsed = parseLine<CodexSessionLine>(line);
     if (parsed.type === "event_msg" && parsed.payload?.type === "thread_name_updated") {
       return parsed.payload.thread_name?.trim() || null;
     }
@@ -183,7 +213,7 @@ function extractTranscript(lines: string[]): string[] {
   const entries: string[] = [];
 
   for (const line of lines) {
-    const parsed = JSON.parse(line) as CodexSessionLine;
+    const parsed = parseLine<CodexSessionLine>(line);
     const payload = parsed.payload;
     if (parsed.type !== "response_item" || payload?.type !== "message") {
       continue;
@@ -220,6 +250,14 @@ function extractTranscript(lines: string[]): string[] {
   }
 
   return transcript;
+}
+
+function parseLine<T>(line: string): T {
+  try {
+    return JSON.parse(line) as T;
+  } catch {
+    return {} as T;
+  }
 }
 
 function isSessionContext(text: string): boolean {

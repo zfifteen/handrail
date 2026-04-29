@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir, hostname } from "node:os";
 import { dirname, join } from "node:path";
 import { randomBytes } from "node:crypto";
-import type { HandrailState, SessionRecord } from "./types.js";
+import type { HandrailState } from "./types.js";
 
 const DEFAULT_PORT = 8787;
 
@@ -19,8 +19,7 @@ export async function loadState(): Promise<HandrailState> {
       port: parsed.port ?? DEFAULT_PORT,
       machineName: parsed.machineName || hostname(),
       defaultRepo: parsed.defaultRepo,
-      pairingToken: parsed.pairingToken,
-      sessions: Array.isArray(parsed.sessions) ? parsed.sessions : []
+      pairingToken: parsed.pairingToken
     };
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
@@ -30,8 +29,7 @@ export async function loadState(): Promise<HandrailState> {
       protocolVersion: 1,
       port: DEFAULT_PORT,
       machineName: hostname(),
-      defaultRepo: process.cwd(),
-      sessions: []
+      defaultRepo: process.cwd()
     };
   }
 }
@@ -61,16 +59,5 @@ export async function ensurePairingToken(): Promise<HandrailState> {
 export async function clearPairingToken(): Promise<void> {
   const state = await loadState();
   delete state.pairingToken;
-  await saveState(state);
-}
-
-export async function upsertSession(record: SessionRecord): Promise<void> {
-  const state = await loadState();
-  const index = state.sessions.findIndex((session) => session.id === record.id);
-  if (index === -1) {
-    state.sessions.unshift(record);
-  } else {
-    state.sessions[index] = record;
-  }
   await saveState(state);
 }

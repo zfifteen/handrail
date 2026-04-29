@@ -2,13 +2,28 @@ import { createServer } from "node:http";
 import { networkInterfaces } from "node:os";
 import { Socket } from "node:net";
 import { WebSocketServer, WebSocket } from "ws";
-import type { ClientMessage, PairingPayload, ServerMessage } from "./types.js";
-import { ensurePairingToken, loadState } from "./state.js";
-import { SessionManager } from "./sessions.js";
+import type { ApprovalRequest, ChatRecord, ClientMessage, HandrailState, NewChatOptions, PairingPayload, ServerMessage, StartChatOptions } from "./types.js";
+import { ensurePairingToken } from "./state.js";
+import { ChatManager } from "./chats.js";
 import { getNewChatOptions } from "./newChatOptions.js";
 
 interface AuthedSocket extends WebSocket {
   isAuthed?: boolean;
+}
+
+interface ChatController {
+  list(): Promise<ChatRecord[]>;
+  startChat(options: StartChatOptions): Promise<ChatRecord>;
+  continue(chatId: string, prompt: string): Promise<ChatRecord>;
+  sendInput(chatId: string, text: string): void;
+  approve(chatId: string, approvalId: string): ApprovalRequest;
+  deny(chatId: string, approvalId: string, reason?: string): ApprovalRequest;
+  stop(chatId: string): Promise<void>;
+}
+
+export interface HandrailServerHandle {
+  port: number;
+  close(): Promise<void>;
 }
 
 export function localNetworkHost(): string {
@@ -48,8 +63,23 @@ export async function isPortOpen(port: number): Promise<boolean> {
 
 export async function startServer(): Promise<void> {
   const state = await ensurePairingToken();
+  const handle = await createHandrailServer({ state });
+
+  console.log(`Handrail server listening on ws://0.0.0.0:${handle.port}`);
+  await new Promise<void>(() => {
+    setInterval(() => {}, 60_000);
+  });
+}
+
+export async function createHandrailServer(options: {
+  state: HandrailState;
+  chats?: ChatController;
+  getOptions?: (projectPath?: string) => Promise<NewChatOptions>;
+  port?: number;
+}): Promise<HandrailServerHandle> {
   const httpServer = createServer();
   const wss = new WebSocketServer({ server: httpServer });
+  const getOptions = options.getOptions ?? getNewChatOptions;
 
   const broadcast = (message: ServerMessage) => {
     const encoded = JSON.stringify(message);
@@ -61,29 +91,44 @@ export async function startServer(): Promise<void> {
     }
   };
 
-  const sessions = new SessionManager(broadcast);
+  const chats = options.chats ?? new ChatManager(broadcast);
 
   wss.on("connection", (socket: AuthedSocket) => {
     socket.on("message", (data) => {
-      void handleMessage(socket, data.toString(), state.pairingToken!, sessions, broadcast);
+      void handleMessage(socket, data.toString(), options.state, chats, broadcast, getOptions);
     });
   });
 
   await new Promise<void>((resolve, reject) => {
     httpServer.once("error", reject);
-    httpServer.listen(state.port, () => resolve());
+    httpServer.listen(options.port ?? options.state.port, () => resolve());
   });
 
-  console.log(`Handrail server listening on ws://0.0.0.0:${state.port}`);
-  await new Promise<void>(() => {});
+  const address = httpServer.address();
+  const port = typeof address === "object" && address ? address.port : options.state.port;
+  return {
+    port,
+    async close() {
+      await new Promise<void>((resolve, reject) => {
+        wss.close((webSocketError) => {
+          if (webSocketError) {
+            reject(webSocketError);
+            return;
+          }
+          httpServer.close((httpError) => httpError ? reject(httpError) : resolve());
+        });
+      });
+    }
+  };
 }
 
 async function handleMessage(
   socket: AuthedSocket,
   raw: string,
-  token: string,
-  sessions: SessionManager,
-  broadcast: (message: ServerMessage) => void
+  state: HandrailState,
+  chats: ChatController,
+  broadcast: (message: ServerMessage) => void,
+  getOptions: (projectPath?: string) => Promise<NewChatOptions> = getNewChatOptions
 ): Promise<void> {
   let message: ClientMessage;
   try {
@@ -94,52 +139,48 @@ async function handleMessage(
   }
 
   if (!socket.isAuthed) {
-    if (message.type !== "hello" || message.token !== token) {
+    if (message.type !== "hello" || message.token !== state.pairingToken) {
       socket.close(1008, "Invalid Handrail pairing token.");
       return;
     }
     socket.isAuthed = true;
-    const state = await loadState();
     socket.send(JSON.stringify({
       type: "machine_status",
       machineName: state.machineName,
       online: true,
       defaultRepo: state.defaultRepo
     } satisfies ServerMessage));
-    socket.send(JSON.stringify({ type: "new_chat_options", options: await getNewChatOptions(state.defaultRepo) } satisfies ServerMessage));
-    socket.send(JSON.stringify({ type: "session_list", sessions: await sessions.list() } satisfies ServerMessage));
+    socket.send(JSON.stringify({ type: "new_chat_options", options: await getOptions(state.defaultRepo) } satisfies ServerMessage));
+    socket.send(JSON.stringify({ type: "chat_list", chats: await chats.list() } satisfies ServerMessage));
     return;
   }
 
   try {
     switch (message.type) {
       case "hello":
-        socket.send(JSON.stringify({ type: "new_chat_options", options: await getNewChatOptions() } satisfies ServerMessage));
-        socket.send(JSON.stringify({ type: "session_list", sessions: await sessions.list() } satisfies ServerMessage));
-        break;
-      case "start_session":
-        await sessions.start(message.repo, message.title, message.prompt);
+        socket.send(JSON.stringify({ type: "new_chat_options", options: await getOptions() } satisfies ServerMessage));
+        socket.send(JSON.stringify({ type: "chat_list", chats: await chats.list() } satisfies ServerMessage));
         break;
       case "start_chat":
-        await sessions.startChat(message);
+        await chats.startChat(message);
         break;
-      case "continue_session":
-        await sessions.continue(message.sessionId, message.prompt);
+      case "continue_chat":
+        await chats.continue(message.chatId, message.prompt);
         break;
-      case "send_input":
-        sessions.sendInput(message.sessionId, message.text);
+      case "send_chat_input":
+        chats.sendInput(message.chatId, message.text);
         break;
       case "approve":
-        sessions.approve(message.sessionId, message.approvalId);
-        broadcast({ type: "session_list", sessions: await sessions.list() });
+        chats.approve(message.chatId, message.approvalId);
+        broadcast({ type: "chat_list", chats: await chats.list() });
         break;
       case "deny":
-        sessions.deny(message.sessionId, message.approvalId, message.reason);
-        broadcast({ type: "session_list", sessions: await sessions.list() });
+        chats.deny(message.chatId, message.approvalId, message.reason);
+        broadcast({ type: "chat_list", chats: await chats.list() });
         break;
-      case "stop_session":
-        await sessions.stop(message.sessionId);
-        socket.send(JSON.stringify({ type: "command_result", ok: true, message: "Session stop requested." } satisfies ServerMessage));
+      case "stop_chat":
+        await chats.stop(message.chatId);
+        socket.send(JSON.stringify({ type: "command_result", ok: true, message: "Chat stop requested." } satisfies ServerMessage));
         break;
     }
   } catch (error) {

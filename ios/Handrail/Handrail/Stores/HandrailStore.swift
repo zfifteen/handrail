@@ -5,7 +5,7 @@ import Observation
 @Observable
 final class HandrailStore {
     var pairedMachine: PairedMachine?
-    var sessions: [HandrailSession] = []
+    var chats: [CodexChat] = []
     var transcripts: [String: [String]] = [:]
     var latestApproval: ApprovalRequest?
     var activity: [ActivityItem] = []
@@ -14,24 +14,29 @@ final class HandrailStore {
     var defaultRepo = ""
     var newChatOptions: NewChatOptions?
     var lastError: String?
-    var lastStartedSessionId: String?
-    var notificationSessionId: String?
+    var newChatError: String?
+    var chatErrors: [String: String] = [:]
+    var lastStartedChatId: String?
+    var notificationChatId: String?
     var showsApprovalFromNotification = false
-    var pinnedSessionIds: Set<String> = []
-    var dismissedAttentionSessionIds: Set<String> = []
-    var isRefreshingSessions = false
-    var lastSessionRefreshAt: Date?
+    var currentChatId: String?
+    var pinnedChatIds: Set<String> = []
+    var dismissedAttentionChatIds: Set<String> = []
+    var isRefreshingChats = false
+    var lastChatRefreshAt: Date?
 
     private let storageKey = "handrail.pairedMachine"
-    private let pinnedStorageKey = "handrail.pinnedSessionIds"
-    private let dismissedAttentionStorageKey = "handrail.dismissedAttentionSessionIds"
+    private let pairingTokenAccount = "paired-machine-token"
+    private let pinnedStorageKey = "handrail.pinnedChatIds"
+    private let dismissedAttentionStorageKey = "handrail.dismissedAttentionChatIds"
     private let client = HandrailWebSocketClient()
-    private var awaitingStartedSession = false
+    private var awaitingStartedChat = false
+    private var pendingErrorTarget: PendingErrorTarget?
 
     init(enableNetworking: Bool = true) {
         loadPairing()
-        loadPinnedSessions()
-        loadDismissedAttentionSessions()
+        loadPinnedChats()
+        loadDismissedAttentionChats()
         client.onMessage = { [weak self] message in
             Task { @MainActor in self?.handle(message) }
         }
@@ -63,171 +68,180 @@ final class HandrailStore {
         client.connect(to: machine)
     }
 
-    func startSession(repo: String, title: String, prompt: String) {
-        guard pairedMachine?.isOnline == true else {
-            reportError("Mac is offline. Start the Handrail server and reconnect before starting a session.")
-            return
-        }
-        lastError = nil
-        awaitingStartedSession = true
-        client.send(.startSession(repo: repo, title: title, prompt: prompt))
-    }
-
     func startChat(_ payload: StartChatPayload) {
         guard pairedMachine?.isOnline == true else {
-            reportError("Mac is offline. Start the Handrail server and reconnect before starting a chat.")
+            reportNewChatError("Mac is offline. Start the Handrail server and reconnect before starting a chat.")
             return
         }
-        lastError = nil
-        awaitingStartedSession = true
+        newChatError = nil
+        pendingErrorTarget = .newChat
+        awaitingStartedChat = true
         client.send(.startChat(payload))
     }
 
-    func continueSession(sessionId: String, prompt: String) {
+    func continueChat(chatId: String, prompt: String) {
         guard pairedMachine?.isOnline == true else {
-            reportError("Mac is offline. Start the Handrail server and reconnect before continuing a chat.")
+            reportChatError("Mac is offline. Start the Handrail server and reconnect before continuing a chat.", chatId: chatId)
             return
         }
-        lastError = nil
-        awaitingStartedSession = true
-        client.send(.continueSession(sessionId: sessionId, prompt: prompt))
+        chatErrors[chatId] = nil
+        pendingErrorTarget = .chat(chatId)
+        awaitingStartedChat = true
+        client.send(.continueChat(chatId: chatId, prompt: prompt))
     }
 
-    func refreshSessions() {
+    func refreshChats() {
         if pairedMachine?.isOnline != true {
             reconnect()
             return
         }
         guard let token = pairedMachine?.token else {
-            isRefreshingSessions = false
+            isRefreshingChats = false
             return
         }
-        isRefreshingSessions = true
+        isRefreshingChats = true
         client.send(.hello(token: token))
     }
 
     func reconnect() {
         guard let pairedMachine else {
-            isRefreshingSessions = false
+            isRefreshingChats = false
             return
         }
         connectionText = "Reconnecting"
-        isRefreshingSessions = true
+        isRefreshingChats = true
         client.connect(to: pairedMachine)
     }
 
-    func sendInput(sessionId: String, text: String) {
-        client.send(.sendInput(sessionId: sessionId, text: text))
+    func sendInput(chatId: String, text: String) {
+        chatErrors[chatId] = nil
+        pendingErrorTarget = .chat(chatId)
+        client.send(.sendChatInput(chatId: chatId, text: text))
     }
 
     func approve(_ approval: ApprovalRequest) {
-        client.send(.approve(sessionId: approval.sessionId, approvalId: approval.approvalId))
+        client.send(.approve(chatId: approval.chatId, approvalId: approval.approvalId))
         latestApproval = nil
     }
 
     func deny(_ approval: ApprovalRequest, reason: String) {
-        client.send(.deny(sessionId: approval.sessionId, approvalId: approval.approvalId, reason: reason))
+        client.send(.deny(chatId: approval.chatId, approvalId: approval.approvalId, reason: reason))
         latestApproval = nil
     }
 
-    func stop(sessionId: String) {
-        client.send(.stopSession(sessionId: sessionId))
+    func stop(chatId: String) {
+        chatErrors[chatId] = nil
+        pendingErrorTarget = .chat(chatId)
+        client.send(.stopChat(chatId: chatId))
     }
 
-    func session(id: String) -> HandrailSession? {
-        sessions.first { $0.id == id }
-    }
-
-    func isPinned(sessionId: String) -> Bool {
-        if let session = session(id: sessionId), session.source == "codex" {
-            return session.isPinned == true
+    func deleteNotifications(at offsets: IndexSet) {
+        for index in offsets.sorted(by: >) {
+            notifications.remove(at: index)
         }
-        return pinnedSessionIds.contains(sessionId)
     }
 
-    func togglePin(sessionId: String) {
-        if let session = session(id: sessionId), session.source == "codex" {
-            return
-        }
-        if pinnedSessionIds.contains(sessionId) {
-            pinnedSessionIds.remove(sessionId)
-        } else {
-            pinnedSessionIds.insert(sessionId)
-        }
-        savePinnedSessions()
+    func clearNotifications() {
+        notifications.removeAll()
     }
 
-    func isAttentionDismissed(sessionId: String) -> Bool {
-        dismissedAttentionSessionIds.contains(sessionId)
+    func chat(id: String) -> CodexChat? {
+        chats.first { $0.id == id }
     }
 
-    func dismissAttention(sessionId: String) {
-        dismissedAttentionSessionIds.insert(sessionId)
-        saveDismissedAttentionSessions()
+    func isPinned(chatId: String) -> Bool {
+        chat(id: chatId)?.isPinned == true
+    }
+
+    func togglePin(chatId: String) {
+        reportError("Pinning is owned by Codex Desktop. Change pinned chats in Codex Desktop, then refresh Handrail.")
+    }
+
+    func isAttentionDismissed(chatId: String) -> Bool {
+        dismissedAttentionChatIds.contains(chatId)
+    }
+
+    func dismissAttention(chatId: String) {
+        dismissedAttentionChatIds.insert(chatId)
+        saveDismissedAttentionChats()
     }
 
     func dismissAllAttention() {
-        dismissedAttentionSessionIds.formUnion(sessions.filter(needsAttention).map(\.id))
-        saveDismissedAttentionSessions()
+        dismissedAttentionChatIds.formUnion(chats.filter(needsAttention).map(\.id))
+        saveDismissedAttentionChats()
     }
 
-    func restoreAttention(sessionId: String) {
-        dismissedAttentionSessionIds.remove(sessionId)
-        saveDismissedAttentionSessions()
+    func restoreAttention(chatId: String) {
+        dismissedAttentionChatIds.remove(chatId)
+        saveDismissedAttentionChats()
     }
 
-    func needsAttention(_ session: HandrailSession) -> Bool {
-        session.status == .waitingForApproval || session.status == .failed
+    func needsAttention(_ chat: CodexChat) -> Bool {
+        chat.status == .waitingForApproval || chat.status == .failed
     }
 
-    func consumeLastStartedSessionId() {
-        lastStartedSessionId = nil
+    func consumeLastStartedChatId() {
+        lastStartedChatId = nil
     }
 
-    func consumeNotificationSessionId() {
-        notificationSessionId = nil
+    func consumeNotificationChatId() {
+        notificationChatId = nil
     }
 
-    func approveFromNotification(sessionId: String, approvalId: String) {
+    func enterChat(chatId: String) {
+        currentChatId = chatId
+    }
+
+    func leaveChat(chatId: String) {
+        if currentChatId == chatId {
+            currentChatId = nil
+        }
+    }
+
+    func isViewingChat(chatId: String) -> Bool {
+        currentChatId == chatId
+    }
+
+    func approveFromNotification(chatId: String, approvalId: String) {
         guard pairedMachine?.isOnline == true else {
             reportError("Mac is offline. Reconnect before approving from a notification.")
             return
         }
-        client.send(.approve(sessionId: sessionId, approvalId: approvalId))
+        client.send(.approve(chatId: chatId, approvalId: approvalId))
         if latestApproval?.approvalId == approvalId {
             latestApproval = nil
         }
     }
 
-    func denyFromNotification(sessionId: String, approvalId: String) {
+    func denyFromNotification(chatId: String, approvalId: String) {
         guard pairedMachine?.isOnline == true else {
             reportError("Mac is offline. Reconnect before denying from a notification.")
             return
         }
-        client.send(.deny(sessionId: sessionId, approvalId: approvalId, reason: "Denied from Handrail notification."))
+        client.send(.deny(chatId: chatId, approvalId: approvalId, reason: "Denied from Handrail notification."))
         if latestApproval?.approvalId == approvalId {
             latestApproval = nil
         }
     }
 
-    func replyFromNotification(sessionId: String, text: String) {
+    func replyFromNotification(chatId: String, text: String) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         guard pairedMachine?.isOnline == true else {
             reportError("Mac is offline. Reconnect before replying from a notification.")
             return
         }
-        client.send(.sendInput(sessionId: sessionId, text: trimmed))
-        notificationSessionId = sessionId
+        client.send(.sendChatInput(chatId: chatId, text: trimmed))
+        notificationChatId = chatId
     }
 
-    func openSessionFromNotification(sessionId: String) {
-        notificationSessionId = sessionId
+    func openChatFromNotification(chatId: String) {
+        notificationChatId = chatId
     }
 
-    func openApprovalFromNotification(sessionId: String) {
-        notificationSessionId = sessionId
-        showsApprovalFromNotification = latestApproval?.sessionId == sessionId
+    func openApprovalFromNotification(chatId: String) {
+        notificationChatId = chatId
+        showsApprovalFromNotification = latestApproval?.chatId == chatId
     }
 
     private func handle(_ message: ServerMessage) {
@@ -244,162 +258,263 @@ final class HandrailStore {
             addActivity("Machine online", machineName)
         case .newChatOptions(let options):
             newChatOptions = options
-        case .sessionList(let sessions):
-            self.sessions = sessions
-            pruneDismissedAttentionSessions(against: sessions)
-            isRefreshingSessions = false
-            lastSessionRefreshAt = Date()
-            for session in sessions {
-                if let transcript = session.transcript, !transcript.isEmpty {
-                    transcripts[session.id] = transcript
+        case .chatList(let chats):
+            self.chats = chats
+            pruneDismissedAttentionChats(against: chats)
+            isRefreshingChats = false
+            lastChatRefreshAt = Date()
+            for chat in chats {
+                if let transcript = chat.transcript, !transcript.isEmpty {
+                    transcripts[chat.id] = transcript
                 }
             }
-        case .sessionStarted(let session):
+        case .chatStarted(let chat):
             lastError = nil
-            upsert(session)
-            if awaitingStartedSession {
-                awaitingStartedSession = false
-                lastStartedSessionId = session.id
+            newChatError = nil
+            chatErrors[chat.id] = nil
+            pendingErrorTarget = nil
+            upsert(chat)
+            if awaitingStartedChat {
+                awaitingStartedChat = false
+                lastStartedChatId = chat.id
             }
-            addActivity("Session started", session.title, sessionId: session.id)
-        case .sessionEvent(let sessionId, let event):
-            handleEvent(sessionId: sessionId, event: event)
+            addActivity("Chat started", chat.title, chatId: chat.id)
+        case .chatEvent(let chatId, let event):
+            handleEvent(chatId: chatId, event: event)
         case .approvalRequired(let approval):
             latestApproval = approval
-            markWaiting(sessionId: approval.sessionId, files: approval.files)
-            addActivity("Approval requested", approval.summary, sessionId: approval.sessionId)
+            markWaiting(chatId: approval.chatId, files: approval.files)
+            addActivity("Approval requested", approval.summary, chatId: approval.chatId)
             if !approval.files.isEmpty {
-                addActivity("Files detected", approval.files.joined(separator: ", "), sessionId: approval.sessionId)
+                addActivity("Files detected", approval.files.joined(separator: ", "), chatId: approval.chatId)
             }
-            notifications.insert(HandrailNotification(title: "Approval required", detail: approval.summary, date: Date(), sessionId: approval.sessionId), at: 0)
+            insertNotification(title: "Approval required", detail: approval.summary, date: Date(), chatId: approval.chatId)
             HandrailNotificationCoordinator.shared.notifyApproval(
                 approval,
-                sessionTitle: session(id: approval.sessionId)?.title ?? approval.title
+                chatTitle: chat(id: approval.chatId)?.title ?? approval.title
             )
         case .error(let message):
-            awaitingStartedSession = false
-            isRefreshingSessions = false
-            reportError(message)
+            awaitingStartedChat = false
+            isRefreshingChats = false
+            reportPendingError(message)
         case .ignored:
             break
         }
     }
 
-    private func handleEvent(sessionId: String, event: SessionEvent) {
+    private func handleEvent(chatId: String, event: ChatEvent) {
         let date = event.at ?? Date()
+        if case .chat(let pendingChatId) = pendingErrorTarget, pendingChatId == chatId {
+            pendingErrorTarget = nil
+            chatErrors[chatId] = nil
+        }
         switch event.kind {
         case "output":
             let text = event.text ?? ""
-            transcripts[sessionId, default: []].append(text)
-            classifyOutput(sessionId: sessionId, text: text, date: date)
-        case "session_completed":
-            updateStatus(sessionId: sessionId, status: .completed)
-            appendTranscript(sessionId: sessionId, text: event.text)
-            addActivity("Session completed", event.text ?? sessionId, date: date, sessionId: sessionId)
-            notifications.insert(HandrailNotification(title: "Task completed", detail: event.text ?? sessionId, date: date, sessionId: sessionId), at: 0)
-            HandrailNotificationCoordinator.shared.notifySessionCompleted(sessionId: sessionId, text: event.text ?? sessionId)
-        case "session_failed":
-            updateStatus(sessionId: sessionId, status: .failed)
-            appendTranscript(sessionId: sessionId, text: event.text)
-            addActivity("Session failed", event.text ?? sessionId, date: date, sessionId: sessionId)
-            notifications.insert(HandrailNotification(title: "Task failed", detail: event.text ?? sessionId, date: date, sessionId: sessionId), at: 0)
-            HandrailNotificationCoordinator.shared.notifySessionFailed(sessionId: sessionId, text: event.text ?? sessionId)
-        case "session_stopped":
-            updateStatus(sessionId: sessionId, status: .stopped)
-            appendTranscript(sessionId: sessionId, text: event.text)
-            addActivity("Session stopped", event.text ?? sessionId, date: date, sessionId: sessionId)
+            transcripts[chatId, default: []].append(text)
+            classifyOutput(chatId: chatId, text: text, date: date)
+        case "chat_completed":
+            updateStatus(chatId: chatId, status: .completed)
+            appendTranscript(chatId: chatId, text: event.text)
+            let detail = notificationDetail(chatId: chatId, eventText: event.text)
+            addActivity("Chat completed", detail, date: date, chatId: chatId)
+            insertNotification(title: "Task completed", detail: detail, date: date, chatId: chatId)
+            HandrailNotificationCoordinator.shared.notifyChatCompleted(chatId: chatId, text: detail)
+        case "chat_failed":
+            updateStatus(chatId: chatId, status: .failed)
+            appendTranscript(chatId: chatId, text: event.text)
+            let detail = notificationDetail(chatId: chatId, eventText: event.text)
+            addActivity("Chat failed", detail, date: date, chatId: chatId)
+            insertNotification(title: "Task failed", detail: detail, date: date, chatId: chatId)
+            HandrailNotificationCoordinator.shared.notifyChatFailed(chatId: chatId, text: detail)
+        case "chat_stopped":
+            updateStatus(chatId: chatId, status: .stopped)
+            appendTranscript(chatId: chatId, text: event.text)
+            addActivity("Chat stopped", event.text ?? chatId, date: date, chatId: chatId)
         case "approval_approved", "approval_denied":
-            updateStatus(sessionId: sessionId, status: .running)
-            addActivity(event.kind == "approval_approved" ? "Approval sent" : "Denial sent", event.text ?? sessionId, date: date, sessionId: sessionId)
+            updateStatus(chatId: chatId, status: .running)
+            addActivity(event.kind == "approval_approved" ? "Approval sent" : "Denial sent", event.text ?? chatId, date: date, chatId: chatId)
         default:
-            addActivity(event.kind.replacingOccurrences(of: "_", with: " "), event.text ?? sessionId, date: date, sessionId: sessionId)
+            addActivity(event.kind.replacingOccurrences(of: "_", with: " "), event.text ?? chatId, date: date, chatId: chatId)
         }
     }
 
-    private func upsert(_ session: HandrailSession) {
-        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
-            sessions[index] = session
+    private func upsert(_ chat: CodexChat) {
+        if let index = chats.firstIndex(where: { $0.id == chat.id }) {
+            chats[index] = chat
         } else {
-            sessions.insert(session, at: 0)
+            chats.insert(chat, at: 0)
         }
-        if let transcript = session.transcript, !transcript.isEmpty {
-            transcripts[session.id] = transcript
-        }
-    }
-
-    private func updateStatus(sessionId: String, status: SessionStatus) {
-        if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
-            sessions[index].status = status
+        if let transcript = chat.transcript, !transcript.isEmpty {
+            transcripts[chat.id] = transcript
         }
     }
 
-    private func markWaiting(sessionId: String, files: [String]) {
-        restoreAttention(sessionId: sessionId)
-        if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
-            sessions[index].status = .waitingForApproval
-            sessions[index].files = files
+    private func updateStatus(chatId: String, status: ChatStatus) {
+        if let index = chats.firstIndex(where: { $0.id == chatId }) {
+            chats[index].status = status
         }
     }
 
-    private func classifyOutput(sessionId: String, text: String, date: Date) {
+    private func markWaiting(chatId: String, files: [String]) {
+        restoreAttention(chatId: chatId)
+        if let index = chats.firstIndex(where: { $0.id == chatId }) {
+            chats[index].status = .waitingForApproval
+            chats[index].files = files
+        }
+    }
+
+    private func classifyOutput(chatId: String, text: String, date: Date) {
         let lowercased = text.lowercased()
         if lowercased.contains("input required") {
-            notifications.insert(HandrailNotification(title: "Input required", detail: text, date: date, sessionId: sessionId), at: 0)
-            HandrailNotificationCoordinator.shared.notifyInputRequired(sessionId: sessionId, text: text)
+            insertNotification(title: "Input required", detail: text, date: date, chatId: chatId)
+            HandrailNotificationCoordinator.shared.notifyInputRequired(chatId: chatId, text: text)
         }
         if lowercased.contains("test failed") || lowercased.contains("tests failed") {
-            notifications.insert(HandrailNotification(title: "Tests failed", detail: text, date: date, sessionId: sessionId), at: 0)
+            insertNotification(title: "Tests failed", detail: text, date: date, chatId: chatId)
         }
         if text.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("$ ") {
-            addActivity("Command run", text, date: date, sessionId: sessionId)
+            addActivity("Command run", text, date: date, chatId: chatId)
         }
     }
 
-    private func addActivity(_ title: String, _ detail: String, date: Date = Date(), sessionId: String? = nil) {
-        activity.insert(ActivityItem(title: title, detail: detail, date: date, sessionId: sessionId), at: 0)
+    private func addActivity(_ title: String, _ detail: String, date: Date = Date(), chatId: String? = nil) {
+        activity.insert(ActivityItem(title: title, detail: detail, date: date, chatId: chatId), at: 0)
     }
 
-    private func appendTranscript(sessionId: String, text: String?) {
+    private func appendTranscript(chatId: String, text: String?) {
         guard let text, !text.isEmpty else { return }
-        transcripts[sessionId, default: []].append(text.hasSuffix("\n") ? text : "\(text)\n")
+        transcripts[chatId, default: []].append(text.hasSuffix("\n") ? text : "\(text)\n")
+    }
+
+    private func notificationDetail(chatId: String, eventText: String?) -> String {
+        let text = eventText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !text.isEmpty && !text.hasPrefix("codex:") {
+            return text
+        }
+        return chat(id: chatId)?.title ?? "Codex chat"
     }
 
     private func reportError(_ message: String) {
         lastError = message
-        notifications.insert(HandrailNotification(title: "Handrail error", detail: message, date: Date(), sessionId: nil), at: 0)
+        insertNotification(title: "Handrail error", detail: message, date: Date(), chatId: nil)
+    }
+
+    private func reportNewChatError(_ message: String) {
+        newChatError = message
+        insertNotification(title: "Handrail error", detail: message, date: Date(), chatId: nil)
+    }
+
+    private func reportChatError(_ message: String, chatId: String) {
+        chatErrors[chatId] = message
+        insertNotification(title: "Handrail error", detail: message, date: Date(), chatId: chatId)
+    }
+
+    private func reportPendingError(_ message: String) {
+        switch pendingErrorTarget {
+        case .newChat:
+            reportNewChatError(message)
+        case .chat(let chatId):
+            reportChatError(message, chatId: chatId)
+        case nil:
+            reportError(message)
+        }
+        pendingErrorTarget = nil
+    }
+
+    private func insertNotification(title: String, detail: String, date: Date, chatId: String?) {
+        if let chatId, isViewingChat(chatId: chatId) {
+            return
+        }
+        notifications.removeAll { notification in
+            notification.title == title &&
+            notification.detail == detail &&
+            notification.chatId == chatId
+        }
+        notifications.insert(HandrailNotification(title: title, detail: detail, date: date, chatId: chatId), at: 0)
     }
 
     private func loadPairing() {
         guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
-        pairedMachine = try? JSONDecoder().decode(PairedMachine.self, from: data)
+        if let metadata = try? JSONDecoder().decode(PairedMachineMetadata.self, from: data) {
+            do {
+                if let token = try KeychainStore.load(account: pairingTokenAccount) {
+                    pairedMachine = metadata.machine(token: token)
+                    return
+                }
+            } catch {
+                reportError("Could not read pairing token from Keychain: \(error.localizedDescription)")
+                return
+            }
+        }
+        if let legacyMachine = try? JSONDecoder().decode(PairedMachine.self, from: data) {
+            pairedMachine = legacyMachine
+            savePairing(legacyMachine)
+        }
     }
 
     private func savePairing(_ machine: PairedMachine) {
-        let data = try? JSONEncoder().encode(machine)
-        UserDefaults.standard.set(data, forKey: storageKey)
+        do {
+            try KeychainStore.save(machine.token, account: pairingTokenAccount)
+            let metadata = PairedMachineMetadata(machine: machine)
+            let data = try JSONEncoder().encode(metadata)
+            UserDefaults.standard.set(data, forKey: storageKey)
+        } catch {
+            reportError("Could not save pairing token to Keychain: \(error.localizedDescription)")
+        }
     }
 
-    private func loadPinnedSessions() {
+    private func loadPinnedChats() {
         let ids = UserDefaults.standard.stringArray(forKey: pinnedStorageKey) ?? []
-        pinnedSessionIds = Set(ids)
+        pinnedChatIds = Set(ids)
     }
 
-    private func savePinnedSessions() {
-        UserDefaults.standard.set(Array(pinnedSessionIds).sorted(), forKey: pinnedStorageKey)
+    private func savePinnedChats() {
+        UserDefaults.standard.set(Array(pinnedChatIds).sorted(), forKey: pinnedStorageKey)
     }
 
-    private func loadDismissedAttentionSessions() {
+    private func loadDismissedAttentionChats() {
         let ids = UserDefaults.standard.stringArray(forKey: dismissedAttentionStorageKey) ?? []
-        dismissedAttentionSessionIds = Set(ids)
+        dismissedAttentionChatIds = Set(ids)
     }
 
-    private func saveDismissedAttentionSessions() {
-        UserDefaults.standard.set(Array(dismissedAttentionSessionIds).sorted(), forKey: dismissedAttentionStorageKey)
+    private func saveDismissedAttentionChats() {
+        UserDefaults.standard.set(Array(dismissedAttentionChatIds).sorted(), forKey: dismissedAttentionStorageKey)
     }
 
-    private func pruneDismissedAttentionSessions(against sessions: [HandrailSession]) {
-        let activeAttentionIds = Set(sessions.filter(needsAttention).map(\.id))
-        dismissedAttentionSessionIds = dismissedAttentionSessionIds.intersection(activeAttentionIds)
-        saveDismissedAttentionSessions()
+    private func pruneDismissedAttentionChats(against chats: [CodexChat]) {
+        let activeAttentionIds = Set(chats.filter(needsAttention).map(\.id))
+        dismissedAttentionChatIds = dismissedAttentionChatIds.intersection(activeAttentionIds)
+        saveDismissedAttentionChats()
+    }
+}
+
+private enum PendingErrorTarget {
+    case newChat
+    case chat(String)
+}
+
+private struct PairedMachineMetadata: Codable {
+    let protocolVersion: Int
+    let host: String
+    let port: Int
+    let machineName: String
+
+    init(machine: PairedMachine) {
+        protocolVersion = machine.protocolVersion
+        host = machine.host
+        port = machine.port
+        machineName = machine.machineName
+    }
+
+    func machine(token: String) -> PairedMachine {
+        PairedMachine(
+            protocolVersion: protocolVersion,
+            host: host,
+            port: port,
+            token: token,
+            machineName: machineName,
+            isOnline: false
+        )
     }
 }

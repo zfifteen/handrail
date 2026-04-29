@@ -1,11 +1,16 @@
 import { randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Socket, createConnection } from "node:net";
+import { promisify } from "node:util";
 
 const INITIALIZING_CLIENT_ID = "initializing-client";
 const REQUEST_TIMEOUT_MS = 15_000;
+const DESKTOP_ROUTE_SETTLE_MS = 6_000;
+
+const execFileAsync = promisify(execFile);
 
 type IpcResponse =
   | { type: "response"; requestId: string; resultType: "success"; method?: string; result?: unknown }
@@ -33,6 +38,7 @@ export interface DesktopTurnInput {
 }
 
 export async function startCodexDesktopTurn(input: DesktopTurnInput): Promise<void> {
+  await openCodexDesktopThread(input.threadId);
   await withCodexDesktopIpc(async (client) => {
     await client.request("thread-follower-start-turn", {
       conversationId: input.threadId,
@@ -44,7 +50,20 @@ export async function startCodexDesktopTurn(input: DesktopTurnInput): Promise<vo
   });
 }
 
+export function codexDesktopThreadUrl(threadId: string): string {
+  return `codex://threads/${encodeURIComponent(threadId)}`;
+}
+
+export async function openCodexDesktopThread(threadId: string): Promise<void> {
+  if (process.platform !== "darwin") {
+    throw new Error("Opening Codex Desktop chats from Handrail is currently supported on macOS only.");
+  }
+  await execFileAsync("open", [codexDesktopThreadUrl(threadId)]);
+  await new Promise((resolve) => setTimeout(resolve, DESKTOP_ROUTE_SETTLE_MS));
+}
+
 export async function interruptCodexDesktopTurn(threadId: string): Promise<void> {
+  await openCodexDesktopThread(threadId);
   await withCodexDesktopIpc(async (client) => {
     await client.request("thread-follower-interrupt-turn", { conversationId: threadId });
   });
@@ -179,7 +198,7 @@ class CodexDesktopIpcClient {
 
 function formatDesktopIpcError(method: string, error: string): string {
   if (error === "no-client-found") {
-    return `Codex Desktop does not have an open owner for this chat, so ${method} could not be routed. Open that chat in Codex Desktop and try again.`;
+    return `Codex Desktop did not become ready to receive this chat after Handrail opened it, so ${method} could not be routed. Try again once the chat is visible in Codex Desktop.`;
   }
   return `Codex Desktop rejected ${method}: ${error}`;
 }

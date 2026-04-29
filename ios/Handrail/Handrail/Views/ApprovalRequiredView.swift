@@ -12,7 +12,7 @@ struct ApprovalRequiredView: View {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("Approval Required")
                                     .font(.title2.weight(.bold))
-                                Text(store.session(id: approval.sessionId)?.title ?? approval.sessionId)
+                                Text(store.chat(id: approval.chatId)?.title ?? approval.chatId)
                                     .foregroundStyle(.secondary)
                                 Text(approval.summary)
                             }
@@ -67,7 +67,7 @@ struct ApprovalRequiredView: View {
                 .padding()
                 .background(Color.black)
             } else {
-                EmptyState(title: "No approval pending", detail: "Approval requests from Codex sessions appear here.", systemImage: "checkmark.shield")
+                EmptyState(title: "No approval pending", detail: "Approval requests from Codex chats appear here.", systemImage: "checkmark.shield")
                     .padding()
             }
         }

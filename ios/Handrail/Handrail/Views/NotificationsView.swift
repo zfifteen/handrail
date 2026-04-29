@@ -10,21 +10,30 @@ struct NotificationsView: View {
                     .listRowBackground(Color.clear)
             } else {
                 ForEach(store.notifications) { item in
-                    if let sessionId = item.sessionId {
-                        NavigationLink(value: sessionId) {
+                    if let chatId = item.chatId {
+                        NavigationLink(value: chatId) {
                             notificationContent(item)
                         }
                     } else {
                         notificationContent(item)
                     }
                 }
+                .onDelete(perform: store.deleteNotifications)
             }
         }
         .scrollContentBackground(.hidden)
         .background(Color.black.ignoresSafeArea())
         .navigationTitle("Notifications")
-        .navigationDestination(for: String.self) { sessionId in
-            SessionDetailView(sessionId: sessionId)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Clear All") {
+                    store.clearNotifications()
+                }
+                .disabled(store.notifications.isEmpty)
+            }
+        }
+        .navigationDestination(for: String.self) { chatId in
+            ChatDetailView(chatId: chatId)
         }
     }
 

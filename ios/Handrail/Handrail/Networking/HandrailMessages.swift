@@ -2,13 +2,12 @@ import Foundation
 
 enum ClientMessage: Encodable {
     case hello(token: String)
-    case startSession(repo: String, title: String, prompt: String)
     case startChat(StartChatPayload)
-    case continueSession(sessionId: String, prompt: String)
-    case sendInput(sessionId: String, text: String)
-    case approve(sessionId: String, approvalId: String)
-    case deny(sessionId: String, approvalId: String, reason: String)
-    case stopSession(sessionId: String)
+    case continueChat(chatId: String, prompt: String)
+    case sendChatInput(chatId: String, text: String)
+    case approve(chatId: String, approvalId: String)
+    case deny(chatId: String, approvalId: String, reason: String)
+    case stopChat(chatId: String)
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -16,7 +15,7 @@ enum ClientMessage: Encodable {
         case repo
         case title
         case prompt
-        case sessionId
+        case chatId
         case text
         case approvalId
         case reason
@@ -36,11 +35,6 @@ enum ClientMessage: Encodable {
         case .hello(let token):
             try container.encode("hello", forKey: .type)
             try container.encode(token, forKey: .token)
-        case .startSession(let repo, let title, let prompt):
-            try container.encode("start_session", forKey: .type)
-            try container.encode(repo, forKey: .repo)
-            try container.encode(title, forKey: .title)
-            try container.encode(prompt, forKey: .prompt)
         case .startChat(let payload):
             try container.encode("start_chat", forKey: .type)
             try container.encode(payload.prompt, forKey: .prompt)
@@ -52,26 +46,26 @@ enum ClientMessage: Encodable {
             try container.encode(payload.accessPreset, forKey: .accessPreset)
             try container.encode(payload.model, forKey: .model)
             try container.encode(payload.reasoningEffort, forKey: .reasoningEffort)
-        case .continueSession(let sessionId, let prompt):
-            try container.encode("continue_session", forKey: .type)
-            try container.encode(sessionId, forKey: .sessionId)
+        case .continueChat(let chatId, let prompt):
+            try container.encode("continue_chat", forKey: .type)
+            try container.encode(chatId, forKey: .chatId)
             try container.encode(prompt, forKey: .prompt)
-        case .sendInput(let sessionId, let text):
-            try container.encode("send_input", forKey: .type)
-            try container.encode(sessionId, forKey: .sessionId)
+        case .sendChatInput(let chatId, let text):
+            try container.encode("send_chat_input", forKey: .type)
+            try container.encode(chatId, forKey: .chatId)
             try container.encode(text, forKey: .text)
-        case .approve(let sessionId, let approvalId):
+        case .approve(let chatId, let approvalId):
             try container.encode("approve", forKey: .type)
-            try container.encode(sessionId, forKey: .sessionId)
+            try container.encode(chatId, forKey: .chatId)
             try container.encode(approvalId, forKey: .approvalId)
-        case .deny(let sessionId, let approvalId, let reason):
+        case .deny(let chatId, let approvalId, let reason):
             try container.encode("deny", forKey: .type)
-            try container.encode(sessionId, forKey: .sessionId)
+            try container.encode(chatId, forKey: .chatId)
             try container.encode(approvalId, forKey: .approvalId)
             try container.encode(reason, forKey: .reason)
-        case .stopSession(let sessionId):
-            try container.encode("stop_session", forKey: .type)
-            try container.encode(sessionId, forKey: .sessionId)
+        case .stopChat(let chatId):
+            try container.encode("stop_chat", forKey: .type)
+            try container.encode(chatId, forKey: .chatId)
         }
     }
 }
@@ -79,9 +73,9 @@ enum ClientMessage: Encodable {
 enum ServerMessage: Decodable {
     case machineStatus(machineName: String, online: Bool, defaultRepo: String?)
     case newChatOptions(NewChatOptions)
-    case sessionList([HandrailSession])
-    case sessionStarted(HandrailSession)
-    case sessionEvent(sessionId: String, event: SessionEvent)
+    case chatList([CodexChat])
+    case chatStarted(CodexChat)
+    case chatEvent(chatId: String, event: ChatEvent)
     case approvalRequired(ApprovalRequest)
     case error(String)
     case ignored
@@ -90,9 +84,9 @@ enum ServerMessage: Decodable {
         case type
         case machineName
         case online
-        case sessions
-        case session
-        case sessionId
+        case chats
+        case chat
+        case chatId
         case event
         case approvalId
         case title
@@ -116,18 +110,18 @@ enum ServerMessage: Decodable {
             )
         case "new_chat_options":
             self = .newChatOptions(try container.decode(NewChatOptions.self, forKey: .options))
-        case "session_list":
-            self = .sessionList(try container.decode([HandrailSession].self, forKey: .sessions))
-        case "session_started":
-            self = .sessionStarted(try container.decode(HandrailSession.self, forKey: .session))
-        case "session_event":
-            self = .sessionEvent(
-                sessionId: try container.decode(String.self, forKey: .sessionId),
-                event: try container.decode(SessionEvent.self, forKey: .event)
+        case "chat_list":
+            self = .chatList(try container.decode([CodexChat].self, forKey: .chats))
+        case "chat_started":
+            self = .chatStarted(try container.decode(CodexChat.self, forKey: .chat))
+        case "chat_event":
+            self = .chatEvent(
+                chatId: try container.decode(String.self, forKey: .chatId),
+                event: try container.decode(ChatEvent.self, forKey: .event)
             )
         case "approval_required":
             self = .approvalRequired(ApprovalRequest(
-                sessionId: try container.decode(String.self, forKey: .sessionId),
+                chatId: try container.decode(String.self, forKey: .chatId),
                 approvalId: try container.decode(String.self, forKey: .approvalId),
                 title: try container.decode(String.self, forKey: .title),
                 summary: try container.decode(String.self, forKey: .summary),

@@ -4,10 +4,10 @@ struct DashboardView: View {
     @Environment(HandrailStore.self) private var store
     @State private var showsScanner = false
     @State private var showsStart = false
-    let navigateToSession: (String) -> Void
+    let navigateToChat: (String) -> Void
 
-    init(navigateToSession: @escaping (String) -> Void = { _ in }) {
-        self.navigateToSession = navigateToSession
+    init(navigateToChat: @escaping (String) -> Void = { _ in }) {
+        self.navigateToChat = navigateToChat
     }
 
     var body: some View {
@@ -16,10 +16,10 @@ struct DashboardView: View {
                 if let machine = store.pairedMachine {
                     machineStatus(machine)
                     SyncStatusRow(
-                        isRefreshing: store.isRefreshingSessions,
-                        lastRefreshAt: store.lastSessionRefreshAt,
+                        isRefreshing: store.isRefreshingChats,
+                        lastRefreshAt: store.lastChatRefreshAt,
                         isOnline: machine.isOnline,
-                        reconnect: store.reconnect
+                        refresh: store.refreshChats
                     )
                     todaySummary
                     attentionSection
@@ -54,9 +54,10 @@ struct DashboardView: View {
         }
         .background(Color.black.ignoresSafeArea())
         .refreshable {
-            store.refreshSessions()
+            store.refreshChats()
         }
         .navigationTitle("Dashboard")
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
@@ -77,7 +78,7 @@ struct DashboardView: View {
             }
         }
         .navigationDestination(for: String.self) { id in
-            SessionDetailView(sessionId: id)
+            ChatDetailView(chatId: id)
         }
         .sheet(isPresented: $showsScanner) {
             QRScannerView { payload in
@@ -88,8 +89,8 @@ struct DashboardView: View {
         .sheet(isPresented: $showsStart) {
             NewChatView()
         }
-        .onChange(of: store.lastStartedSessionId) { _, sessionId in
-            if sessionId != nil {
+        .onChange(of: store.lastStartedChatId) { _, chatId in
+            if chatId != nil {
                 showsStart = false
             }
         }
@@ -133,8 +134,8 @@ struct DashboardView: View {
                 }
 
                 HStack(spacing: 10) {
-                    metric("Running", activeSessions.count, .green, "play.fill")
-                    metric("Needs attention", visibleAttentionSessions.count, .orange, "exclamationmark.triangle.fill")
+                    metric("Running", activeChats.count, .green, "play.fill")
+                    metric("Needs attention", visibleAttentionChats.count, .orange, "exclamationmark.triangle.fill")
                     metric("Done", completedToday.count, .blue, "checkmark.circle.fill")
                 }
             }
@@ -163,15 +164,15 @@ struct DashboardView: View {
     private var attentionSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionTitle("Needs attention")
-            if visibleAttentionSessions.isEmpty {
+            if visibleAttentionChats.isEmpty {
                 quietRow("No approvals or failures")
             } else {
-                ForEach(visibleAttentionSessions.prefix(3)) { session in
-                    dashboardRow(session, icon: attentionIcon(for: session), color: attentionColor(for: session))
-                        .contextMenu {
-                            Button {
-                                store.dismissAttention(sessionId: session.id)
-                            } label: {
+                ForEach(visibleAttentionChats.prefix(3)) { chat in
+                    dashboardRow(chat, icon: attentionIcon(for: chat), color: attentionColor(for: chat))
+                    .contextMenu {
+                        Button {
+                                store.dismissAttention(chatId: chat.id)
+                        } label: {
                                 Label("Dismiss", systemImage: "xmark.circle")
                             }
                         }
@@ -183,11 +184,11 @@ struct DashboardView: View {
     private var runningNowSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionTitle("Running now")
-            if activeSessions.isEmpty {
+            if activeChats.isEmpty {
                 quietRow("No running Codex chats")
             } else {
-                ForEach(activeSessions.prefix(3)) { session in
-                    dashboardRow(session, icon: "play.fill", color: .green)
+                ForEach(activeChats.prefix(3)) { chat in
+                    dashboardRow(chat, icon: "play.fill", color: .green)
                 }
             }
         }
@@ -199,8 +200,8 @@ struct DashboardView: View {
             if pinnedChats.isEmpty {
                 quietRow("No pinned chats")
             } else {
-                ForEach(pinnedChats.prefix(5)) { session in
-                    dashboardRow(session, icon: "pin.fill", color: .secondary)
+                ForEach(pinnedChats.prefix(5)) { chat in
+                    dashboardRow(chat, icon: "pin.fill", color: .secondary)
                 }
             }
         }
@@ -212,8 +213,8 @@ struct DashboardView: View {
             if allChats.isEmpty {
                 quietRow("No Codex chats found")
             } else {
-                ForEach(allChats.prefix(5)) { session in
-                    dashboardRow(session, icon: "message.fill", color: .purple)
+                ForEach(allChats.prefix(5)) { chat in
+                    dashboardRow(chat, icon: "message.fill", color: .purple)
                 }
             }
         }
@@ -242,8 +243,8 @@ struct DashboardView: View {
             .padding(.horizontal, 8)
     }
 
-    private func dashboardRow(_ session: HandrailSession, icon: String, color: Color) -> some View {
-        NavigationLink(value: session.id) {
+    private func dashboardRow(_ chat: CodexChat, icon: String, color: Color) -> some View {
+        NavigationLink(value: chat.id) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.body.weight(.semibold))
@@ -251,11 +252,11 @@ struct DashboardView: View {
                     .frame(width: 24)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(displayTitle(for: session))
+                    Text(displayTitle(for: chat))
                         .font(.body.weight(.semibold))
                         .foregroundStyle(.primary)
                         .lineLimit(1)
-                    Text(projectName(for: session))
+                    Text(projectName(for: chat))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -263,7 +264,7 @@ struct DashboardView: View {
 
                 Spacer()
 
-                Text(HandrailFormatters.relativeAge(since: sortDate(for: session)))
+                Text(HandrailFormatters.relativeAge(since: sortDate(for: chat)))
                     .font(.body.weight(.medium))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
@@ -275,30 +276,30 @@ struct DashboardView: View {
         .buttonStyle(.plain)
     }
 
-    private var activeSessions: [HandrailSession] {
-        sorted(store.sessions.filter {
-            $0.source != "handrail" && ($0.status == .running || $0.status == .waitingForApproval)
+    private var activeChats: [CodexChat] {
+        sorted(store.chats.filter {
+            ($0.status == .running || $0.status == .waitingForApproval)
         })
     }
 
-    private var attentionSessions: [HandrailSession] {
-        sorted(store.sessions.filter { $0.source != "handrail" && store.needsAttention($0) })
+    private var attentionChats: [CodexChat] {
+        sorted(store.chats.filter { store.needsAttention($0) })
     }
 
-    private var visibleAttentionSessions: [HandrailSession] {
-        attentionSessions.filter { !store.isAttentionDismissed(sessionId: $0.id) }
+    private var visibleAttentionChats: [CodexChat] {
+        attentionChats.filter { !store.isAttentionDismissed(chatId: $0.id) }
     }
 
-    private var completedToday: [HandrailSession] {
+    private var completedToday: [CodexChat] {
         let startOfToday = Calendar.current.startOfDay(for: Date())
-        return store.sessions.filter {
-            $0.source != "handrail" && $0.status == .completed && sortDate(for: $0) >= startOfToday
+        return store.chats.filter {
+            $0.status == .completed && sortDate(for: $0) >= startOfToday
         }
     }
 
-    private var pinnedChats: [HandrailSession] {
-        store.sessions
-            .filter { $0.source != "handrail" && store.isPinned(sessionId: $0.id) }
+    private var pinnedChats: [CodexChat] {
+        store.chats
+            .filter { store.isPinned(chatId: $0.id) }
             .sorted {
                 let leftOrder = $0.pinnedOrder ?? Int.max
                 let rightOrder = $1.pinnedOrder ?? Int.max
@@ -309,35 +310,35 @@ struct DashboardView: View {
             }
     }
 
-    private var allChats: [HandrailSession] {
-        sorted(store.sessions.filter { $0.source != "handrail" && !store.isPinned(sessionId: $0.id) })
+    private var allChats: [CodexChat] {
+        sorted(store.chats.filter { !store.isPinned(chatId: $0.id) })
     }
 
-    private func sorted(_ sessions: [HandrailSession]) -> [HandrailSession] {
-        sessions.sorted { sortDate(for: $0) > sortDate(for: $1) }
+    private func sorted(_ chats: [CodexChat]) -> [CodexChat] {
+        chats.sorted { sortDate(for: $0) > sortDate(for: $1) }
     }
 
-    private func displayTitle(for session: HandrailSession) -> String {
-        if session.title.hasPrefix("Codex: ") {
-            return String(session.title.dropFirst("Codex: ".count))
+    private func displayTitle(for chat: CodexChat) -> String {
+        if chat.title.hasPrefix("Codex: ") {
+            return String(chat.title.dropFirst("Codex: ".count))
         }
-        return session.title
+        return chat.title
     }
 
-    private func projectName(for session: HandrailSession) -> String {
-        URL(fileURLWithPath: session.repo).lastPathComponent
+    private func projectName(for chat: CodexChat) -> String {
+        chat.projectName ?? URL(fileURLWithPath: chat.repo).lastPathComponent
     }
 
-    private func sortDate(for session: HandrailSession) -> Date {
-        session.updatedAt ?? session.endedAt ?? session.startedAt
+    private func sortDate(for chat: CodexChat) -> Date {
+        chat.updatedAt ?? chat.endedAt ?? chat.startedAt
     }
 
-    private func attentionIcon(for session: HandrailSession) -> String {
-        session.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill"
+    private func attentionIcon(for chat: CodexChat) -> String {
+        chat.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill"
     }
 
-    private func attentionColor(for session: HandrailSession) -> Color {
-        session.status == .failed ? .red : .orange
+    private func attentionColor(for chat: CodexChat) -> Color {
+        chat.status == .failed ? .red : .orange
     }
 }
 

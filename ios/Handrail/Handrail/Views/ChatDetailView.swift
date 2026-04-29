@@ -1,45 +1,52 @@
 import SwiftUI
 
-struct SessionDetailView: View {
+struct ChatDetailView: View {
     @Environment(HandrailStore.self) private var store
-    let sessionId: String
+    let chatId: String
     @State private var input = ""
     @State private var showJumpToLatest = false
     @State private var pendingContinuePrompt: String?
+    @FocusState private var isComposerFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
             chatSurface
-            if canControlSession {
+            if canControlChat {
                 if canSendInput {
                     composer(placeholder: "Send input") { text in
-                        store.sendInput(sessionId: sessionId, text: text)
+                        store.sendInput(chatId: chatId, text: text)
                     }
                 } else {
-                    readOnlyNotice("This session is running without live text input.")
+                    readOnlyNotice("Codex is working.")
                 }
-            } else if canContinueArchivedChat {
-                continueComposer
-            } else if store.session(id: sessionId)?.source == "codex" {
-                readOnlyNotice(store.pairedMachine?.isOnline == true ? "Archived Codex chat" : "Connect to your Mac to continue this chat.")
+            } else if canStartFollowUp {
+                followUpComposer
+            } else if store.chat(id: chatId) != nil {
+                readOnlyNotice(store.pairedMachine?.isOnline == true ? "This Codex chat cannot receive input right now." : "Connect to your Mac to keep chatting.")
             }
         }
         .background(Color.black.ignoresSafeArea())
-        .navigationTitle(displayTitle(store.session(id: sessionId)?.title ?? "Session"))
+        .navigationTitle(displayTitle(store.chat(id: chatId)?.title ?? "Chat"))
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            store.enterChat(chatId: chatId)
+        }
+        .onDisappear {
+            store.leaveChat(chatId: chatId)
+        }
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if canDismissAttention {
                     Button {
-                        store.dismissAttention(sessionId: sessionId)
+                        store.dismissAttention(chatId: chatId)
                     } label: {
                         Image(systemName: "xmark.circle")
                     }
                     .accessibilityLabel("Dismiss attention item")
                 }
-                if canControlSession {
+                if canControlChat {
                     Button(role: .destructive) {
-                        store.stop(sessionId: sessionId)
+                        store.stop(chatId: chatId)
                     } label: {
                         Image(systemName: "stop.fill")
                     }
@@ -53,10 +60,10 @@ struct SessionDetailView: View {
             ZStack(alignment: .bottomTrailing) {
                 ScrollView {
                     VStack(spacing: 14) {
-                        if let session = store.session(id: sessionId) {
-                            chatHeader(session)
-                            attentionSummary(session)
-                            files(session.files ?? [])
+                        if let chat = store.chat(id: chatId) {
+                            chatHeader(chat)
+                            attentionSummary(chat)
+                            files(chat.files ?? [])
                         }
                         chatMessages
                         Color.clear
@@ -67,6 +74,9 @@ struct SessionDetailView: View {
                     .padding(.top, 12)
                     .padding(.bottom, 18)
                 }
+                .contentShape(Rectangle())
+                .simultaneousGesture(TapGesture().onEnded { _ in dismissComposerKeyboard() })
+                .scrollDismissesKeyboard(.interactively)
                 .onAppear {
                     scrollToLatest(proxy, animated: false)
                 }
@@ -74,7 +84,7 @@ struct SessionDetailView: View {
                     clearCompletedContinuePromptIfNeeded()
                     scrollToLatest(proxy, animated: true)
                 }
-                .onChange(of: store.lastError) { _, error in
+                .onChange(of: chatError) { _, error in
                     if error != nil {
                         pendingContinuePrompt = nil
                     }
@@ -106,40 +116,48 @@ struct SessionDetailView: View {
         }
     }
 
-    private var canControlSession: Bool {
-        guard let session = store.session(id: sessionId) else { return false }
+    private var canControlChat: Bool {
+        guard let chat = store.chat(id: chatId) else { return false }
         return store.pairedMachine?.isOnline == true &&
-            (session.status == .running || session.status == .waitingForApproval)
+            (chat.status == .running || chat.status == .waitingForApproval)
     }
 
     private var canSendInput: Bool {
-        store.session(id: sessionId)?.acceptsInput == true
+        store.chat(id: chatId)?.acceptsInput == true
     }
 
-    private var canContinueArchivedChat: Bool {
-        guard let session = store.session(id: sessionId) else { return false }
-        return session.source == "codex" &&
-            store.pairedMachine?.isOnline == true &&
-            session.status != .running &&
-            session.status != .waitingForApproval
+    private var canStartFollowUp: Bool {
+        guard let chat = store.chat(id: chatId) else { return false }
+        return store.pairedMachine?.isOnline == true &&
+            chat.status != .running &&
+            chat.status != .waitingForApproval
     }
 
     private var canDismissAttention: Bool {
-        guard let session = store.session(id: sessionId) else { return false }
-        return store.needsAttention(session) && !store.isAttentionDismissed(sessionId: sessionId)
+        guard let chat = store.chat(id: chatId) else { return false }
+        return store.needsAttention(chat) && !store.isAttentionDismissed(chatId: chatId)
     }
 
-    private func chatHeader(_ session: HandrailSession) -> some View {
+    private func chatHeader(_ chat: CodexChat) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 8) {
-                StatusBadge(status: session.status)
-                if session.source == "codex" && session.status != .running && session.status != .waitingForApproval {
-                    Text("Can continue")
+                StatusBadge(status: chat.status)
+                if chat.status == .running {
+                    HStack(spacing: 6) {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(.green)
+                        Text("Codex is working")
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.green)
+                } else if chat.status != .waitingForApproval {
+                    Text("Ready for follow-up")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
             }
-            Text(session.repo)
+            Text(chat.repo)
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
@@ -166,15 +184,17 @@ struct SessionDetailView: View {
         }
     }
 
-    private func attentionSummary(_ session: HandrailSession) -> some View {
+    private func attentionSummary(_ chat: CodexChat) -> some View {
         Group {
-            if store.needsAttention(session) {
+            if let approval = store.latestApproval, approval.chatId == chat.id {
+                approvalPanel(approval)
+            } else if store.needsAttention(chat) {
                 Card {
                     VStack(alignment: .leading, spacing: 8) {
-                        Label(session.status == .failed ? "Needs attention" : "Approval required", systemImage: session.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill")
+                        Label(chat.status == .failed ? "Needs attention" : "Approval required", systemImage: chat.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill")
                             .font(.headline)
-                            .foregroundStyle(session.status == .failed ? .red : .orange)
-                        Text(attentionDetail(for: session))
+                            .foregroundStyle(chat.status == .failed ? .red : .orange)
+                        Text(attentionDetail(for: chat))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .textSelection(.enabled)
@@ -184,13 +204,72 @@ struct SessionDetailView: View {
         }
     }
 
-    private func attentionDetail(for session: HandrailSession) -> String {
-        if session.status == .waitingForApproval {
+    private func approvalPanel(_ approval: ApprovalRequest) -> some View {
+        Card {
+            VStack(alignment: .leading, spacing: 12) {
+                Label("Approval required", systemImage: "exclamationmark.triangle.fill")
+                    .font(.headline)
+                    .foregroundStyle(.orange)
+                Text(approval.summary)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+
+                if !approval.files.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Changed files")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        ForEach(approval.files, id: \.self) { file in
+                            Text(file)
+                                .font(.caption.monospaced())
+                                .textSelection(.enabled)
+                        }
+                    }
+                }
+
+                if !approval.diff.isEmpty {
+                    DisclosureGroup("Diff") {
+                        ScrollView(.horizontal) {
+                            Text(approval.diff)
+                                .font(.caption.monospaced())
+                                .textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.top, 6)
+                        }
+                    }
+                    .font(.caption.weight(.semibold))
+                }
+
+                HStack(spacing: 10) {
+                    Button(role: .destructive) {
+                        store.deny(approval, reason: "Denied from Handrail.")
+                    } label: {
+                        Text("Deny")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button {
+                        store.approve(approval)
+                    } label: {
+                        Text("Approve")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.purple)
+                }
+            }
+        }
+    }
+
+    private func attentionDetail(for chat: CodexChat) -> String {
+        if chat.status == .waitingForApproval {
             return "Codex is waiting for a decision before it can continue."
         }
         let text = transcriptText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
-            return "This session failed before Handrail received readable output."
+            return "This chat failed before readable output was received."
         }
         return ChatBlock.failureSummary(from: text)
     }
@@ -203,7 +282,10 @@ struct SessionDetailView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 48)
-                if let error = store.lastError {
+                if isChatWorking {
+                    CodexWorkingIndicator()
+                }
+                if let error = chatError {
                     Text(error)
                         .font(.caption)
                         .foregroundStyle(.red)
@@ -217,7 +299,10 @@ struct SessionDetailView: View {
                     }
                     ChatMessageBubble(block: block, isLatest: index == chatBlocks.count - 1)
                 }
-                sessionErrorView
+                chatErrorView
+                if isChatWorking {
+                    CodexWorkingIndicator()
+                }
             }
         }
     }
@@ -227,9 +312,11 @@ struct SessionDetailView: View {
             TextField(placeholder, text: $input, axis: .vertical)
                 .lineLimit(1...4)
                 .textFieldStyle(.roundedBorder)
+                .focused($isComposerFocused)
             Button {
                 action(input)
                 input = ""
+                dismissComposerKeyboard()
             } label: {
                 Image(systemName: "paperplane.fill")
             }
@@ -241,23 +328,24 @@ struct SessionDetailView: View {
         .background(Color.black)
     }
 
-    private var continueComposer: some View {
+    private var followUpComposer: some View {
         VStack(alignment: .leading, spacing: 10) {
-            TextField("Continue this Codex chat", text: $input, axis: .vertical)
+            TextField("Ask for follow-up changes", text: $input, axis: .vertical)
                 .lineLimit(2...5)
                 .textFieldStyle(.roundedBorder)
+                .focused($isComposerFocused)
             Button {
                 let prompt = input.trimmingCharacters(in: .whitespacesAndNewlines)
                 pendingContinuePrompt = prompt
-                store.continueSession(sessionId: sessionId, prompt: prompt)
+                store.continueChat(chatId: chatId, prompt: prompt)
+                dismissComposerKeyboard()
             } label: {
-                Label(pendingContinuePrompt == nil ? "Continue Chat" : "Sending to Desktop", systemImage: "arrow.turn.down.right")
+                Label(pendingContinuePrompt == nil ? "Send" : "Sending to Codex", systemImage: "paperplane.fill")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .tint(.purple)
             .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || pendingContinuePrompt != nil)
-            sessionErrorView
         }
         .padding()
         .background(Color.black)
@@ -273,10 +361,10 @@ struct SessionDetailView: View {
     }
 
     private var emptyTranscriptText: String {
-        guard let session = store.session(id: sessionId) else {
-            return "Session not found."
+        guard let chat = store.chat(id: chatId) else {
+            return "Chat not found."
         }
-        switch session.status {
+        switch chat.status {
         case .running:
             return "Codex is starting. Output will appear here."
         case .waitingForApproval:
@@ -293,7 +381,15 @@ struct SessionDetailView: View {
     }
 
     private var transcriptText: String {
-        (store.transcripts[sessionId] ?? []).joined()
+        (store.transcripts[chatId] ?? []).joined()
+    }
+
+    private var chatError: String? {
+        store.chatErrors[chatId]
+    }
+
+    private var isChatWorking: Bool {
+        store.chat(id: chatId)?.status == .running
     }
 
     private var chatBlocks: [ChatBlock] {
@@ -301,7 +397,7 @@ struct SessionDetailView: View {
     }
 
     private var bottomId: String {
-        "bottom-\(sessionId)"
+        "bottom-\(chatId)"
     }
 
     private func scrollToLatest(_ proxy: ScrollViewProxy, animated: Bool) {
@@ -324,9 +420,13 @@ struct SessionDetailView: View {
         }
     }
 
-    private var sessionErrorView: some View {
+    private func dismissComposerKeyboard() {
+        isComposerFocused = false
+    }
+
+    private var chatErrorView: some View {
         Group {
-            if let error = store.lastError {
+            if let error = chatError {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
                     .font(.caption)
                     .foregroundStyle(.red)
@@ -399,6 +499,23 @@ private struct ChatMessageBubble: View {
                 Spacer(minLength: 26)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct CodexWorkingIndicator: View {
+    var body: some View {
+        HStack(spacing: 10) {
+            ProgressView()
+                .controlSize(.small)
+                .tint(.green)
+            Text("Codex is working")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.green)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color.green.opacity(0.12), in: Capsule())
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -493,7 +610,7 @@ private struct ChatBlock {
         if isRawMarkupNoise(text) {
             return "Codex produced raw markup output. The full raw response is contained below."
         }
-        return lines.last ?? "This session failed."
+        return lines.last ?? "This chat failed."
     }
 
     private static func isRawMarkupNoise(_ text: String) -> Bool {
@@ -505,6 +622,9 @@ private struct ChatBlock {
             || lowercased.contains("<div class=")
             || lowercased.contains("window._cf_chl_opt")
             || lowercased.contains("enable javascript and cookies to continue")
+            || lowercased.contains("default profile:")
+            || lowercased.contains(" process running for ")
+            || lowercased.contains(" info ")
     }
 }
 
@@ -545,10 +665,10 @@ private struct RawOutputNotice: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Raw browser response", systemImage: "doc.text.magnifyingglass")
+            Label("Raw output", systemImage: "doc.text.magnifyingglass")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.orange)
-            Text("Handrail kept this output readable instead of rendering the embedded HTML/SVG as chat.")
+            Text("Handrail kept this output compact instead of rendering process logs or embedded markup as normal chat.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Text(preview)

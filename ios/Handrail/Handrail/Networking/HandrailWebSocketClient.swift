@@ -6,6 +6,8 @@ final class HandrailWebSocketClient {
 
     private var task: URLSessionWebSocketTask?
     private var machine: PairedMachine?
+    private var connectionGeneration = 0
+    private var reconnectWorkItem: DispatchWorkItem?
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 
@@ -16,15 +18,23 @@ final class HandrailWebSocketClient {
 
     func connect(to machine: PairedMachine) {
         self.machine = machine
+        connectionGeneration += 1
+        let generation = connectionGeneration
+        reconnectWorkItem?.cancel()
+        reconnectWorkItem = nil
         let url = URL(string: "ws://\(machine.host):\(machine.port)")!
         task?.cancel(with: .goingAway, reason: nil)
-        task = URLSession.shared.webSocketTask(with: url)
-        task?.resume()
+        let nextTask = URLSession.shared.webSocketTask(with: url)
+        task = nextTask
+        nextTask.resume()
         send(.hello(token: machine.token))
-        receive()
+        receive(on: nextTask, generation: generation)
     }
 
     func disconnect() {
+        connectionGeneration += 1
+        reconnectWorkItem?.cancel()
+        reconnectWorkItem = nil
         task?.cancel(with: .goingAway, reason: nil)
         task = nil
         onConnectionChange?(false)
@@ -48,18 +58,19 @@ final class HandrailWebSocketClient {
         }
     }
 
-    private func receive() {
-        task?.receive { [weak self] result in
+    private func receive(on currentTask: URLSessionWebSocketTask, generation: Int) {
+        currentTask.receive { [weak self] result in
             guard let self else { return }
+            guard self.task === currentTask, self.connectionGeneration == generation else { return }
             switch result {
             case .success(let message):
                 if case .string(let text) = message {
                     self.decode(text)
                 }
-                self.receive()
+                self.receive(on: currentTask, generation: generation)
             case .failure:
                 self.onConnectionChange?(false)
-                self.scheduleReconnect()
+                self.scheduleReconnect(generation: generation)
             }
         }
     }
@@ -73,10 +84,14 @@ final class HandrailWebSocketClient {
         }
     }
 
-    private func scheduleReconnect() {
+    private func scheduleReconnect(generation: Int) {
         guard let machine else { return }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        reconnectWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self, self.connectionGeneration == generation else { return }
             self.connect(to: machine)
         }
+        reconnectWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: workItem)
     }
 }

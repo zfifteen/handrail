@@ -14,26 +14,27 @@ This file is updated by the recurring improvement task. Each run should choose o
 
 | Priority | Feature | Status | Notes |
 | --- | --- | --- | --- |
-| P1 | Approval workflow hardening | Planned | Add deterministic fixtures for approval-like Codex output and diff display. |
-| P2 | iOS pairing storage hardening | Planned | Move pairing token from UserDefaults to Keychain. |
-| P2 | CLI state hygiene | Planned | Add a command to prune old Handrail-managed sessions without touching Codex history. |
-| P2 | Test coverage expansion | Planned | Add WebSocket integration tests for start, continue, refresh, stop, and error events. |
+| P2 | Test coverage expansion | Completed | Added WebSocket integration coverage for pairing, refresh, stop, and command error events. |
 
 ## Completed
 
 | Date | Feature | Verification |
 | --- | --- | --- |
-| 2026-04-25 | Sessions list uses Codex desktop chat names and `updated_at` ordering. | Server session list checked against Codex session index; iOS screenshot verified. |
-| 2026-04-25 | Start Session navigates directly to Session Detail. | Simulator and physical iPhone build/install; WebSocket `session_started` path verified. |
-| 2026-04-25 | Stopping a Handrail-managed session reports Stopped, not Failed. | CLI tests and runtime stop check. |
-| 2026-04-25 | Archived Codex chats show a continue composer. | Simulator screenshot and invalid `continue_session` server error check. |
+| 2026-04-25 | Chat list uses Codex desktop chat names and `updated_at` ordering. | Server chat list checked against Codex chat index; iOS screenshot verified. |
+| 2026-04-25 | New Chat navigates directly to Chat Detail. | Simulator and physical iPhone build/install; WebSocket `chat_started` path verified. |
+| 2026-04-25 | Stopping a Codex chat reports Stopped, not Failed. | CLI tests and runtime stop check. |
+| 2026-04-25 | Archived Codex chats show a continue composer. | Simulator screenshot and invalid `continue_chat` server error check. |
 | 2026-04-25 | Transcript renders as role-separated rich text instead of raw monospace text. | Simulator screenshot. |
 | 2026-04-26 | Transcript readability preserves line breaks from imported Codex chats. | CLI tests 4/4, iOS simulator build, WebSocket transcript-shape check, screenshot `test-artifacts/handrail-transcript-readable-2026-04-26.png`. |
-| 2026-04-26 | Continue archived Codex chats creates a live chat-shaped session and routes to it. | CLI tests 5/5, deterministic fake-Codex protocol check, iOS simulator build, screenshot `test-artifacts/handrail-continue-routing-2026-04-26.png`. |
+| 2026-04-26 | Continue archived Codex chats creates a live Codex chat route. | CLI tests 5/5, deterministic fake-Codex protocol check, iOS simulator build, screenshot `test-artifacts/handrail-continue-routing-2026-04-26.png`. |
 | 2026-04-26 | Pull-to-refresh feedback shows refresh progress and last sync time. | CLI tests 5/5, iOS simulator build, simulator launch screenshot `test-artifacts/handrail-refresh-feedback-2026-04-26.png`. |
-| 2026-04-26 | Start Session offers recent Mac repositories and clearer disabled-state feedback. | CLI tests 5/5, iOS simulator build, simulator Start Session screenshot `test-artifacts/handrail-start-session-recent-repos-2026-04-26.png`. |
+| 2026-04-26 | New Chat offers recent Mac repositories and clearer disabled-state feedback. | CLI tests 5/5, iOS simulator build, simulator New Chat screenshot `test-artifacts/handrail-start-session-recent-repos-2026-04-26.png`. |
 | 2026-04-26 | Archived Codex chat detail has a primary Continue Chat action. | CLI tests 5/5, iOS simulator build, simulator archived-chat screenshot `test-artifacts/handrail-archived-continue-control-2026-04-26.png`. |
 | 2026-04-27 | Sync status has an explicit refresh/reconnect action. | CLI tests 5/5, iOS simulator build, simulator Dashboard screenshot `test-artifacts/handrail-sync-reconnect-action-2026-04-27.png`. |
+| 2026-04-27 | Approval workflow hardening with deterministic approval fixture and inline approval controls. | CLI tests 15/15, iOS simulator build, WebSocket approval protocol check, simulator screenshot `test-artifacts/handrail-approval-hardening-2026-04-27.png`. |
+| 2026-04-27 | iOS pairing token moved from UserDefaults to Keychain. | CLI tests 15/15, iOS simulator build, simulator launch, UserDefaults plist inspection, screenshot `test-artifacts/handrail-keychain-pairing-2026-04-27.png`. |
+| 2026-04-28 | Removed legacy Handrail-owned chat records from the active product model. | CLI tests 16/16, direct isolated state check, iOS simulator build and launch, simulator screenshot `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_5cebea27-b28c-42da-ba37-b203093ef80e.jpg`. |
+| 2026-04-29 | WebSocket integration coverage for core chat protocol paths. | CLI tests 22/22, iOS simulator build, protocol-level WebSocket test for pair, refresh, stop, and error events. |
 
 ## Run Log
 
@@ -53,30 +54,30 @@ This file is updated by the recurring improvement task. Each run should choose o
 ### 2026-04-26 Recurring Feature Run
 
 - Completed the P0 archived-chat continuation path with deterministic verification.
-- CLI live sessions now seed the transcript with the user's prompt and wrap Codex output as `Codex:` turns, so resumed chats enter the mobile UI as chat rounds instead of raw process output.
-- iOS routing for newly started sessions now lives in `RootView`, so continuing an archived chat can navigate to the new live session from the app level.
+- CLI live chat routing now seeds the transcript with the user's prompt and wraps Codex output as `Codex:` turns, so resumed chats enter the mobile UI as chat rounds instead of raw process output.
+- iOS routing for newly started chats now lives in `RootView`, so continuing an archived chat can navigate to the live chat from the app level.
 - Verified with `cd cli && npm test`, an isolated fake-Codex continuation protocol check, iOS simulator build, and simulator screenshot.
-- Remaining highest-priority item: pull-to-refresh feedback on the Dashboard/Sessions screens.
+- Remaining highest-priority item: pull-to-refresh feedback on the Dashboard/Chats screens.
 
 ### 2026-04-26 Recurring Feature Run 2
 
 - Completed the P0 pull-to-refresh feedback item.
-- iOS now tracks session refresh progress and the timestamp of the last successful `session_list` response from the Mac.
-- Dashboard and Sessions both show a visible sync row: `Refreshing from Mac...`, `Synced <time>`, or `Not synced yet`.
+- iOS now tracks chat refresh progress and the timestamp of the last successful `chat_list` response from the Mac.
+- Dashboard and Chats both show a visible sync row: `Refreshing from Mac...`, `Synced <time>`, or `Not synced yet`.
 - Verified with `cd cli && npm test`, iOS simulator build, simulator launch, and screenshot.
-- Remaining highest-priority item: Start Session usability, specifically recent repo choices and clearer invalid-path feedback.
+- Remaining highest-priority item: New Chat usability, specifically recent repo choices and clearer invalid-path feedback.
 
 ### 2026-04-26 Recurring Feature Run 3
 
-- Completed the P1 Start Session usability item.
-- The Start Session sheet now preselects the most recently used repository reported by the Mac and offers the five most recent distinct repository paths as tappable choices.
+- Completed the P1 New Chat usability item.
+- The New Chat sheet now preselects the most recently used repository reported by the Mac and offers the five most recent distinct repository paths as tappable choices.
 - The Start button now has explicit disabled-state feedback for offline Mac, missing repo, missing title, and missing prompt states before any request is sent.
 - Verified with `cd cli && npm test`, iOS simulator build, simulator launch, and screenshot.
-- Remaining highest-priority item: Session detail controls for archived-chat continuation affordance.
+- Remaining highest-priority item: Chat detail controls for archived-chat continuation affordance.
 
 ### 2026-04-26 Recurring Feature Run 4
 
-- Completed the P1 Session detail controls item.
+- Completed the P1 Chat detail controls item.
 - Archived Codex chat detail now shows a dedicated multiline continuation prompt and a full-width `Continue Chat` primary button instead of relying on a small paper-plane composer.
 - If the Mac is offline, archived chats now explain that reconnecting is required before continuation is available.
 - Verified with `cd cli && npm test`, iOS simulator build, simulator launch, and archived-chat screenshot.
@@ -86,6 +87,49 @@ This file is updated by the recurring improvement task. Each run should choose o
 
 - Completed the P1 Connection state reliability item.
 - The store now exposes a manual reconnect path that reopens the paired Mac WebSocket and sends the pairing hello again.
-- Dashboard and Sessions sync rows now show the last sync state plus a visible action: `Refresh` while online and `Reconnect` while offline.
+- Dashboard and Chats sync rows now show the last sync state plus a visible action: `Refresh` while online and `Reconnect` while offline.
 - Verified with `cd cli && npm test`, iOS simulator build, simulator launch, and Dashboard screenshot.
 - Remaining highest-priority item: Approval workflow hardening with deterministic approval-like output and diff fixtures.
+
+### 2026-04-27 Recurring Feature Run 2
+
+- Completed the P1 approval workflow hardening item.
+- CLI now has a deterministic fake approval agent fixture proving approval-like output emits `approval_required` with changed files and git diff.
+- Chat detail now shows matched approval requests inline with changed files, optional diff, and Deny/Approve controls.
+- `handrail serve` now keeps a real timer handle so detached local server commands stay alive.
+- Verified with `cd cli && npm test`, iOS simulator build, WebSocket approval protocol check, simulator launch, and device build/install.
+- Remaining highest-priority item: iOS pairing storage hardening.
+
+### 2026-04-27 Recurring Feature Run 3
+
+- Completed the P2 iOS pairing storage hardening item.
+- Pairing tokens now save to Keychain under the Handrail service instead of inside the serialized UserDefaults machine record.
+- Existing legacy UserDefaults pairings migrate on first launch: the token is copied to Keychain and the stored machine record is rewritten without the token.
+- Verified with `cd cli && npm test`, iOS simulator build, simulator launch, UserDefaults plist inspection showing only host, port, protocol version, and machine name, and simulator screenshot.
+- Remaining highest-priority item: CLI state hygiene.
+
+### 2026-04-27 Recurring Feature Run 4
+
+- Implemented the P2 CLI state hygiene item, but left it marked In progress until the iOS/device verification gate can run outside the current sandbox.
+- Removed the active product path that stored Handrail-owned chat records in `~/.handrail/state.json`.
+- Codex Desktop records remain the only visible chat source.
+- Verified with `cd cli && npm test` and a direct CLI prune check against an isolated temporary `HOME`.
+- Remaining blocker: current sandbox prevents Xcode's nested `sandbox-exec` macro build and prevents `devicectl` from initializing CoreDeviceService.
+
+### 2026-04-28 Recurring Feature Run
+
+- Completed the P2 CLI state hygiene item.
+- The CLI now ignores legacy Handrail-owned records and serves Codex Desktop chats as the only visible chat source.
+- Codex Desktop remains the source of truth for visible chat metadata.
+- README now documents the prune command and the current pairing-token storage model: token in iOS Keychain, paired-machine metadata in UserDefaults.
+- Verified with `cd cli && npm test`, a direct isolated CLI prune check, iOS simulator build, simulator launch, and simulator screenshot.
+- Remaining highest-priority item: WebSocket integration test coverage for new chat, continue, refresh, stop, and error events.
+
+### 2026-04-29 Recurring Feature Run
+
+- Completed the P2 WebSocket integration test coverage item.
+- The CLI server now exposes a narrow testable server factory so protocol behavior can be verified without launching the long-running daemon.
+- Added an integration test proving a paired client receives machine status, New Chat options, chat list refreshes, stop acknowledgements, and scoped command errors.
+- Verified with `cd cli && npm test` and an iOS simulator build.
+- Built and installed the app on Dionisio's iPhone; launch was blocked by iOS because the device was locked.
+- Remaining roadmap backlog is empty; the next run should add the highest-priority user-observed breakage before implementation begins.

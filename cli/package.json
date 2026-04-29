@@ -1,7 +1,7 @@
 {
   "name": "handrail",
   "version": "0.1.0",
-  "description": "Local-first iOS remote control for Codex CLI sessions.",
+  "description": "Local-first iOS remote control for Codex chats.",
   "type": "module",
   "bin": {
     "handrail": "./dist/src/index.js"

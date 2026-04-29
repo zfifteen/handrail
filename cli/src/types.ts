@@ -1,16 +1,16 @@
-export type SessionStatus = "running" | "waiting_for_approval" | "completed" | "failed" | "stopped" | "idle";
+export type ChatStatus = "running" | "waiting_for_approval" | "completed" | "failed" | "stopped" | "idle";
 
-export interface SessionRecord {
+export interface ChatRecord {
   id: string;
   repo: string;
   title: string;
-  status: SessionStatus;
+  projectName?: string;
+  status: ChatStatus;
   startedAt: string;
   updatedAt?: string;
   endedAt?: string;
   exitCode?: number | null;
   files?: string[];
-  source?: "handrail" | "codex";
   transcript?: string[];
   acceptsInput?: boolean;
   isPinned?: boolean;
@@ -64,7 +64,6 @@ export interface HandrailState {
   machineName: string;
   defaultRepo?: string;
   pairingToken?: string;
-  sessions: SessionRecord[];
 }
 
 export interface PairingPayload {
@@ -77,16 +76,15 @@ export interface PairingPayload {
 
 export type ClientMessage =
   | { type: "hello"; token: string }
-  | { type: "start_session"; repo: string; title: string; prompt?: string }
   | ({ type: "start_chat" } & StartChatOptions)
-  | { type: "continue_session"; sessionId: string; prompt: string }
-  | { type: "send_input"; sessionId: string; text: string }
-  | { type: "approve"; sessionId: string; approvalId: string }
-  | { type: "deny"; sessionId: string; approvalId: string; reason?: string }
-  | { type: "stop_session"; sessionId: string };
+  | { type: "continue_chat"; chatId: string; prompt: string }
+  | { type: "send_chat_input"; chatId: string; text: string }
+  | { type: "approve"; chatId: string; approvalId: string }
+  | { type: "deny"; chatId: string; approvalId: string; reason?: string }
+  | { type: "stop_chat"; chatId: string };
 
 export interface ApprovalRequest {
-  sessionId: string;
+  chatId: string;
   approvalId: string;
   title: string;
   summary: string;
@@ -97,9 +95,9 @@ export interface ApprovalRequest {
 export type ServerMessage =
   | { type: "machine_status"; machineName: string; online: boolean; defaultRepo?: string }
   | { type: "new_chat_options"; options: NewChatOptions }
-  | { type: "session_list"; sessions: SessionRecord[] }
-  | { type: "session_started"; session: SessionRecord }
-  | { type: "session_event"; sessionId: string; event: { kind: string; text?: string; status?: SessionStatus; at?: string } }
+  | { type: "chat_list"; chats: ChatRecord[] }
+  | { type: "chat_started"; chat: ChatRecord }
+  | { type: "chat_event"; chatId: string; event: { kind: string; text?: string; status?: ChatStatus; at?: string } }
   | ({ type: "approval_required" } & ApprovalRequest)
   | { type: "command_result"; ok: true; message: string }
   | { type: "error"; message: string };

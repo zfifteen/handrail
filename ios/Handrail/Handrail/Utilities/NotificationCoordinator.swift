@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import UserNotifications
 
 final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterDelegate {
@@ -18,52 +19,56 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
         center.setNotificationCategories([
             approvalCategory,
             inputCategory,
-            sessionCategory
+            chatCategory
         ])
         center.requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
     }
 
-    func notifyApproval(_ approval: ApprovalRequest, sessionTitle: String) {
+    @MainActor
+    func notifyApproval(_ approval: ApprovalRequest, chatTitle: String) {
         let content = baseContent(
             title: "Approval required",
             body: approval.summary,
             category: "HANDRAIL_APPROVAL",
-            sessionId: approval.sessionId
+            chatId: approval.chatId
         )
-        content.subtitle = sessionTitle
+        content.subtitle = chatTitle
         content.userInfo["approvalId"] = approval.approvalId
         schedule(content, identifier: "handrail.approval.\(approval.approvalId)")
     }
 
-    func notifyInputRequired(sessionId: String, text: String) {
+    @MainActor
+    func notifyInputRequired(chatId: String, text: String) {
         let content = baseContent(
             title: "Input required",
             body: text,
             category: "HANDRAIL_INPUT",
-            sessionId: sessionId
+            chatId: chatId
         )
-        schedule(content, identifier: "handrail.input.\(sessionId)")
+        schedule(content, identifier: "handrail.input.\(chatId)")
     }
 
-    func notifySessionFailed(sessionId: String, text: String) {
+    @MainActor
+    func notifyChatFailed(chatId: String, text: String) {
         let content = baseContent(
             title: "Task failed",
             body: text,
-            category: "HANDRAIL_SESSION",
-            sessionId: sessionId
+            category: "HANDRAIL_CHAT",
+            chatId: chatId
         )
-        schedule(content, identifier: "handrail.failed.\(sessionId)")
+        schedule(content, identifier: "handrail.failed.\(chatId)")
     }
 
-    func notifySessionCompleted(sessionId: String, text: String) {
+    @MainActor
+    func notifyChatCompleted(chatId: String, text: String) {
         let content = baseContent(
             title: "Task completed",
             body: text,
-            category: "HANDRAIL_SESSION",
-            sessionId: sessionId
+            category: "HANDRAIL_CHAT",
+            chatId: chatId
         )
         content.sound = nil
-        schedule(content, identifier: "handrail.completed.\(sessionId)")
+        schedule(content, identifier: "handrail.completed.\(chatId)")
     }
 
     func userNotificationCenter(
@@ -71,7 +76,14 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        completionHandler([.banner, .list, .sound])
+        let chatId = notification.request.content.userInfo["chatId"] as? String
+        Task { @MainActor in
+            if let chatId, store?.isViewingChat(chatId: chatId) == true {
+                completionHandler([])
+                return
+            }
+            completionHandler([.banner, .list, .sound])
+        }
     }
 
     func userNotificationCenter(
@@ -80,30 +92,30 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
-        let sessionId = userInfo["sessionId"] as? String
+        let chatId = userInfo["chatId"] as? String
         let approvalId = userInfo["approvalId"] as? String
 
         Task { @MainActor in
             switch response.actionIdentifier {
             case "HANDRAIL_APPROVE":
-                if let sessionId, let approvalId {
-                    store?.approveFromNotification(sessionId: sessionId, approvalId: approvalId)
+                if let chatId, let approvalId {
+                    store?.approveFromNotification(chatId: chatId, approvalId: approvalId)
                 }
             case "HANDRAIL_DENY":
-                if let sessionId, let approvalId {
-                    store?.denyFromNotification(sessionId: sessionId, approvalId: approvalId)
+                if let chatId, let approvalId {
+                    store?.denyFromNotification(chatId: chatId, approvalId: approvalId)
                 }
             case "HANDRAIL_OPEN_DIFF":
-                if let sessionId {
-                    store?.openApprovalFromNotification(sessionId: sessionId)
+                if let chatId {
+                    store?.openApprovalFromNotification(chatId: chatId)
                 }
             case "HANDRAIL_REPLY":
-                if let sessionId, let response = response as? UNTextInputNotificationResponse {
-                    store?.replyFromNotification(sessionId: sessionId, text: response.userText)
+                if let chatId, let response = response as? UNTextInputNotificationResponse {
+                    store?.replyFromNotification(chatId: chatId, text: response.userText)
                 }
             default:
-                if let sessionId {
-                    store?.openSessionFromNotification(sessionId: sessionId)
+                if let chatId {
+                    store?.openChatFromNotification(chatId: chatId)
                 }
             }
             completionHandler()
@@ -152,13 +164,13 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
         )
     }
 
-    private var sessionCategory: UNNotificationCategory {
+    private var chatCategory: UNNotificationCategory {
         UNNotificationCategory(
-            identifier: "HANDRAIL_SESSION",
+            identifier: "HANDRAIL_CHAT",
             actions: [
                 UNNotificationAction(
-                    identifier: "HANDRAIL_OPEN_SESSION",
-                    title: "Open Session",
+                    identifier: "HANDRAIL_OPEN_CHAT",
+                    title: "Open Chat",
                     options: [.foreground]
                 )
             ],
@@ -167,17 +179,24 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
         )
     }
 
-    private func baseContent(title: String, body: String, category: String, sessionId: String) -> UNMutableNotificationContent {
+    private func baseContent(title: String, body: String, category: String, chatId: String) -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.categoryIdentifier = category
         content.sound = .default
-        content.userInfo = ["sessionId": sessionId]
+        content.userInfo = ["chatId": chatId]
         return content
     }
 
+    @MainActor
     private func schedule(_ content: UNMutableNotificationContent, identifier: String) {
+        let chatId = content.userInfo["chatId"] as? String
+        if UIApplication.shared.applicationState == .active,
+           let chatId,
+           store?.isViewingChat(chatId: chatId) == true {
+            return
+        }
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
     }

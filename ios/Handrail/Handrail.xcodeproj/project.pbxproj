@@ -15,8 +15,8 @@
 		100000000000000000000106 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000006 /* Formatters.swift */; };
 		100000000000000000000107 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000007 /* RootView.swift */; };
 		100000000000000000000108 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000008 /* Components.swift */; };
-		100000000000000000000109 /* SessionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000009 /* SessionsView.swift */; };
-		10000000000000000000010A /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000A /* SessionDetailView.swift */; };
+		100000000000000000000109 /* ChatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000009 /* ChatsView.swift */; };
+		10000000000000000000010A /* ChatDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000A /* ChatDetailView.swift */; };
 		10000000000000000000010B /* ApprovalRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000B /* ApprovalRequiredView.swift */; };
 		10000000000000000000010C /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000C /* ActivityView.swift */; };
 		10000000000000000000010D /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000000D /* NotificationsView.swift */; };
@@ -26,6 +26,7 @@
 		100000000000000000000111 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000011 /* DashboardView.swift */; };
 		100000000000000000000112 /* AttentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000012 /* AttentionView.swift */; };
 		100000000000000000000113 /* NotificationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* NotificationCoordinator.swift */; };
+		100000000000000000000114 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* KeychainStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,8 +38,8 @@
 		100000000000000000000006 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Utilities/Formatters.swift; sourceTree = "<group>"; };
 		100000000000000000000007 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/RootView.swift; sourceTree = "<group>"; };
 		100000000000000000000008 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/Components.swift; sourceTree = "<group>"; };
-		100000000000000000000009 /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/SessionsView.swift; sourceTree = "<group>"; };
-		10000000000000000000000A /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/SessionDetailView.swift; sourceTree = "<group>"; };
+		100000000000000000000009 /* ChatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/ChatsView.swift; sourceTree = "<group>"; };
+		10000000000000000000000A /* ChatDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/ChatDetailView.swift; sourceTree = "<group>"; };
 		10000000000000000000000B /* ApprovalRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/ApprovalRequiredView.swift; sourceTree = "<group>"; };
 		10000000000000000000000C /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/ActivityView.swift; sourceTree = "<group>"; };
 		10000000000000000000000D /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/NotificationsView.swift; sourceTree = "<group>"; };
@@ -48,6 +49,7 @@
 		100000000000000000000011 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/DashboardView.swift; sourceTree = "<group>"; };
 		100000000000000000000012 /* AttentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/AttentionView.swift; sourceTree = "<group>"; };
 		100000000000000000000013 /* NotificationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Utilities/NotificationCoordinator.swift; sourceTree = "<group>"; };
+		100000000000000000000014 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Utilities/KeychainStore.swift; sourceTree = "<group>"; };
 		100000000000000000000201 /* Handrail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Handrail.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -72,12 +74,13 @@
 				100000000000000000000005 /* HandrailStore.swift */,
 				100000000000000000000006 /* Formatters.swift */,
 				100000000000000000000013 /* NotificationCoordinator.swift */,
+				100000000000000000000014 /* KeychainStore.swift */,
 				100000000000000000000007 /* RootView.swift */,
 				100000000000000000000011 /* DashboardView.swift */,
 				100000000000000000000012 /* AttentionView.swift */,
 				100000000000000000000008 /* Components.swift */,
-				100000000000000000000009 /* SessionsView.swift */,
-				10000000000000000000000A /* SessionDetailView.swift */,
+				100000000000000000000009 /* ChatsView.swift */,
+				10000000000000000000000A /* ChatDetailView.swift */,
 				10000000000000000000000B /* ApprovalRequiredView.swift */,
 				10000000000000000000000C /* ActivityView.swift */,
 				10000000000000000000000D /* NotificationsView.swift */,
@@ -161,8 +164,8 @@
 				100000000000000000000106 /* Formatters.swift in Sources */,
 				100000000000000000000107 /* RootView.swift in Sources */,
 				100000000000000000000108 /* Components.swift in Sources */,
-				100000000000000000000109 /* SessionsView.swift in Sources */,
-				10000000000000000000010A /* SessionDetailView.swift in Sources */,
+				100000000000000000000109 /* ChatsView.swift in Sources */,
+				10000000000000000000010A /* ChatDetailView.swift in Sources */,
 				10000000000000000000010B /* ApprovalRequiredView.swift in Sources */,
 				10000000000000000000010C /* ActivityView.swift in Sources */,
 				10000000000000000000010D /* NotificationsView.swift in Sources */,
@@ -172,6 +175,7 @@
 				100000000000000000000111 /* DashboardView.swift in Sources */,
 				100000000000000000000112 /* AttentionView.swift in Sources */,
 				100000000000000000000113 /* NotificationCoordinator.swift in Sources */,
+				100000000000000000000114 /* KeychainStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -16,7 +16,7 @@ struct Card<Content: View>: View {
 }
 
 struct StatusBadge: View {
-    let status: SessionStatus
+    let status: ChatStatus
 
     var body: some View {
         Label(status.title, systemImage: icon)
@@ -76,7 +76,7 @@ struct SyncStatusRow: View {
     let isRefreshing: Bool
     let lastRefreshAt: Date?
     let isOnline: Bool
-    let reconnect: () -> Void
+    let refresh: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
@@ -88,7 +88,7 @@ struct SyncStatusRow: View {
                 .foregroundStyle(.secondary)
             Spacer()
             Button(isOnline ? "Refresh" : "Reconnect") {
-                reconnect()
+                refresh()
             }
             .font(.caption.weight(.semibold))
             .buttonStyle(.bordered)
@@ -110,7 +110,10 @@ struct SyncStatusRow: View {
         guard let lastRefreshAt else {
             return "Not synced yet"
         }
-        return "Synced \(HandrailFormatters.time.string(from: lastRefreshAt))"
+        if Date().timeIntervalSince(lastRefreshAt) < 60 {
+            return "Synced just now"
+        }
+        return "Last synced \(HandrailFormatters.time.string(from: lastRefreshAt))"
     }
 
     private var icon: String {

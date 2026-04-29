@@ -6,7 +6,7 @@ struct AttentionView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 14) {
-                if visibleAttentionSessions.isEmpty {
+                if visibleAttentionChats.isEmpty {
                     Card {
                         EmptyState(
                             title: "Nothing needs attention",
@@ -15,11 +15,11 @@ struct AttentionView: View {
                         )
                     }
                 } else {
-                    ForEach(visibleAttentionSessions) { session in
-                        attentionRow(session)
+                    ForEach(visibleAttentionChats) { chat in
+                        attentionRow(chat)
                             .contextMenu {
                                 Button {
-                                    store.dismissAttention(sessionId: session.id)
+                                    store.dismissAttention(chatId: chat.id)
                                 } label: {
                                     Label("Dismiss", systemImage: "xmark.circle")
                                 }
@@ -38,31 +38,31 @@ struct AttentionView: View {
                 Button("Dismiss All") {
                     store.dismissAllAttention()
                 }
-                .disabled(visibleAttentionSessions.isEmpty)
+                .disabled(visibleAttentionChats.isEmpty)
             }
         }
         .navigationDestination(for: String.self) { id in
-            SessionDetailView(sessionId: id)
+            ChatDetailView(chatId: id)
         }
     }
 
-    private func attentionRow(_ session: HandrailSession) -> some View {
-        NavigationLink(value: session.id) {
+    private func attentionRow(_ chat: CodexChat) -> some View {
+        NavigationLink(value: chat.id) {
             HStack(alignment: .center, spacing: 12) {
-                Image(systemName: icon(for: session))
+                Image(systemName: icon(for: chat))
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(color(for: session))
+                    .foregroundStyle(color(for: chat))
                     .frame(width: 30)
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(displayTitle(for: session))
+                    Text(displayTitle(for: chat))
                         .font(.headline)
                         .foregroundStyle(.primary)
                         .lineLimit(2)
                     HStack(spacing: 8) {
-                        Text(projectName(for: session))
+                        Text(projectName(for: chat))
                         Text("•")
-                        Text(session.status.title)
+                        Text(chat.status.title)
                     }
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -71,7 +71,7 @@ struct AttentionView: View {
 
                 Spacer(minLength: 8)
 
-                Text(HandrailFormatters.relativeAge(since: sortDate(for: session)))
+                Text(HandrailFormatters.relativeAge(since: sortDate(for: chat)))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
@@ -86,34 +86,34 @@ struct AttentionView: View {
         .buttonStyle(.plain)
     }
 
-    private var visibleAttentionSessions: [HandrailSession] {
-        store.sessions
+    private var visibleAttentionChats: [CodexChat] {
+        store.chats
             .filter(store.needsAttention)
-            .filter { !store.isAttentionDismissed(sessionId: $0.id) }
+            .filter { !store.isAttentionDismissed(chatId: $0.id) }
             .sorted { sortDate(for: $0) > sortDate(for: $1) }
     }
 
-    private func displayTitle(for session: HandrailSession) -> String {
-        if session.title.hasPrefix("Codex: ") {
-            return String(session.title.dropFirst("Codex: ".count))
+    private func displayTitle(for chat: CodexChat) -> String {
+        if chat.title.hasPrefix("Codex: ") {
+            return String(chat.title.dropFirst("Codex: ".count))
         }
-        return session.title
+        return chat.title
     }
 
-    private func projectName(for session: HandrailSession) -> String {
-        URL(fileURLWithPath: session.repo).lastPathComponent
+    private func projectName(for chat: CodexChat) -> String {
+        chat.projectName ?? URL(fileURLWithPath: chat.repo).lastPathComponent
     }
 
-    private func sortDate(for session: HandrailSession) -> Date {
-        session.updatedAt ?? session.endedAt ?? session.startedAt
+    private func sortDate(for chat: CodexChat) -> Date {
+        chat.updatedAt ?? chat.endedAt ?? chat.startedAt
     }
 
-    private func icon(for session: HandrailSession) -> String {
-        session.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill"
+    private func icon(for chat: CodexChat) -> String {
+        chat.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill"
     }
 
-    private func color(for session: HandrailSession) -> Color {
-        session.status == .failed ? .red : .orange
+    private func color(for chat: CodexChat) -> Color {
+        chat.status == .failed ? .red : .orange
     }
 }
 

@@ -4,27 +4,27 @@ struct RootView: View {
     @Environment(HandrailStore.self) private var store
     @State private var selectedTab: HandrailTab = .dashboard
     @State private var dashboardPath = NavigationPath()
-    @State private var sessionsPath = NavigationPath()
+    @State private var chatsPath = NavigationPath()
 
     var body: some View {
         @Bindable var store = store
 
         TabView(selection: $selectedTab) {
             NavigationStack(path: $dashboardPath) {
-                DashboardView { sessionId in
-                    dashboardPath.append(sessionId)
+                DashboardView { chatId in
+                    dashboardPath.append(chatId)
                 }
             }
             .tabItem { Label("Dashboard", systemImage: "gauge.with.dots.needle.67percent") }
             .tag(HandrailTab.dashboard)
 
-            NavigationStack(path: $sessionsPath) {
-                SessionsView { sessionId in
-                    sessionsPath.append(sessionId)
+            NavigationStack(path: $chatsPath) {
+                ChatsView { chatId in
+                    chatsPath.append(chatId)
                 }
             }
-            .tabItem { Label("Sessions", systemImage: "rectangle.stack") }
-            .tag(HandrailTab.sessions)
+            .tabItem { Label("Chats", systemImage: "rectangle.stack") }
+            .tag(HandrailTab.chats)
 
             NavigationStack {
                 AttentionView()
@@ -51,15 +51,15 @@ struct RootView: View {
             .tag(HandrailTab.settings)
         }
         .tint(.purple)
-        .onChange(of: store.lastStartedSessionId) { _, sessionId in
-            guard let sessionId else { return }
-            routeToStartedSession(sessionId)
-            store.consumeLastStartedSessionId()
+        .onChange(of: store.lastStartedChatId) { _, chatId in
+            guard let chatId else { return }
+            routeToStartedChat(chatId)
+            store.consumeLastStartedChatId()
         }
-        .onChange(of: store.notificationSessionId) { _, sessionId in
-            guard let sessionId else { return }
-            routeToNotificationSession(sessionId)
-            store.consumeNotificationSessionId()
+        .onChange(of: store.notificationChatId) { _, chatId in
+            guard let chatId else { return }
+            routeToNotificationChat(chatId)
+            store.consumeNotificationChatId()
         }
         .sheet(isPresented: $store.showsApprovalFromNotification) {
             NavigationStack {
@@ -68,25 +68,25 @@ struct RootView: View {
         }
     }
 
-    private func routeToStartedSession(_ sessionId: String) {
+    private func routeToStartedChat(_ chatId: String) {
         switch selectedTab {
-        case .sessions:
-            sessionsPath.append(sessionId)
+        case .chats:
+            chatsPath.append(chatId)
         default:
             selectedTab = .dashboard
-            dashboardPath.append(sessionId)
+            dashboardPath.append(chatId)
         }
     }
 
-    private func routeToNotificationSession(_ sessionId: String) {
+    private func routeToNotificationChat(_ chatId: String) {
         selectedTab = .dashboard
-        dashboardPath.append(sessionId)
+        dashboardPath.append(chatId)
     }
 }
 
 private enum HandrailTab {
     case dashboard
-    case sessions
+    case chats
     case attention
     case activity
     case alerts

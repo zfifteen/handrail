@@ -1,15 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { once } from "node:events";
+import { EventEmitter, once } from "node:events";
 import { join } from "node:path";
-import { chmod, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { chatArgs, formatAgentOutput, startAgent } from "../src/codex.js";
 import { parseDesktopPinnedThreadIds } from "../src/codexSessions.js";
 import { desktopThreadPromotion } from "../src/codexDesktop.js";
-import { codexDesktopIpcRequest, codexDesktopIpcRequestVersion, encodeCodexDesktopIpcFrame } from "../src/codexDesktopIpc.js";
+import { codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame } from "../src/codexDesktopIpc.js";
 import { discoverProjects } from "../src/newChatOptions.js";
-import { extractCodexThreadId, SessionManager } from "../src/sessions.js";
+import { ChatManager, extractCodexThreadId } from "../src/chats.js";
 
 test("starts configured agent with initial prompt as an argument", async () => {
   const previousCommand = process.env.HANDRAIL_AGENT_COMMAND;
@@ -34,7 +34,7 @@ test("starts configured agent with initial prompt as an argument", async () => {
   }
 });
 
-test("continues Codex exec sessions with resume id and prompt", async () => {
+test("continues Codex chats with resume id and prompt", async () => {
   const previousCommand = process.env.HANDRAIL_AGENT_COMMAND;
   const tempDir = await mkdtemp(join(tmpdir(), "handrail-codex-"));
   const fakeCodex = join(tempDir, "codex");
@@ -82,7 +82,7 @@ test("maps new chat options into Codex exec arguments", async () => {
     const [code] = await once(agent.child, "exit");
 
     assert.equal(code, 0);
-    assert.match(output, /args:exec\|--json\|--color\|never\|--skip-git-repo-check\|-m\|gpt-5\.5\|-c\|model_reasoning_effort=\\?"high\\?"\|-s\|danger-full-access\|-a\|never\|Build it/);
+    assert.match(output, /args:exec\|--json\|--color\|never\|--skip-git-repo-check\|-m\|gpt-5\.5\|-c\|model_reasoning_effort=\\?"high\\?"\|-s\|danger-full-access\|-c\|approval_policy=\\?"never\\?"\|Build it/);
   } finally {
     await rm(tempDir, { recursive: true, force: true });
     if (previousCommand === undefined) {
@@ -128,8 +128,8 @@ test("constructs Codex chat argument presets", () => {
     "model_reasoning_effort=\"xhigh\"",
     "-s",
     "read-only",
-    "-a",
-    "on-request"
+    "-c",
+    "approval_policy=\"on-request\""
   ]);
 });
 
@@ -163,22 +163,27 @@ test("builds deterministic desktop thread promotion SQL", () => {
   const promotion = desktopThreadPromotion(
     "019dc424-e857-76e0-8229-589ecf107eb4",
     "Phone prompt",
-    "Phone prompt body",
-    1_777_268_840_434
+    "Phone prompt's body",
+    1_777_268_840_434,
+    {
+      cwd: "/Users/me/project",
+      rolloutPath: "/Users/me/.codex/sessions/rollout-019dc424-e857-76e0-8229-589ecf107eb4.jsonl",
+      model: "gpt-5.5",
+      reasoningEffort: "high",
+      sandboxPolicy: "read-only",
+      approvalMode: "on-request"
+    }
   );
 
   assert.match(promotion.databasePath, /\.codex\/state_5\.sqlite$/);
-  assert.match(promotion.sql, /UPDATE threads SET source = \?/);
-  assert.deepEqual(promotion.args, [
-    "vscode",
-    "Phone prompt",
-    "Phone prompt body",
-    "1777268840",
-    "1777268840",
-    "1777268840434",
-    "1777268840434",
-    "019dc424-e857-76e0-8229-589ecf107eb4"
-  ]);
+  assert.match(promotion.sql, /INSERT INTO threads/);
+  assert.match(promotion.sql, /\/Users\/me\/\.codex\/sessions\/rollout-019dc424-e857-76e0-8229-589ecf107eb4\.jsonl/);
+  assert.match(promotion.sql, /UPDATE threads SET source = 'vscode'/);
+  assert.match(promotion.sql, /title = CASE WHEN title = '' OR source = 'exec' THEN 'Phone prompt' ELSE title END/);
+  assert.match(promotion.sql, /first_user_message = CASE WHEN first_user_message = '' THEN 'Phone prompt''s body' ELSE first_user_message END/);
+  assert.match(promotion.sql, /updated_at = CASE WHEN updated_at < 1777268840 THEN 1777268840 ELSE updated_at END/);
+  assert.match(promotion.sql, /WHERE id = '019dc424-e857-76e0-8229-589ecf107eb4'/);
+  assert.match(promotion.sql, /SELECT COUNT\(\*\) FROM threads/);
 });
 
 test("builds Codex Desktop IPC follower requests", () => {
@@ -213,6 +218,13 @@ test("builds Codex Desktop IPC follower requests", () => {
   });
 });
 
+test("builds Codex Desktop thread deeplinks", () => {
+  assert.equal(
+    codexDesktopThreadUrl("019dc424-e857-76e0-8229-589ecf107eb4"),
+    "codex://threads/019dc424-e857-76e0-8229-589ecf107eb4"
+  );
+});
+
 test("encodes Codex Desktop IPC frames with little-endian length prefix", () => {
   const frame = encodeCodexDesktopIpcFrame({ type: "request", method: "initialize" });
   const length = frame.readUInt32LE(0);
@@ -221,44 +233,187 @@ test("encodes Codex Desktop IPC frames with little-endian length prefix", () => 
   assert.equal(frame.subarray(4).toString("utf8"), "{\"type\":\"request\",\"method\":\"initialize\"}");
 });
 
-test("stop immediately persists and broadcasts stopped status", async () => {
-  const previousHome = process.env.HOME;
-  const previousCommand = process.env.HANDRAIL_AGENT_COMMAND;
-  const tempDir = await mkdtemp(join(tmpdir(), "handrail-stop-"));
-  const agentPath = join(tempDir, "agent");
-  await writeFile(agentPath, "#!/bin/sh\nsleep 30\n", "utf8");
-  await chmod(agentPath, 0o755);
-  process.env.HOME = tempDir;
-  process.env.HANDRAIL_AGENT_COMMAND = agentPath;
+test("chat manager refuses non-Codex chat ids", async () => {
+  const manager = new ChatManager(() => {});
+  await assert.rejects(
+    () => manager.stop("local-process-id"),
+    /No Codex chat with id local-process-id/
+  );
+});
 
+test("new chat creation promotes the Codex thread into a Desktop-visible chat", async () => {
+  const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   const messages: unknown[] = [];
-  try {
-    const manager = new SessionManager((message) => messages.push(message));
-    const session = await manager.start(tempDir, "Stop me", "hello");
-    await manager.stop(session.id);
+  const promoted: Array<{ threadId: string; title: string; firstUserMessage: string }> = [];
+  const opened: string[] = [];
+  const stdout = new EventEmitter();
+  const stderr = new EventEmitter();
+  const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter };
+  child.stdout = stdout;
+  child.stderr = stderr;
+  let desktopChats = [] as Awaited<ReturnType<ChatManager["list"]>>;
 
-    const state = JSON.parse(await readFile(join(tempDir, ".handrail", "state.json"), "utf8"));
-    assert.equal(state.sessions[0].id, session.id);
-    assert.equal(state.sessions[0].status, "stopped");
-    assert.ok(messages.some((message) => {
-      const record = message as { type?: string; event?: { kind?: string; status?: string } };
-      return record.type === "session_event" &&
-        record.event?.kind === "session_stopped" &&
-        record.event?.status === "stopped";
-    }));
-  } finally {
-    if (previousHome === undefined) {
-      delete process.env.HOME;
-    } else {
-      process.env.HOME = previousHome;
-    }
-    if (previousCommand === undefined) {
-      delete process.env.HANDRAIL_AGENT_COMMAND;
-    } else {
-      process.env.HANDRAIL_AGENT_COMMAND = previousCommand;
-    }
-    await rm(tempDir, { recursive: true, force: true });
-  }
+  const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
+    listCodexChats: async () => desktopChats,
+    prepareChatWorkspace: async (options) => {
+      assert.equal(options.projectPath, "/Users/me/project");
+      assert.equal(options.branch, "main");
+      assert.equal(options.workMode, "local");
+      return "/Users/me/project";
+    },
+    startAgent: (repo, prompt, resumeSessionId, options) => {
+      assert.equal(repo, "/Users/me/project");
+      assert.equal(prompt, "Phone-created Codex chat");
+      assert.equal(resumeSessionId, undefined);
+      assert.ok(options);
+      assert.equal(options.model, "gpt-5.5");
+      assert.equal(options.reasoningEffort, "high");
+      assert.equal(options.accessPreset, "on_request");
+      assert.equal(options.skipGitRepoCheck, false);
+      process.nextTick(() => {
+        stdout.emit("data", Buffer.from([
+          JSON.stringify({ type: "thread.started", thread_id: threadId }),
+          JSON.stringify({ type: "turn.started" }),
+          JSON.stringify({ type: "item.completed", item: { type: "agent_message", text: "Created from Desktop-visible Codex." } })
+        ].join("\n")));
+        child.emit("exit", 0);
+      });
+      return {
+        child,
+        acceptsInput: false,
+        send() {},
+        stop() {}
+      } as never;
+    },
+    promoteCodexThreadToDesktop: async (id, title, firstUserMessage, metadata) => {
+      promoted.push({ threadId: id, title, firstUserMessage });
+      assert.equal(metadata.cwd, "/Users/me/project");
+      assert.equal(metadata.model, "gpt-5.5");
+      assert.equal(metadata.reasoningEffort, "high");
+      assert.equal(metadata.sandboxPolicy, "workspace-write");
+      assert.equal(metadata.approvalMode, "on-request");
+      desktopChats = [{
+        id: `codex:${id}`,
+        repo: "/Users/me/project",
+        title,
+        projectName: "project",
+        status: "idle",
+        startedAt: "2026-04-28T13:00:00.000Z",
+        updatedAt: "2026-04-28T13:00:00.000Z",
+        transcript: []
+      }];
+    },
+    waitForCodexDesktopThreadSettled: async () => {},
+    openCodexDesktopThread: async (id) => {
+      opened.push(id);
+    },
+    startCodexDesktopTurn: async () => {},
+    interruptCodexDesktopTurn: async () => {}
+  });
+
+  const chat = await manager.startChat({
+    prompt: "Phone-created Codex chat",
+    projectId: "/Users/me/project",
+    projectPath: "/Users/me/project",
+    workMode: "local",
+    branch: "main",
+    accessPreset: "on_request",
+    model: "gpt-5.5",
+    reasoningEffort: "high"
+  });
+
+  await new Promise((resolve) => setTimeout(resolve, 2_100));
+
+  assert.equal(chat.id, `codex:${threadId}`);
+  assert.equal(chat.title, "Phone-created Codex chat");
+  assert.deepEqual(promoted, [
+    { threadId, title: "Phone-created Codex chat", firstUserMessage: "Phone-created Codex chat" },
+    { threadId, title: "Phone-created Codex chat", firstUserMessage: "Phone-created Codex chat" }
+  ]);
+  assert.deepEqual(opened, [threadId]);
+  assert.ok(messages.some((message) => (message as { type?: string }).type === "chat_started"));
+  assert.ok(messages.some((message) => {
+    const serverMessage = message as { type?: string; chats?: Array<{ id: string }> };
+    return serverMessage.type === "chat_list" && serverMessage.chats?.some((item) => item.id === `codex:${threadId}`);
+  }));
+});
+
+test("continued Codex chats resume through the local Codex CLI", async () => {
+  const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
+  const messages: unknown[] = [];
+  const promoted: Array<{ threadId: string; title: string; firstUserMessage: string }> = [];
+  const stdout = new EventEmitter();
+  const stderr = new EventEmitter();
+  const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter };
+  child.stdout = stdout;
+  child.stderr = stderr;
+  const desktopChat = {
+    id: `codex:${threadId}`,
+    repo: "/Users/me/project",
+    title: "Say hello",
+    projectName: "project",
+    status: "idle" as const,
+    startedAt: "2026-04-28T13:00:00.000Z",
+    updatedAt: "2026-04-28T13:01:00.000Z",
+    transcript: [
+      "User:\nSay hello  \n\n",
+      "Codex:\nHello.  \n\n"
+    ]
+  };
+
+  const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
+    listCodexChats: async () => [desktopChat],
+    prepareChatWorkspace: async () => "/Users/me/project",
+    startAgent: (repo, prompt, resumeSessionId) => {
+      assert.equal(repo, "/Users/me/project");
+      assert.equal(prompt, "Again");
+      assert.equal(resumeSessionId, threadId);
+      process.nextTick(() => {
+        stdout.emit("data", Buffer.from(JSON.stringify({ type: "item.completed", item: { type: "agent_message", text: "Again hello." } })));
+        child.emit("exit", 0);
+      });
+      return {
+        child,
+        acceptsInput: false,
+        send() {},
+        stop() {}
+      } as never;
+    },
+    promoteCodexThreadToDesktop: async (id, title, firstUserMessage, metadata) => {
+      promoted.push({ threadId: id, title, firstUserMessage });
+      assert.equal(metadata.cwd, "/Users/me/project");
+    },
+    waitForCodexDesktopThreadSettled: async () => {},
+    openCodexDesktopThread: async () => {},
+    startCodexDesktopTurn: async () => {
+      throw new Error("Desktop IPC should not be used for continued chats.");
+    },
+    interruptCodexDesktopTurn: async () => {}
+  });
+
+  const chat = await manager.continue(`codex:${threadId}`, "Again");
+  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(chat.acceptsInput, false);
+  assert.ok(chat.transcript?.some((entry) => entry.includes("Again")));
+  assert.ok(messages.some((message) => {
+    const started = message as { type?: string; chat?: { status?: string } };
+    return started.type === "chat_started" && started.chat?.status === "running";
+  }));
+  assert.deepEqual(promoted, [
+    { threadId, title: "Say hello", firstUserMessage: "Say hello" }
+  ]);
+  assert.ok(messages.some((message) => {
+    const event = message as { type?: string; event?: { kind?: string; text?: string } };
+    return event.type === "chat_event" &&
+      event.event?.kind === "output" &&
+      event.event.text?.includes("Again hello.");
+  }));
+  assert.ok(messages.some((message) => {
+    const event = message as { type?: string; event?: { kind?: string } };
+    return event.type === "chat_event" && event.event?.kind === "chat_completed";
+  }));
 });
 
 test("reads Codex Desktop pinned thread ids", () => {

@@ -18,7 +18,7 @@ struct PairedMachine: Codable, Identifiable, Hashable {
     var isOnline: Bool
 }
 
-enum SessionStatus: String, Codable {
+enum ChatStatus: String, Codable {
     case running
     case waitingForApproval = "waiting_for_approval"
     case completed
@@ -38,33 +38,33 @@ enum SessionStatus: String, Codable {
     }
 }
 
-struct HandrailSession: Codable, Identifiable, Hashable {
+struct CodexChat: Codable, Identifiable, Hashable {
     let id: String
     let repo: String
     let title: String
-    var status: SessionStatus
+    var projectName: String? = nil
+    var status: ChatStatus
     let startedAt: Date
     var updatedAt: Date? = nil
     var endedAt: Date?
     var exitCode: Int?
     var files: [String]?
-    var source: String? = nil
     var transcript: [String]? = nil
     var acceptsInput: Bool? = nil
     var isPinned: Bool? = nil
     var pinnedOrder: Int? = nil
 }
 
-struct SessionEvent: Codable, Hashable {
+struct ChatEvent: Codable, Hashable {
     let kind: String
     let text: String?
-    let status: SessionStatus?
+    let status: ChatStatus?
     let at: Date?
 }
 
 struct ApprovalRequest: Codable, Identifiable, Hashable {
     var id: String { approvalId }
-    let sessionId: String
+    let chatId: String
     let approvalId: String
     let title: String
     let summary: String
@@ -77,13 +77,13 @@ struct ActivityItem: Identifiable, Hashable {
     let title: String
     let detail: String
     let date: Date
-    let sessionId: String?
+    let chatId: String?
 
-    init(title: String, detail: String, date: Date, sessionId: String? = nil) {
+    init(title: String, detail: String, date: Date, chatId: String? = nil) {
         self.title = title
         self.detail = detail
         self.date = date
-        self.sessionId = sessionId
+        self.chatId = chatId
     }
 }
 
@@ -92,7 +92,7 @@ struct HandrailNotification: Identifiable, Hashable {
     let title: String
     let detail: String
     let date: Date
-    let sessionId: String?
+    let chatId: String?
 }
 
 struct NewChatProject: Codable, Identifiable, Hashable {

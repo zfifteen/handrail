@@ -10,7 +10,7 @@ const program = new Command();
 
 program
   .name("handrail")
-  .description("Local-first iOS remote control for Codex CLI sessions.")
+  .description("Local-first iOS remote control for Codex chats.")
   .version("0.1.0");
 
 program.command("pair")
@@ -39,38 +39,20 @@ program.command("serve")
     await startServer();
   });
 
-program.command("start")
-  .requiredOption("--repo <path>", "Repository path")
-  .requiredOption("--title <title>", "Session title")
-  .option("--prompt <prompt>", "Initial prompt to send to Codex")
-  .description("Start a new Codex CLI session through the running Handrail server.")
-  .action(async (options: { repo: string; title: string; prompt?: string }) => {
-    const state = await loadState();
-    if (!state.pairingToken) {
-      throw new Error("No pairing token. Run `handrail pair` first.");
-    }
-    await sendLocalServerMessage({
-      type: "start_session",
-      repo: options.repo,
-      title: options.title,
-      prompt: options.prompt
-    }, "session_started");
-  });
-
-program.command("sessions")
+program.command("chats")
   .description("List known Codex Desktop chats.")
   .action(async () => {
-    const sessions = await fetchLocalSessions();
-    for (const session of sessions) {
-      console.log(`${session.id}\t${session.status}\t${session.title}\t${session.repo}`);
+    const chats = await fetchLocalChats();
+    for (const chat of chats) {
+      console.log(`${chat.id}\t${chat.status}\t${chat.title}\t${chat.repo}`);
     }
   });
 
 program.command("stop")
-  .argument("<session-id>", "Session id")
-  .description("Stop a running session.")
-  .action(async (sessionId: string) => {
-    await sendLocalServerMessage({ type: "stop_session", sessionId }, "command_result");
+  .argument("<chat-id>", "Codex chat id")
+  .description("Stop a running Codex chat.")
+  .action(async (chatId: string) => {
+    await sendLocalServerMessage({ type: "stop_chat", chatId }, "command_result");
   });
 
 program.command("unpair")
@@ -108,8 +90,8 @@ async function sendLocalServerMessage(message: object, expectedType: ServerMessa
         return;
       }
       if (serverMessage.type === expectedType) {
-        if (serverMessage.type === "session_started") {
-          console.log(`Started ${serverMessage.session.id}`);
+        if (serverMessage.type === "chat_started") {
+          console.log(`Started ${serverMessage.chat.id}`);
         }
         resolved = true;
         ws.close();
@@ -127,7 +109,7 @@ async function sendLocalServerMessage(message: object, expectedType: ServerMessa
   });
 }
 
-async function fetchLocalSessions(): Promise<Extract<ServerMessage, { type: "session_list" }>["sessions"]> {
+async function fetchLocalChats(): Promise<Extract<ServerMessage, { type: "chat_list" }>["chats"]> {
   const state = await loadState();
   if (!state.pairingToken) {
     throw new Error("No pairing token. Run `handrail pair` first.");
@@ -143,10 +125,10 @@ async function fetchLocalSessions(): Promise<Extract<ServerMessage, { type: "ses
     });
     ws.on("message", (data) => {
       const serverMessage = JSON.parse(data.toString()) as ServerMessage;
-      if (serverMessage.type === "session_list") {
+      if (serverMessage.type === "chat_list") {
         resolved = true;
         ws.close();
-        resolve(serverMessage.sessions);
+        resolve(serverMessage.chats);
       }
       if (serverMessage.type === "error") {
         reject(new Error(serverMessage.message));
@@ -154,7 +136,7 @@ async function fetchLocalSessions(): Promise<Extract<ServerMessage, { type: "ses
     });
     ws.once("close", () => {
       if (!resolved) {
-        reject(new Error("Handrail server closed before sending sessions."));
+        reject(new Error("Handrail server closed before sending chats."));
       }
     });
   });

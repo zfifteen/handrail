@@ -1,11 +1,11 @@
 # Handrail
 
-Handrail is a free, local-first iOS remote control for Codex CLI sessions running on your own Mac.
+Handrail is a free, local-first iOS remote control for Codex chats on your own Mac.
 
 It has two parts:
 
-- `handrail`, a desktop CLI that starts a local WebSocket server and supervises Codex CLI subprocesses.
-- `Handrail`, a SwiftUI iOS app that pairs with the CLI, shows live sessions, streams output, sends input, handles approvals, and stops sessions.
+- `handrail`, a desktop CLI that starts a local WebSocket server and exposes Codex chat state to iOS.
+- `Handrail`, a SwiftUI iOS app that pairs with the CLI, shows Codex chats, continues chats through the Mac, surfaces approvals, and requests stops.
 
 Works with OpenAI Codex CLI. Not affiliated with OpenAI.
 
@@ -42,22 +42,22 @@ The command creates or reuses a pairing token in `~/.handrail/state.json`, print
 
 On iOS, open Handrail, tap the QR scanner, and scan the code. The QR payload is JSON containing the protocol version, local host, port, pairing token, and machine name.
 
-## Start a Session
+## Work With Chats
 
 With `handrail pair` or `handrail serve` running:
 
 ```sh
-handrail start --repo /path/to/repo --title "API Refactor" --prompt "Refactor the API client and add tests."
+handrail chats
 ```
 
-You can also start a session from the iOS app after pairing. Handrail starts Codex in the requested repository and streams stdout and stderr to connected iOS clients.
+The iOS app reads the same Codex Desktop chat list the Mac app uses. It does not create a separate Handrail-owned chat list.
 
 Other CLI commands:
 
 ```sh
 handrail serve
-handrail sessions
-handrail stop <session-id>
+handrail chats
+handrail stop <chat-id>
 handrail unpair
 ```
 
@@ -81,10 +81,10 @@ Handrail is local-first:
 - No payment code.
 - Code stays on the user’s machine.
 - CLI executes Codex locally.
-- iOS receives session output, changed file names, and git diffs.
+- iOS receives chat output, changed file names, and git diffs.
 - Local network access is required for the MVP.
 
-The token is stored in `~/.handrail/state.json` on the Mac and in UserDefaults on iOS for this MVP. A later hardening pass should move the iOS token to Keychain.
+The token is stored in `~/.handrail/state.json` on the Mac and in Keychain on iOS. iOS stores only non-secret paired-machine metadata in UserDefaults.
 
 ## Approval Behavior
 
@@ -96,15 +96,14 @@ git -C <repo> diff
 git -C <repo> diff --name-only
 ```
 
-The iOS app shows the summary, changed files, and diff. Approve sends `y` to Codex stdin. Deny sends `n`.
+The iOS app shows the summary, changed files, and diff. Approval routing must go through the Codex chat route exposed by the Mac.
 
 ## Limitations
 
 - Approval detection is intentionally small pattern matching.
 - The WebSocket server is plain local-network `ws://`.
-- `handrail start` requires a running `handrail serve` or `handrail pair` process.
-- The iOS app stores pairing data in UserDefaults for the MVP.
-- The CLI manages sessions only while the server process is alive.
+- The iOS app stores the pairing token in Keychain and paired-machine metadata in UserDefaults.
+- Handrail does not maintain an independent chat store.
 - There is no background daemon, cloud relay, account sync, or generic terminal.
 
 ## Tests
