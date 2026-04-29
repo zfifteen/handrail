@@ -26,7 +26,7 @@ This file is updated by the recurring improvement task. Each run should choose o
 | 2026-04-25 | Archived Codex chats show a continue composer. | Simulator screenshot and invalid `continue_chat` server error check. |
 | 2026-04-25 | Transcript renders as role-separated rich text instead of raw monospace text. | Simulator screenshot. |
 | 2026-04-26 | Transcript readability preserves line breaks from imported Codex chats. | CLI tests 4/4, iOS simulator build, WebSocket transcript-shape check, screenshot `test-artifacts/handrail-transcript-readable-2026-04-26.png`. |
-| 2026-04-26 | Continue archived Codex chats creates a live Codex chat route. | CLI tests 5/5, deterministic fake-Codex protocol check, iOS simulator build, screenshot `test-artifacts/handrail-continue-routing-2026-04-26.png`. |
+| 2026-04-26 | Continue archived Codex chats creates a live Codex chat route. | Desktop protocol test, iOS simulator build, screenshot `test-artifacts/handrail-continue-routing-2026-04-26.png`. |
 | 2026-04-26 | Pull-to-refresh feedback shows refresh progress and last sync time. | CLI tests 5/5, iOS simulator build, simulator launch screenshot `test-artifacts/handrail-refresh-feedback-2026-04-26.png`. |
 | 2026-04-26 | New Chat offers recent Mac repositories and clearer disabled-state feedback. | CLI tests 5/5, iOS simulator build, simulator New Chat screenshot `test-artifacts/handrail-start-session-recent-repos-2026-04-26.png`. |
 | 2026-04-26 | Archived Codex chat detail has a primary Continue Chat action. | CLI tests 5/5, iOS simulator build, simulator archived-chat screenshot `test-artifacts/handrail-archived-continue-control-2026-04-26.png`. |
@@ -35,6 +35,7 @@ This file is updated by the recurring improvement task. Each run should choose o
 | 2026-04-27 | iOS pairing token moved from UserDefaults to Keychain. | CLI tests 15/15, iOS simulator build, simulator launch, UserDefaults plist inspection, screenshot `test-artifacts/handrail-keychain-pairing-2026-04-27.png`. |
 | 2026-04-28 | Removed legacy Handrail-owned chat records from the active product model. | CLI tests 16/16, direct isolated state check, iOS simulator build and launch, simulator screenshot `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_5cebea27-b28c-42da-ba37-b203093ef80e.jpg`. |
 | 2026-04-29 | WebSocket integration coverage for core chat protocol paths. | CLI tests 22/22, iOS simulator build, protocol-level WebSocket test for pair, refresh, stop, and error events. |
+| 2026-04-29 | New Chat only shows Desktop-visible Codex chats. | CLI tests 20/20, simulator build and launch, simulator screenshot `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_d1862fca-d63e-4b48-8cfc-fe5591036b99.jpg`. |
 
 ## Run Log
 
@@ -54,9 +55,9 @@ This file is updated by the recurring improvement task. Each run should choose o
 ### 2026-04-26 Recurring Feature Run
 
 - Completed the P0 archived-chat continuation path with deterministic verification.
-- CLI live chat routing now seeds the transcript with the user's prompt and wraps Codex output as `Codex:` turns, so resumed chats enter the mobile UI as chat rounds instead of raw process output.
+- Desktop chat routing now seeds the transcript with the user's prompt and wraps Codex output as `Codex:` turns, so resumed chats enter the mobile UI as chat rounds instead of raw process output.
 - iOS routing for newly started chats now lives in `RootView`, so continuing an archived chat can navigate to the live chat from the app level.
-- Verified with `cd cli && npm test`, an isolated fake-Codex continuation protocol check, iOS simulator build, and simulator screenshot.
+- Verified with `cd cli && npm test`, a Desktop continuation protocol check, iOS simulator build, and simulator screenshot.
 - Remaining highest-priority item: pull-to-refresh feedback on the Dashboard/Chats screens.
 
 ### 2026-04-26 Recurring Feature Run 2
@@ -133,3 +134,12 @@ This file is updated by the recurring improvement task. Each run should choose o
 - Verified with `cd cli && npm test` and an iOS simulator build.
 - Built and installed the app on Dionisio's iPhone; launch was blocked by iOS because the device was locked.
 - Remaining roadmap backlog is empty; the next run should add the highest-priority user-observed breakage before implementation begins.
+
+### 2026-04-29 Recurring Feature Run 2
+
+- Completed the P0 Desktop-visible New Chat item.
+- New Chat creation now waits for Codex Desktop to expose the real `codex:` chat row before Handrail broadcasts `chat_started` or `chat_list`.
+- If Codex Desktop does not expose the new chat, the CLI returns an explicit error and broadcasts no orphan mobile-only chat.
+- Continued chats now overlay only an existing Desktop-visible row and still route through Codex Desktop.
+- Verified with `cd cli && npm test`, iOS simulator build and launch, and simulator screenshot.
+- Remaining highest-priority item: verify physical iPhone install when CoreDevice is available and the phone is connected.

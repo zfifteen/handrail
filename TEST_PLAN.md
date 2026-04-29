@@ -80,7 +80,7 @@ This plan covers the MVP path a user exercises on a Mac plus iPhone:
 
 - Local server port: `8788`.
 - Physical iPhone bundle id: `com.velocityworks.Handrail`.
-- Handrail should prefer the bundled Codex app CLI when available, then fall back to `HANDRAIL_AGENT_COMMAND`, then `codex`.
+- Handrail should control Codex Desktop through the Desktop app's local IPC socket.
 
 ## 2026-04-25 Usability Pass
 

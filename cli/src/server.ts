@@ -158,7 +158,7 @@ async function handleMessage(
   try {
     switch (message.type) {
       case "hello":
-        socket.send(JSON.stringify({ type: "new_chat_options", options: await getOptions() } satisfies ServerMessage));
+        socket.send(JSON.stringify({ type: "new_chat_options", options: await getOptions(state.defaultRepo) } satisfies ServerMessage));
         socket.send(JSON.stringify({ type: "chat_list", chats: await chats.list() } satisfies ServerMessage));
         break;
       case "start_chat":

@@ -54,7 +54,7 @@ struct SettingsView: View {
                             .font(.headline)
                         Text("Version 0.1.0")
                             .foregroundStyle(.secondary)
-                        Text("Works with OpenAI Codex CLI. Not affiliated with OpenAI.")
+                        Text("Works with OpenAI Codex Desktop. Not affiliated with OpenAI.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }

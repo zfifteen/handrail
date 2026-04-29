@@ -145,7 +145,7 @@ async function readCodexSession(thread: CodexDesktopThread, pinnedThreadIds: Map
     repo,
     title: thread.title.trim() || extractTitle(lines.slice(1)) || basename(repo),
     projectName: desktopProjectName(repo, projectNames),
-    status: "idle",
+    status: extractStatus(lines.slice(1)),
     startedAt: unixSecondsToIso(thread.created_at) || parsed.payload.timestamp,
     updatedAt: unixSecondsToIso(thread.updated_at) || extractUpdatedAt(lines) || parsed.payload.timestamp,
     transcript: extractTranscript(lines.slice(1)),
@@ -207,6 +207,26 @@ function extractTitle(lines: string[]): string | null {
     }
   }
   return null;
+}
+
+export function extractStatus(lines: string[]): ChatRecord["status"] {
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    const parsed = parseLine<CodexSessionLine>(lines[index]);
+    if (parsed.type !== "event_msg") {
+      continue;
+    }
+    switch (parsed.payload?.type) {
+      case "task_complete":
+        return "completed";
+      case "task_failed":
+        return "failed";
+      case "task_interrupted":
+        return "stopped";
+      case "task_started":
+        return "running";
+    }
+  }
+  return "idle";
 }
 
 function extractTranscript(lines: string[]): string[] {

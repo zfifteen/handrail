@@ -57,17 +57,20 @@ export function discoverProjects(config: string, globalState: unknown): NewChatP
 
 export async function prepareChatWorkspace(options: { projectPath?: string | null; branch: string; newBranch?: string; workMode: "local" | "worktree" }): Promise<string> {
   const root = options.projectPath || defaultProjectRoot;
-  const branch = options.newBranch?.trim() || options.branch.trim();
+  const selectedBranch = options.branch.trim();
+  const newBranch = options.newBranch?.trim();
   if (options.workMode === "local") {
-    if (branch) {
-      await execFileAsync("git", ["checkout", options.newBranch?.trim() ? "-b" : "", branch].filter(Boolean), { cwd: root });
+    if (newBranch) {
+      await execFileAsync("git", ["checkout", "-b", newBranch, selectedBranch || "HEAD"], { cwd: root });
+    } else if (selectedBranch) {
+      await execFileAsync("git", ["checkout", selectedBranch], { cwd: root });
     }
     return root;
   }
-  const worktreeBranch = branch || await currentBranch(root);
+  const worktreeBranch = newBranch || selectedBranch || await currentBranch(root);
   const worktreePath = `${root}-${sanitizeBranchName(worktreeBranch)}-worktree`;
-  const args = options.newBranch?.trim()
-    ? ["worktree", "add", "-b", worktreeBranch, worktreePath, "HEAD"]
+  const args = newBranch
+    ? ["worktree", "add", "-b", newBranch, worktreePath, selectedBranch || "HEAD"]
     : ["worktree", "add", worktreePath, worktreeBranch];
   await execFileAsync("git", args, { cwd: root });
   return worktreePath;

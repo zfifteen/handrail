@@ -437,18 +437,15 @@ struct NewChatView: View {
             Divider()
                 .overlay(Color.white.opacity(0.16))
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    optionChip("folder", selectedProject?.name ?? "No project")
-                    optionChip("laptopcomputer", workModeTitle(workMode))
-                    if selectedProject?.path != nil {
-                        optionChip("point.3.connected.trianglepath.dotted", createsBranch ? trimmedNewBranch ?? "New branch" : branchLabel)
-                    }
-                    optionChip("shield", accessTitle(accessPreset))
-                    optionChip("cpu", model)
-                    optionChip("speedometer", reasoningTitle(reasoningEffort))
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8, alignment: .leading)], alignment: .leading, spacing: 8) {
+                optionChip("folder", selectedProject?.name ?? "No project")
+                optionChip("laptopcomputer", workModeTitle(workMode))
+                if selectedProject?.path != nil {
+                    optionChip("point.3.connected.trianglepath.dotted", createsBranch ? trimmedNewBranch ?? "New branch" : branchLabel)
                 }
-                .padding(.vertical, 2)
+                optionChip("shield", accessTitle(accessPreset))
+                optionChip("cpu", model)
+                optionChip("speedometer", reasoningTitle(reasoningEffort))
             }
         }
         .padding(16)
@@ -551,6 +548,7 @@ struct NewChatView: View {
             .lineLimit(1)
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.white.opacity(0.10), in: Capsule())
             .foregroundStyle(.secondary)
             .simultaneousGesture(TapGesture().onEnded(dismissPromptKeyboard))

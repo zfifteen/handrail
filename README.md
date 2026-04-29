@@ -4,14 +4,14 @@ Handrail is a free, local-first iOS remote control for Codex chats on your own M
 
 It has two parts:
 
-- `handrail`, a desktop CLI that starts a local WebSocket server and exposes Codex chat state to iOS.
+- `handrail`, a desktop command that starts a local WebSocket server and exposes Codex Desktop chat state to iOS.
 - `Handrail`, a SwiftUI iOS app that pairs with the CLI, shows Codex chats, continues chats through the Mac, surfaces approvals, and requests stops.
 
-Works with OpenAI Codex CLI. Not affiliated with OpenAI.
+Works with OpenAI Codex Desktop. Not affiliated with OpenAI.
 
 ## What Handrail Is Not
 
-Handrail is not a cloud coding workspace, a generic SSH terminal, an account system, a paid product, or a multi-agent control plane. It does not support Claude, Gemini, OpenCode, or other agents. It does not edit files directly. Codex runs locally and Handrail supervises it.
+Handrail is not a cloud coding workspace, a generic SSH terminal, an account system, a paid product, or a multi-agent control plane. It does not support Claude, Gemini, OpenCode, or other agents. It does not edit files directly. Codex Desktop runs locally and Handrail supervises it.
 
 ## CLI Install
 
@@ -22,13 +22,7 @@ npm run build
 npm link
 ```
 
-The CLI prefers the Codex binary bundled in `/Applications/Codex.app/Contents/Resources/codex` when the desktop app is installed, because that binary is updated with the desktop app. If the app bundle is unavailable, Handrail falls back to `codex` on `PATH`.
-
-To use a different local command path for Codex, set:
-
-```sh
-export HANDRAIL_AGENT_COMMAND="/path/to/codex exec --json --color never"
-```
+Handrail controls Codex Desktop through the Desktop app's local IPC socket. It does not start a separate Codex execution process.
 
 ## Run the Server and Pair
 

@@ -185,7 +185,7 @@ Captured from the iPhone simulator and cross-checked against the SwiftUI route m
   - Open the pairing scanner.
 - View app version.
 - View compatibility copy.
-  - `Works with OpenAI Codex CLI. Not affiliated with OpenAI.`
+  - `Works with OpenAI Codex Desktop. Not affiliated with OpenAI.`
 
 ## Pairing Scanner
 
