@@ -131,3 +131,9 @@ struct StartChatPayload: Hashable {
     let model: String
     let reasoningEffort: String
 }
+
+struct PushTokenRegistration: Hashable {
+    let deviceToken: String
+    let environment: String
+    let deviceName: String?
+}

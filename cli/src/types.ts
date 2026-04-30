@@ -64,6 +64,17 @@ export interface HandrailState {
   machineName: string;
   defaultRepo?: string;
   pairingToken?: string;
+  pushDevice?: PushDeviceRegistration;
+  sentNotificationEventIds?: string[];
+}
+
+export type PushEnvironment = "sandbox" | "production";
+
+export interface PushDeviceRegistration {
+  deviceToken: string;
+  environment: PushEnvironment;
+  deviceName?: string;
+  registeredAt: string;
 }
 
 export interface PairingPayload {
@@ -76,6 +87,7 @@ export interface PairingPayload {
 
 export type ClientMessage =
   | { type: "hello"; token: string }
+  | { type: "register_push_token"; deviceToken: string; environment: PushEnvironment; deviceName?: string }
   | ({ type: "start_chat" } & StartChatOptions)
   | { type: "continue_chat"; chatId: string; prompt: string }
   | { type: "send_chat_input"; chatId: string; text: string }
@@ -90,6 +102,17 @@ export interface ApprovalRequest {
   summary: string;
   files: string[];
   diff: string;
+}
+
+export type NotificationEventKind = "completed" | "failed" | "approval_required" | "input_required";
+
+export interface NotificationEvent {
+  eventId: string;
+  chatId: string;
+  kind: NotificationEventKind;
+  title: string;
+  body: string;
+  at: string;
 }
 
 export type ServerMessage =

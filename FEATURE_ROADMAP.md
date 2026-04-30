@@ -36,6 +36,11 @@ This file is updated by the recurring improvement task. Each run should choose o
 | 2026-04-28 | Removed legacy Handrail-owned chat records from the active product model. | CLI tests 16/16, direct isolated state check, iOS simulator build and launch, simulator screenshot `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_5cebea27-b28c-42da-ba37-b203093ef80e.jpg`. |
 | 2026-04-29 | WebSocket integration coverage for core chat protocol paths. | CLI tests 22/22, iOS simulator build, protocol-level WebSocket test for pair, refresh, stop, and error events. |
 | 2026-04-29 | New Chat only shows Desktop-visible Codex chats. | CLI tests 20/20, simulator build and launch, simulator screenshot `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_d1862fca-d63e-4b48-8cfc-fe5591036b99.jpg`. |
+| 2026-04-29 | Notifications and chat records never expose raw Codex ids as titles. | CLI tests 26/26, iOS simulator build, raw `codex:<uuid>` title normalization test. |
+| 2026-04-29 | Debug iPhone installs are not blocked by Push Notification provisioning. | CLI tests 26/26, iOS simulator build, iPhone Debug build, iPhone install. |
+| 2026-04-29 | Debug builds do not attempt APNs registration without APNs entitlement. | CLI tests 26/26, simulator build, iPhone Debug build, iPhone install. |
+| 2026-04-29 | Chat Detail empty states use live chat language, not transcript language. | CLI tests 26/26, simulator build and launch, simulator screenshot `test-artifacts/handrail-chat-language-2026-04-29.png`, iPhone Debug build and install. |
+| 2026-04-30 | Task notifications never show raw Codex thread ids. | CLI tests 27/27, iOS simulator build and launch, simulator screenshot `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_f4d9008a-11f2-4ebf-b1da-f3bc7ba535dd.jpg`, notification body fallback test. |
 
 ## Run Log
 
@@ -143,3 +148,45 @@ This file is updated by the recurring improvement task. Each run should choose o
 - Continued chats now overlay only an existing Desktop-visible row and still route through Codex Desktop.
 - Verified with `cd cli && npm test`, iOS simulator build and launch, and simulator screenshot.
 - Remaining highest-priority item: verify physical iPhone install when CoreDevice is available and the phone is connected.
+
+### 2026-04-29 Recurring Feature Run 3
+
+- Completed the P0 raw Codex id title cleanup item.
+- The CLI now preserves Codex Desktop `first_user_message` metadata during visible chat import.
+- Imported chat titles now reject raw UUID and `codex:<uuid>` values before they reach iOS lists, chat detail, or APNs notifications.
+- If Desktop has not generated a human title yet, Handrail uses the rollout title or first user message; if neither exists, it uses the repository basename.
+- Verified with `cd cli && npm test` and an iOS simulator build.
+- Restarted the local Handrail server so the normalized title path is live.
+- iPhone was connected, but device build/install is blocked by Apple provisioning: the personal development profile for `com.velocityworks.Handrail` does not include Push Notifications or `aps-environment`.
+
+### 2026-04-29 Recurring Feature Run 4
+
+- Completed the P0 local Debug installability item.
+- The Debug target no longer requests the Push Notifications entitlement, so the personal Apple development team can sign the app for Dionisio's iPhone.
+- Release still keeps `Handrail.entitlements`, preserving the push-capable build path for a team/profile that supports APNs.
+- Verified with `cd cli && npm test`, iOS simulator build, exact iPhone Debug build, and `devicectl` install to Dionisio's iPhone.
+- Launch was blocked because the phone was locked: `Unable to launch com.velocityworks.Handrail because the device was not, or could not be, unlocked.`
+
+### 2026-04-29 Recurring Feature Run 5
+
+- Completed the P0 Debug APNs registration cleanup item.
+- Debug builds now configure local notifications without requesting remote push registration, matching the Debug signing profile that intentionally omits the APNs entitlement.
+- Release builds still register for remote notifications, preserving the APNs path when a push-capable profile is used.
+- Verified with `cd cli && npm test`, iOS simulator build, exact iPhone Debug build, and `devicectl` install to Dionisio's iPhone.
+- Launch was blocked because the phone was locked: `Unable to launch com.velocityworks.Handrail because the device was not, or could not be, unlocked.`
+
+### 2026-04-29 Recurring Feature Run 6
+
+- Completed the P0 Chat Detail language item.
+- Chat Detail empty states now describe missing chat messages instead of missing transcript output.
+- Existing chats no longer surface transcript/archive wording when the chat has no visible messages.
+- Verified with `cd cli && npm test`, iOS simulator build, simulator install and launch, simulator screenshot, exact iPhone Debug build, and `devicectl` install to Dionisio's iPhone.
+- Launch was blocked because the phone was locked: `Unable to launch com.velocityworks.Handrail because the device was not, or could not be, unlocked.`
+
+### 2026-04-30 Recurring Feature Run
+
+- Completed the P0 task notification label item.
+- CLI task notifications now reject raw UUID and `codex:<uuid>` chat labels before constructing completed, failed, approval-required, or input-required notification events.
+- iOS local notification details now apply the same raw-id rejection and fall back to the human chat title, project name, repository basename, or `Codex chat`.
+- Verified with `cd cli && npm test`, iOS simulator build and launch through XcodeBuildMCP, and simulator screenshot.
+- Physical iPhone install could not run because `xcrun devicectl list devices` failed before listing devices: CoreDeviceService timed out while initializing.

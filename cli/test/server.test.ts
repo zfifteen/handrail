@@ -114,6 +114,63 @@ test("WebSocket server pairs, refreshes chats, stops chats, and reports command 
   }
 });
 
+test("WebSocket server accepts and persists push token registration", async () => {
+  let savedState: HandrailState | undefined;
+  const server = await createHandrailServer({
+    state: { ...state },
+    port: 0,
+    getOptions: async () => options,
+    persistState: async (nextState) => {
+      savedState = JSON.parse(JSON.stringify(nextState)) as HandrailState;
+    },
+    chats: {
+      list: async () => [],
+      startChat: async () => {
+        throw new Error("unused");
+      },
+      continue: async () => {
+        throw new Error("unused");
+      },
+      sendInput() {},
+      approve() {
+        throw new Error("unused");
+      },
+      deny() {
+        throw new Error("unused");
+      },
+      async stop() {}
+    }
+  });
+
+  try {
+    const ws = new WebSocket(`ws://127.0.0.1:${server.port}`);
+    await once(ws, "open");
+    const messages = new MessageInbox(ws);
+    ws.send(JSON.stringify({ type: "hello", token: state.pairingToken }));
+    assert.equal((await messages.next()).type, "machine_status");
+    assert.equal((await messages.next()).type, "new_chat_options");
+    assert.equal((await messages.next()).type, "chat_list");
+
+    ws.send(JSON.stringify({
+      type: "register_push_token",
+      deviceToken: "abcdef",
+      environment: "sandbox",
+      deviceName: "Test iPhone"
+    }));
+
+    await waitFor(() => savedState !== undefined);
+    assert.equal(savedState?.pushDevice?.deviceToken, "abcdef");
+    assert.equal(savedState?.pushDevice?.environment, "sandbox");
+    assert.equal(savedState?.pushDevice?.deviceName, "Test iPhone");
+
+    const close = once(ws, "close");
+    ws.close();
+    await close;
+  } finally {
+    await server.close();
+  }
+});
+
 class MessageInbox {
   private readonly queue: ServerMessage[] = [];
   private readonly waiters: Array<(message: ServerMessage) => void> = [];
@@ -137,4 +194,14 @@ class MessageInbox {
     }
     return new Promise((resolve) => this.waiters.push(resolve));
   }
+}
+
+async function waitFor(predicate: () => boolean): Promise<void> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    if (predicate()) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  throw new Error("Timed out waiting for condition.");
 }

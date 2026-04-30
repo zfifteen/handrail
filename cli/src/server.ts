@@ -3,9 +3,10 @@ import { networkInterfaces } from "node:os";
 import { Socket } from "node:net";
 import { WebSocketServer, WebSocket } from "ws";
 import type { ApprovalRequest, ChatRecord, ClientMessage, HandrailState, NewChatOptions, PairingPayload, ServerMessage, StartChatOptions } from "./types.js";
-import { ensurePairingToken } from "./state.js";
+import { ensurePairingToken, saveState } from "./state.js";
 import { ChatManager } from "./chats.js";
 import { getNewChatOptions } from "./newChatOptions.js";
+import { NotificationDispatcher, type PersistState } from "./notifications.js";
 
 interface AuthedSocket extends WebSocket {
   isAuthed?: boolean;
@@ -75,6 +76,9 @@ export async function createHandrailServer(options: {
   state: HandrailState;
   chats?: ChatController;
   getOptions?: (projectPath?: string) => Promise<NewChatOptions>;
+  persistState?: PersistState;
+  notificationDispatcher?: NotificationDispatcher;
+  notificationPollIntervalMs?: number;
   port?: number;
 }): Promise<HandrailServerHandle> {
   const httpServer = createServer();
@@ -91,11 +95,32 @@ export async function createHandrailServer(options: {
     }
   };
 
-  const chats = options.chats ?? new ChatManager(broadcast);
+  const persistState = options.persistState ?? saveState;
+  const notificationDispatcher = options.notificationDispatcher ?? new NotificationDispatcher(options.state, persistState);
+  let chats: ChatController;
+  const notifyChatById = async (chatId: string) => {
+    const chat = (await chats.list()).find((item) => item.id === chatId);
+    if (chat) {
+      await notificationDispatcher.notifyChat(chat);
+    }
+  };
+  chats = options.chats ?? new ChatManager(broadcast, undefined, notifyChatById);
+  const observeNotifications = async () => {
+    const visibleChats = await chats.list();
+    await notificationDispatcher.notifyVisibleChats(
+      visibleChats,
+      (message) => broadcast({ type: "error", message })
+    );
+  };
+  const observer = setInterval(() => {
+    void observeNotifications().catch((error) => {
+      broadcast({ type: "error", message: (error as Error).message });
+    });
+  }, options.notificationPollIntervalMs ?? 5_000);
 
   wss.on("connection", (socket: AuthedSocket) => {
     socket.on("message", (data) => {
-      void handleMessage(socket, data.toString(), options.state, chats, broadcast, getOptions);
+      void handleMessage(socket, data.toString(), options.state, chats, broadcast, getOptions, notificationDispatcher);
     });
   });
 
@@ -109,6 +134,7 @@ export async function createHandrailServer(options: {
   return {
     port,
     async close() {
+      clearInterval(observer);
       await new Promise<void>((resolve, reject) => {
         wss.close((webSocketError) => {
           if (webSocketError) {
@@ -128,7 +154,8 @@ async function handleMessage(
   state: HandrailState,
   chats: ChatController,
   broadcast: (message: ServerMessage) => void,
-  getOptions: (projectPath?: string) => Promise<NewChatOptions> = getNewChatOptions
+  getOptions: (projectPath?: string) => Promise<NewChatOptions> = getNewChatOptions,
+  notificationDispatcher?: NotificationDispatcher
 ): Promise<void> {
   let message: ClientMessage;
   try {
@@ -160,6 +187,9 @@ async function handleMessage(
       case "hello":
         socket.send(JSON.stringify({ type: "new_chat_options", options: await getOptions(state.defaultRepo) } satisfies ServerMessage));
         socket.send(JSON.stringify({ type: "chat_list", chats: await chats.list() } satisfies ServerMessage));
+        break;
+      case "register_push_token":
+        await notificationDispatcher?.registerPushToken(message);
         break;
       case "start_chat":
         await chats.startChat(message);

@@ -27,6 +27,7 @@
 		100000000000000000000112 /* AttentionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000012 /* AttentionView.swift */; };
 		100000000000000000000113 /* NotificationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* NotificationCoordinator.swift */; };
 		100000000000000000000114 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* KeychainStore.swift */; };
+		100000000000000000000115 /* LaunchSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000016 /* LaunchSplashView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +51,8 @@
 		100000000000000000000012 /* AttentionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/AttentionView.swift; sourceTree = "<group>"; };
 		100000000000000000000013 /* NotificationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Utilities/NotificationCoordinator.swift; sourceTree = "<group>"; };
 		100000000000000000000014 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Utilities/KeychainStore.swift; sourceTree = "<group>"; };
+		100000000000000000000015 /* Handrail.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Handrail/Handrail.entitlements; sourceTree = "<group>"; };
+		100000000000000000000016 /* LaunchSplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/LaunchSplashView.swift; sourceTree = "<group>"; };
 		100000000000000000000201 /* Handrail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Handrail.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -75,7 +78,9 @@
 				100000000000000000000006 /* Formatters.swift */,
 				100000000000000000000013 /* NotificationCoordinator.swift */,
 				100000000000000000000014 /* KeychainStore.swift */,
+				100000000000000000000015 /* Handrail.entitlements */,
 				100000000000000000000007 /* RootView.swift */,
+				100000000000000000000016 /* LaunchSplashView.swift */,
 				100000000000000000000011 /* DashboardView.swift */,
 				100000000000000000000012 /* AttentionView.swift */,
 				100000000000000000000008 /* Components.swift */,
@@ -176,6 +181,7 @@
 				100000000000000000000112 /* AttentionView.swift in Sources */,
 				100000000000000000000113 /* NotificationCoordinator.swift in Sources */,
 				100000000000000000000114 /* KeychainStore.swift in Sources */,
+				100000000000000000000115 /* LaunchSplashView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,6 +334,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Handrail/Handrail.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 535MQ7U2FY;

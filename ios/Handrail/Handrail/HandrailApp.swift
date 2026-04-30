@@ -1,11 +1,40 @@
 import SwiftUI
+import UIKit
+
+final class HandrailAppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        Task { @MainActor in
+            HandrailNotificationCoordinator.shared.updateRemotePushToken(
+                deviceToken,
+                environment: Self.apnsEnvironment
+            )
+        }
+    }
+
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error
+    ) {}
+
+    private static var apnsEnvironment: String {
+        #if DEBUG
+        "sandbox"
+        #else
+        "production"
+        #endif
+    }
+}
 
 @main
 struct HandrailApp: App {
+    @UIApplicationDelegateAdaptor(HandrailAppDelegate.self) private var appDelegate
     @State private var store = HandrailStore()
 
     init() {
-        HandrailNotificationCoordinator.shared.configure()
+        HandrailNotificationCoordinator.shared.configure(remotePushEnabled: Self.remotePushEnabled)
     }
 
     var body: some Scene {
@@ -17,5 +46,13 @@ struct HandrailApp: App {
                     HandrailNotificationCoordinator.shared.attach(store: store)
                 }
         }
+    }
+
+    private static var remotePushEnabled: Bool {
+        #if DEBUG
+        false
+        #else
+        true
+        #endif
     }
 }

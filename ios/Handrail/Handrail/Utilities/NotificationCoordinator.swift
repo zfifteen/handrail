@@ -6,14 +6,19 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
     static let shared = HandrailNotificationCoordinator()
 
     private weak var store: HandrailStore?
+    private var pushTokenRegistration: PushTokenRegistration?
 
     private override init() {}
 
+    @MainActor
     func attach(store: HandrailStore) {
         self.store = store
+        if let pushTokenRegistration {
+            store.registerPushToken(pushTokenRegistration)
+        }
     }
 
-    func configure() {
+    func configure(remotePushEnabled: Bool) {
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         center.setNotificationCategories([
@@ -21,7 +26,25 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
             inputCategory,
             chatCategory
         ])
-        center.requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+        center.requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in
+            if remotePushEnabled {
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+        }
+    }
+
+    @MainActor
+    func updateRemotePushToken(_ deviceToken: Data, environment: String) {
+        let token = deviceToken.map { String(format: "%02x", $0) }.joined()
+        let registration = PushTokenRegistration(
+            deviceToken: token,
+            environment: environment,
+            deviceName: UIDevice.current.name
+        )
+        pushTokenRegistration = registration
+        store?.registerPushToken(registration)
     }
 
     @MainActor
@@ -191,9 +214,9 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
 
     @MainActor
     private func schedule(_ content: UNMutableNotificationContent, identifier: String) {
+        guard UIApplication.shared.applicationState == .active else { return }
         let chatId = content.userInfo["chatId"] as? String
-        if UIApplication.shared.applicationState == .active,
-           let chatId,
+        if let chatId,
            store?.isViewingChat(chatId: chatId) == true {
             return
         }

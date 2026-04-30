@@ -25,7 +25,11 @@ const defaultDeps: ChatManagerDeps = {
 };
 
 export class ChatManager {
-  constructor(private readonly broadcast: Broadcast, private readonly deps: ChatManagerDeps = defaultDeps) {}
+  constructor(
+    private readonly broadcast: Broadcast,
+    private readonly deps: ChatManagerDeps = defaultDeps,
+    private readonly notifyChatById?: (chatId: string) => Promise<void>
+  ) {}
 
   async list(): Promise<ChatRecord[]> {
     return (await this.deps.listCodexChats()).sort(
@@ -158,6 +162,11 @@ export class ChatManager {
     const now = new Date().toISOString();
     this.broadcast({ type: "chat_event", chatId, event: { kind: "chat_completed", status: "completed", at: now } });
     this.broadcast({ type: "chat_list", chats: await this.list() });
+    try {
+      await this.notifyChatById?.(chatId);
+    } catch (error) {
+      this.broadcast({ type: "error", message: (error as Error).message });
+    }
   }
 }
 

@@ -14,13 +14,20 @@ export async function loadState(): Promise<HandrailState> {
   try {
     const raw = await readFile(statePath(), "utf8");
     const parsed = JSON.parse(raw) as HandrailState;
-    return {
+    const state: HandrailState = {
       protocolVersion: 1,
       port: parsed.port ?? DEFAULT_PORT,
       machineName: parsed.machineName || hostname(),
       defaultRepo: parsed.defaultRepo,
       pairingToken: parsed.pairingToken
     };
+    if (parsed.pushDevice) {
+      state.pushDevice = parsed.pushDevice;
+    }
+    if (parsed.sentNotificationEventIds) {
+      state.sentNotificationEventIds = parsed.sentNotificationEventIds;
+    }
+    return state;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
       throw error;

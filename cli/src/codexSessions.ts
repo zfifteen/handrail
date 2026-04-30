@@ -25,6 +25,7 @@ export interface CodexDesktopThread {
   rollout_path: string;
   cwd: string;
   title: string;
+  first_user_message: string;
   created_at: number;
   updated_at: number;
 }
@@ -93,11 +94,12 @@ export function visibleDesktopThreads(rows: CodexDesktopThreadRow[]): CodexDeskt
     )
     .sort((left, right) => right.updated_at - left.updated_at)
     .slice(0, MAX_CODEX_SESSIONS)
-    .map(({ id, rollout_path, cwd, title, created_at, updated_at }) => ({
+    .map(({ id, rollout_path, cwd, title, first_user_message, created_at, updated_at }) => ({
       id,
       rollout_path,
       cwd,
       title,
+      first_user_message,
       created_at,
       updated_at
     }));
@@ -143,7 +145,7 @@ async function readCodexSession(thread: CodexDesktopThread, pinnedThreadIds: Map
   return {
     id: `codex:${parsed.payload.id}`,
     repo,
-    title: thread.title.trim() || extractTitle(lines.slice(1)) || basename(repo),
+    title: humanCodexTitle(thread.title, extractTitle(lines.slice(1)), thread.first_user_message, repo),
     projectName: desktopProjectName(repo, projectNames),
     status: extractStatus(lines.slice(1)),
     startedAt: unixSecondsToIso(thread.created_at) || parsed.payload.timestamp,
@@ -152,6 +154,21 @@ async function readCodexSession(thread: CodexDesktopThread, pinnedThreadIds: Map
     isPinned: pinnedThreadIds.has(parsed.payload.id),
     pinnedOrder: pinnedThreadIds.get(parsed.payload.id)
   };
+}
+
+export function humanCodexTitle(
+  desktopTitle: string,
+  rolloutTitle: string | null,
+  firstUserMessage: string,
+  repo: string
+): string {
+  for (const candidate of [desktopTitle, rolloutTitle ?? "", firstUserMessage]) {
+    const title = compactTitle(candidate);
+    if (title && !isRawCodexIdentifier(title)) {
+      return title;
+    }
+  }
+  return basename(repo);
 }
 
 export async function readRolloutLines(path: string): Promise<string[]> {
@@ -207,6 +224,19 @@ function extractTitle(lines: string[]): string | null {
     }
   }
   return null;
+}
+
+function compactTitle(value: string): string | null {
+  const compact = value.replace(/\s+/g, " ").trim();
+  if (!compact) {
+    return null;
+  }
+  return compact.length > 96 ? `${compact.slice(0, 93)}...` : compact;
+}
+
+function isRawCodexIdentifier(value: string): boolean {
+  const candidate = value.replace(/^codex:/i, "");
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(candidate);
 }
 
 export function extractStatus(lines: string[]): ChatRecord["status"] {

@@ -277,7 +277,7 @@ struct ChatDetailView: View {
     private var chatMessages: some View {
         VStack(spacing: 14) {
             if chatBlocks.isEmpty {
-                Text(emptyTranscriptText)
+                Text(emptyChatText)
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -360,23 +360,23 @@ struct ChatDetailView: View {
             .background(Color.black)
     }
 
-    private var emptyTranscriptText: String {
+    private var emptyChatText: String {
         guard let chat = store.chat(id: chatId) else {
             return "Chat not found."
         }
         switch chat.status {
         case .running:
-            return "Codex is starting. Output will appear here."
+            return "Codex is starting. Messages will appear here."
         case .waitingForApproval:
             return "Waiting for approval."
         case .completed:
-            return "Completed with no transcript output."
+            return "This chat completed without visible messages."
         case .failed:
-            return "Failed before transcript output was received."
+            return "This chat failed before visible messages arrived."
         case .stopped:
-            return "Stopped before transcript output was received."
+            return "This chat stopped before visible messages arrived."
         case .idle:
-            return "No transcript is available for this chat."
+            return "No messages are available for this chat yet."
         }
     }
 

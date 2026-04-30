@@ -1,0 +1,243 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1120" viewBox="0 0 1500 1120">
+  <defs>
+    <style>
+      .page { fill: #050506; }
+      .panel { fill: #101012; stroke: rgba(255,255,255,0.1); stroke-width: 1; }
+      .screen { fill: #000; stroke: rgba(255,255,255,0.14); stroke-width: 1; }
+      .thin { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .purple { stroke: #bf5af2; }
+      .green { stroke: #30d158; }
+      .blue { stroke: #0a84ff; }
+      .orange { stroke: #ff9f0a; }
+      .white { stroke: rgba(255,255,255,0.55); }
+      .soft { stroke: rgba(255,255,255,0.24); }
+      .core { filter: url(#glow); }
+      .spin { transform-box: fill-box; transform-origin: center; animation: spin 2s linear infinite; }
+      .spinBack { transform-box: fill-box; transform-origin: center; animation: spinBack 2s linear infinite; }
+      .pulse { transform-box: fill-box; transform-origin: center; animation: pulse 2s ease-in-out infinite; }
+      .breathe { animation: breathe 2s ease-in-out infinite; }
+      .draw { stroke-dasharray: 270; stroke-dashoffset: 270; animation: draw 2s ease-in-out infinite; }
+      .handoff { animation: handoff 2s ease-in-out infinite; }
+      .rise { animation: rise 2s ease-in-out infinite; }
+      .blink { animation: blink 2s steps(2, jump-none) infinite; }
+      .grain { opacity: 0.11; }
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      @keyframes spinBack { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+      @keyframes pulse {
+        0%, 100% { transform: scale(0.84); opacity: 0.52; }
+        44% { transform: scale(1.08); opacity: 1; }
+        72% { transform: scale(1); opacity: 0.84; }
+      }
+      @keyframes breathe {
+        0%, 100% { opacity: 0.25; }
+        45% { opacity: 0.92; }
+        78% { opacity: 0.52; }
+      }
+      @keyframes draw {
+        0% { stroke-dashoffset: 270; opacity: 0.18; }
+        48% { stroke-dashoffset: 0; opacity: 1; }
+        78% { stroke-dashoffset: -80; opacity: 0.76; }
+        100% { stroke-dashoffset: -270; opacity: 0.2; }
+      }
+      @keyframes handoff {
+        0% { transform: translateX(-54px); opacity: 0; }
+        22% { opacity: 1; }
+        58% { transform: translateX(0); opacity: 1; }
+        100% { transform: translateX(54px); opacity: 0; }
+      }
+      @keyframes rise {
+        0% { transform: translateY(34px); opacity: 0; }
+        34%, 72% { transform: translateY(0); opacity: 1; }
+        100% { transform: translateY(-12px); opacity: 0; }
+      }
+      @keyframes blink {
+        0%, 22% { opacity: 0; }
+        23%, 62% { opacity: 1; }
+        63%, 100% { opacity: 0.22; }
+      }
+    </style>
+    <filter id="glow" x="-90%" y="-90%" width="280%" height="280%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0.72 0 0 0 0.2 0 0.18 0 0 0.7 0 0 0.85 0 0.95 0 0 0 0.72 0" result="color"/>
+      <feMerge>
+        <feMergeNode in="color"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grain" width="18" height="18" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="3" r="0.6" fill="#fff"/>
+      <circle cx="13" cy="9" r="0.5" fill="#fff"/>
+      <circle cx="7" cy="15" r="0.4" fill="#fff"/>
+    </pattern>
+    <radialGradient id="phoneGlow" cx="50%" cy="39%" r="62%">
+      <stop offset="0%" stop-color="#7a35ff" stop-opacity="0.25"/>
+      <stop offset="58%" stop-color="#151515" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect class="page" width="1500" height="1120"/>
+  <rect class="grain" width="1500" height="1120" fill="url(#grain)"/>
+
+  <g transform="translate(55,55)">
+    <rect class="panel" x="0" y="0" width="320" height="470" rx="8"/>
+    <g transform="translate(70,58)">
+      <rect class="screen" x="0" y="0" width="180" height="354" rx="36"/>
+      <rect x="8" y="8" width="164" height="338" rx="29" fill="url(#phoneGlow)"/>
+      <rect x="64" y="15" width="52" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+      <g transform="translate(90,177)" class="core">
+        <circle class="thin purple breathe" r="62" stroke-width="1.2"/>
+        <g class="spin">
+          <path class="thin green" d="M-18,-46 L32,-33 L46,18 L8,49 L-40,28 L-48,-18 Z" stroke-width="8"/>
+          <path class="thin purple" d="M-2,-48 L44,-4 L20,44 L-34,39 L-48,-8 Z" stroke-width="4"/>
+        </g>
+        <g class="spinBack" opacity="0.72">
+          <path class="thin blue" d="M-42,10 L-10,-44 L45,-18 L36,36 L-18,48 Z" stroke-width="3"/>
+        </g>
+        <circle r="8" fill="#fff"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(415,55)">
+    <rect class="panel" x="0" y="0" width="320" height="470" rx="8"/>
+    <g transform="translate(70,58)">
+      <rect class="screen" x="0" y="0" width="180" height="354" rx="36"/>
+      <rect x="8" y="8" width="164" height="338" rx="29" fill="url(#phoneGlow)"/>
+      <rect x="64" y="15" width="52" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+      <g transform="translate(90,177)" class="core">
+        <line x1="0" y1="-84" x2="0" y2="84" class="thin soft" stroke-width="5"/>
+        <line x1="0" y1="84" x2="0" y2="-84" class="thin purple draw" stroke-width="5"/>
+        <g class="pulse">
+          <path class="thin green" d="M-48,-35 L-8,-60 L32,-42 L54,-6 L36,35 L-4,56 L-47,31 L-59,-8 Z" stroke-width="7"/>
+          <path class="thin purple" d="M-31,0 L0,-31 L31,0 L0,31 Z" stroke-width="5"/>
+        </g>
+        <circle cy="-84" r="6" fill="#30d158"/>
+        <circle r="7" fill="#bf5af2"/>
+        <circle cy="84" r="6" fill="#0a84ff"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(775,55)">
+    <rect class="panel" x="0" y="0" width="320" height="470" rx="8"/>
+    <g transform="translate(70,58)">
+      <rect class="screen" x="0" y="0" width="180" height="354" rx="36"/>
+      <rect x="8" y="8" width="164" height="338" rx="29" fill="url(#phoneGlow)"/>
+      <rect x="64" y="15" width="52" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+      <g transform="translate(90,177)" class="core">
+        <path class="thin green draw" d="M-66,-20 L-36,0 L-66,20" stroke-width="8"/>
+        <path class="thin purple draw" d="M66,-20 L36,0 L66,20" stroke-width="8"/>
+        <path class="thin blue draw" d="M-20,-66 L0,-36 L20,-66" stroke-width="8"/>
+        <path class="thin orange draw" d="M-20,66 L0,36 L20,66" stroke-width="8"/>
+        <circle class="thin soft spin" r="54" stroke-width="2" stroke-dasharray="12 14"/>
+        <rect x="-20" y="-20" width="40" height="40" rx="8" fill="rgba(191,90,242,0.22)" stroke="#bf5af2"/>
+        <rect x="-2" y="-10" width="4" height="20" rx="2" fill="#fff" class="blink"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(1135,55)">
+    <rect class="panel" x="0" y="0" width="320" height="470" rx="8"/>
+    <g transform="translate(70,58)">
+      <rect class="screen" x="0" y="0" width="180" height="354" rx="36"/>
+      <rect x="8" y="8" width="164" height="338" rx="29" fill="url(#phoneGlow)"/>
+      <rect x="64" y="15" width="52" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+      <g transform="translate(90,177)" class="core">
+        <g class="spin">
+          <path class="thin purple" d="M0,-70 A70,70 0 0 1 60,-36" stroke-width="7"/>
+          <path class="thin green" d="M69,-4 A70,70 0 0 1 37,60" stroke-width="7"/>
+          <path class="thin blue" d="M-8,69 A70,70 0 0 1 -60,35" stroke-width="7"/>
+          <path class="thin orange" d="M-68,-9 A70,70 0 0 1 -29,-64" stroke-width="7"/>
+        </g>
+        <g class="spinBack" opacity="0.75">
+          <path class="thin soft" d="M-45,-45 L45,45" stroke-width="3"/>
+          <path class="thin soft" d="M45,-45 L-45,45" stroke-width="3"/>
+        </g>
+        <polygon points="0,-33 29,-17 29,17 0,33 -29,17 -29,-17" fill="rgba(255,255,255,0.07)" stroke="#fff" stroke-opacity="0.46"/>
+        <circle class="pulse" r="10" fill="#bf5af2"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(55,595)">
+    <rect class="panel" x="0" y="0" width="320" height="470" rx="8"/>
+    <g transform="translate(70,58)">
+      <rect class="screen" x="0" y="0" width="180" height="354" rx="36"/>
+      <rect x="8" y="8" width="164" height="338" rx="29" fill="url(#phoneGlow)"/>
+      <rect x="64" y="15" width="52" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+      <g transform="translate(90,177)" class="core">
+        <rect x="-70" y="-20" width="42" height="30" rx="5" fill="none" stroke="rgba(255,255,255,0.48)" stroke-width="2"/>
+        <line x1="-56" y1="13" x2="-42" y2="13" class="thin soft" stroke-width="2"/>
+        <rect x="36" y="-30" width="28" height="56" rx="8" fill="none" stroke="rgba(255,255,255,0.48)" stroke-width="2"/>
+        <circle cx="50" cy="17" r="2" fill="rgba(255,255,255,0.48)"/>
+        <line x1="-24" y1="-6" x2="24" y2="-6" class="thin soft" stroke-width="3"/>
+        <circle cy="-6" r="12" fill="#bf5af2" class="handoff"/>
+        <g class="pulse" transform="translate(0,36)">
+          <path class="thin green" d="M-25,-18 L8,-29 L32,-3 L17,25 L-15,29 L-33,4 Z" stroke-width="5"/>
+          <path class="thin purple" d="M-4,-29 L30,-2 L4,29 L-30,4 Z" stroke-width="3"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(415,595)">
+    <rect class="panel" x="0" y="0" width="320" height="470" rx="8"/>
+    <g transform="translate(70,58)">
+      <rect class="screen" x="0" y="0" width="180" height="354" rx="36"/>
+      <rect x="8" y="8" width="164" height="338" rx="29" fill="url(#phoneGlow)"/>
+      <rect x="64" y="15" width="52" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+      <g transform="translate(90,177)" class="core">
+        <rect x="-39" y="-56" width="20" height="112" rx="8" fill="rgba(255,255,255,0.1)" stroke="#bf5af2"/>
+        <rect x="19" y="-56" width="20" height="112" rx="8" fill="rgba(255,255,255,0.1)" stroke="#30d158"/>
+        <rect x="-25" y="-10" width="50" height="20" rx="8" fill="rgba(191,90,242,0.45)"/>
+        <g class="spin">
+          <path class="thin purple" d="M-58,-43 L-18,-64 L25,-53 L58,-14" stroke-width="4"/>
+          <path class="thin green" d="M58,43 L18,64 L-25,53 L-58,14" stroke-width="4"/>
+        </g>
+        <circle class="thin soft breathe" r="72" stroke-width="1.4"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(775,595)">
+    <rect class="panel" x="0" y="0" width="320" height="470" rx="8"/>
+    <g transform="translate(70,58)">
+      <rect class="screen" x="0" y="0" width="180" height="354" rx="36"/>
+      <rect x="8" y="8" width="164" height="338" rx="29" fill="url(#phoneGlow)"/>
+      <rect x="64" y="15" width="52" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+      <g transform="translate(90,177)" class="core">
+        <circle class="thin soft" r="68" stroke-width="2"/>
+        <g class="spin">
+          <path class="thin purple" d="M-52,-24 C-18,-52 18,-52 52,-24" stroke-width="7"/>
+          <path class="thin green" d="M52,24 C18,52 -18,52 -52,24" stroke-width="7"/>
+        </g>
+        <g class="spinBack">
+          <path class="thin blue" d="M-24,52 C-52,18 -52,-18 -24,-52" stroke-width="5"/>
+          <path class="thin orange" d="M24,-52 C52,-18 52,18 24,52" stroke-width="5"/>
+        </g>
+        <path class="thin white draw" d="M-28,-8 L-4,18 L36,-26" stroke-width="8"/>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(1135,595)">
+    <rect class="panel" x="0" y="0" width="320" height="470" rx="8"/>
+    <g transform="translate(70,58)">
+      <rect class="screen" x="0" y="0" width="180" height="354" rx="36"/>
+      <rect x="8" y="8" width="164" height="338" rx="29" fill="url(#phoneGlow)"/>
+      <rect x="64" y="15" width="52" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+      <g transform="translate(90,177)" class="core">
+        <g class="rise">
+          <path class="thin green" d="M-46,28 L-18,-16 L12,-4 L46,-42" stroke-width="8"/>
+          <path class="thin purple" d="M-46,-18 L-16,20 L18,4 L46,38" stroke-width="5"/>
+        </g>
+        <circle class="thin soft breathe" r="70" stroke-width="2"/>
+        <g class="spin" opacity="0.8">
+          <path class="thin blue" d="M0,-64 L16,-24 L58,-18 L25,8 L34,50 L0,26 L-34,50 L-25,8 L-58,-18 L-16,-24 Z" stroke-width="3"/>
+        </g>
+        <circle r="9" fill="#bf5af2"/>
+      </g>
+    </g>
+  </g>
+</svg>

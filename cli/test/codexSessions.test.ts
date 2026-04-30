@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { desktopProjectName, formatCodexTranscriptEntry, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
+import { desktopProjectName, formatCodexTranscriptEntry, humanCodexTitle, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
 
 test("formats imported Codex transcript entries for rich mobile rendering", () => {
   const entry = formatCodexTranscriptEntry("assistant", [
@@ -49,6 +49,7 @@ test("imports only visible desktop chat rows", () => {
       rollout_path: "/tmp/newer-visible.jsonl",
       cwd: "/tmp/project",
       title: "Newer Visible Desktop Chat",
+      first_user_message: "Hello",
       created_at: 1,
       updated_at: 20
     },
@@ -57,10 +58,36 @@ test("imports only visible desktop chat rows", () => {
       rollout_path: "/tmp/visible.jsonl",
       cwd: "/tmp/project",
       title: "Visible Desktop Chat",
+      first_user_message: "Hello",
       created_at: 1,
       updated_at: 10
     }
   ]);
+});
+
+test("normalizes raw Codex thread ids out of user-visible chat titles", () => {
+  assert.equal(
+    humanCodexTitle(
+      "codex:019dd5d6-86b5-7081-8d93-318872cfb02a",
+      null,
+      "What should we build in Handrail?",
+      "/Users/me/IdeaProjects/handrail"
+    ),
+    "What should we build in Handrail?"
+  );
+  assert.equal(
+    humanCodexTitle(
+      "019dd5d6-86b5-7081-8d93-318872cfb02a",
+      "Build Handrail MVP",
+      "What should we build?",
+      "/Users/me/IdeaProjects/handrail"
+    ),
+    "Build Handrail MVP"
+  );
+  assert.equal(
+    humanCodexTitle("Build Handrail MVP", "Ignored", "Ignored", "/Users/me/IdeaProjects/handrail"),
+    "Build Handrail MVP"
+  );
 });
 
 test("uses Codex Desktop project names for imported chat metadata", () => {

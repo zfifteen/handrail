@@ -32,6 +32,7 @@ final class HandrailStore {
     private let client = HandrailWebSocketClient()
     private var awaitingStartedChat = false
     private var pendingErrorTarget: PendingErrorTarget?
+    private var pushTokenRegistration: PushTokenRegistration?
 
     init(enableNetworking: Bool = true) {
         loadPairing()
@@ -66,6 +67,11 @@ final class HandrailStore {
         pairedMachine = machine
         savePairing(machine)
         client.connect(to: machine)
+    }
+
+    func registerPushToken(_ registration: PushTokenRegistration) {
+        pushTokenRegistration = registration
+        sendPushTokenIfConnected()
     }
 
     func startChat(_ payload: StartChatPayload) {
@@ -256,6 +262,7 @@ final class HandrailStore {
                 pairedMachine = machine
             }
             addActivity("Machine online", machineName)
+            sendPushTokenIfConnected()
         case .newChatOptions(let options):
             newChatOptions = options
         case .chatList(let chats):
@@ -389,10 +396,35 @@ final class HandrailStore {
 
     private func notificationDetail(chatId: String, eventText: String?) -> String {
         let text = eventText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        if !text.isEmpty && !text.hasPrefix("codex:") {
+        if !text.isEmpty && !isRawCodexIdentifier(text) {
             return text
         }
-        return chat(id: chatId)?.title ?? "Codex chat"
+        return humanChatLabel(chatId: chatId)
+    }
+
+    private func humanChatLabel(chatId: String) -> String {
+        guard let chat = chat(id: chatId) else {
+            return "Codex chat"
+        }
+        for candidate in [
+            chat.title,
+            chat.projectName ?? "",
+            URL(fileURLWithPath: chat.repo).lastPathComponent
+        ] {
+            let trimmed = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty && !isRawCodexIdentifier(trimmed) {
+                return trimmed
+            }
+        }
+        return "Codex chat"
+    }
+
+    private func isRawCodexIdentifier(_ value: String) -> Bool {
+        let candidate = value.replacingOccurrences(of: "^codex:", with: "", options: [.regularExpression, .caseInsensitive])
+        return candidate.range(
+            of: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            options: [.regularExpression, .caseInsensitive]
+        ) != nil
     }
 
     private func reportError(_ message: String) {
@@ -420,6 +452,11 @@ final class HandrailStore {
             reportError(message)
         }
         pendingErrorTarget = nil
+    }
+
+    private func sendPushTokenIfConnected() {
+        guard pairedMachine?.isOnline == true, let pushTokenRegistration else { return }
+        client.send(.registerPushToken(pushTokenRegistration))
     }
 
     private func insertNotification(title: String, detail: String, date: Date, chatId: String?) {

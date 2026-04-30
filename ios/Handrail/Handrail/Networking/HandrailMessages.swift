@@ -2,6 +2,7 @@ import Foundation
 
 enum ClientMessage: Encodable {
     case hello(token: String)
+    case registerPushToken(PushTokenRegistration)
     case startChat(StartChatPayload)
     case continueChat(chatId: String, prompt: String)
     case sendChatInput(chatId: String, text: String)
@@ -27,6 +28,9 @@ enum ClientMessage: Encodable {
         case accessPreset
         case model
         case reasoningEffort
+        case deviceToken
+        case environment
+        case deviceName
     }
 
     func encode(to encoder: Encoder) throws {
@@ -35,6 +39,11 @@ enum ClientMessage: Encodable {
         case .hello(let token):
             try container.encode("hello", forKey: .type)
             try container.encode(token, forKey: .token)
+        case .registerPushToken(let registration):
+            try container.encode("register_push_token", forKey: .type)
+            try container.encode(registration.deviceToken, forKey: .deviceToken)
+            try container.encode(registration.environment, forKey: .environment)
+            try container.encodeIfPresent(registration.deviceName, forKey: .deviceName)
         case .startChat(let payload):
             try container.encode("start_chat", forKey: .type)
             try container.encode(payload.prompt, forKey: .prompt)
