@@ -3,10 +3,20 @@ import SwiftUI
 struct IPadChatListWorkspaceView: View {
     @Environment(HandrailStore.self) private var store
     @Binding var selection: IPadWorkspaceSelection
+    @Binding var focusesSearch: Bool
     @State private var searchText = ""
     @State private var filter: ChatListFilter = .all
     @State private var sort: ChatListSort = .updated
     @State private var groupsByProject = false
+    @FocusState private var searchFocused: Bool
+
+    init(
+        selection: Binding<IPadWorkspaceSelection>,
+        focusesSearch: Binding<Bool> = .constant(false)
+    ) {
+        self._selection = selection
+        self._focusesSearch = focusesSearch
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,22 +30,63 @@ struct IPadChatListWorkspaceView: View {
         }
         .background(Color.black.ignoresSafeArea())
         .navigationTitle("Chats")
-        .searchable(text: $searchText, prompt: "Search chats")
+        .background(dismissSearchShortcut)
+        .onChange(of: focusesSearch) { _, shouldFocus in
+            guard shouldFocus else { return }
+            searchFocused = true
+            focusesSearch = false
+        }
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    searchFocused = true
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                }
+                .keyboardShortcut("f", modifiers: .command)
+                .accessibilityLabel("Search chats")
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     store.refreshChats()
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
+                .keyboardShortcut("r", modifiers: .command)
                 .disabled(store.pairedMachine == nil)
                 .accessibilityLabel("Refresh chats")
             }
         }
     }
 
+    private var dismissSearchShortcut: some View {
+        Button("Dismiss Search") {
+            searchFocused = false
+        }
+        .keyboardShortcut(.cancelAction)
+        .hidden()
+    }
+
     private var controls: some View {
         HStack(spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                TextField("Search chats", text: $searchText)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .focused($searchFocused)
+                    .submitLabel(.search)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .frame(maxWidth: 280)
+            .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(searchFocused ? Color.purple.opacity(0.7) : Color.white.opacity(0.10), lineWidth: 1)
+            )
+
             Menu {
                 Picker("Status", selection: $filter) {
                     ForEach(ChatListFilter.allCases) { filter in

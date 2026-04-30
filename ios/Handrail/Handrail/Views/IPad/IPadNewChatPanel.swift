@@ -54,12 +54,14 @@ struct IPadNewChatPanel: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
+                    .keyboardShortcut(.cancelAction)
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Start") {
                     isStarting = true
                     store.startChat(payload)
                 }
+                .keyboardShortcut(.return, modifiers: .command)
                 .disabled(!canStart || isStarting)
             }
         }

@@ -6,6 +6,7 @@ struct RootView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Binding var iPadSelection: IPadWorkspaceSelection
     @Binding var showsIPadNewChat: Bool
+    @Binding var focusesIPadChatSearch: Bool
     @State private var showsLaunchSplash = true
     @State private var launchSplashOpacity = 1.0
     @State private var phoneRoute: PhoneRootRoute?
@@ -13,10 +14,12 @@ struct RootView: View {
 
     init(
         iPadSelection: Binding<IPadWorkspaceSelection> = .constant(IPadWorkspaceSelection()),
-        showsIPadNewChat: Binding<Bool> = .constant(false)
+        showsIPadNewChat: Binding<Bool> = .constant(false),
+        focusesIPadChatSearch: Binding<Bool> = .constant(false)
     ) {
         self._iPadSelection = iPadSelection
         self._showsIPadNewChat = showsIPadNewChat
+        self._focusesIPadChatSearch = focusesIPadChatSearch
     }
 
     var body: some View {
@@ -71,7 +74,11 @@ struct RootView: View {
         case .phone:
             PhoneRootView(route: $phoneRoute)
         case .iPadRegular:
-            IPadWorkspaceRootView(selection: $iPadSelection, showsNewChat: $showsIPadNewChat)
+            IPadWorkspaceRootView(
+                selection: $iPadSelection,
+                showsNewChat: $showsIPadNewChat,
+                focusesChatSearch: $focusesIPadChatSearch
+            )
         }
     }
 

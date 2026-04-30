@@ -3,13 +3,16 @@ import SwiftUI
 struct IPadWorkspaceRootView: View {
     @Binding var selection: IPadWorkspaceSelection
     @Binding var showsNewChat: Bool
+    @Binding var focusesChatSearch: Bool
 
     init(
         selection: Binding<IPadWorkspaceSelection> = .constant(IPadWorkspaceSelection()),
-        showsNewChat: Binding<Bool> = .constant(false)
+        showsNewChat: Binding<Bool> = .constant(false),
+        focusesChatSearch: Binding<Bool> = .constant(false)
     ) {
         self._selection = selection
         self._showsNewChat = showsNewChat
+        self._focusesChatSearch = focusesChatSearch
     }
 
     var body: some View {
@@ -29,7 +32,7 @@ struct IPadWorkspaceRootView: View {
         case .dashboard:
             IPadDashboardWorkspaceView(selection: $selection, showsNewChat: $showsNewChat)
         case .chats:
-            IPadChatListWorkspaceView(selection: $selection)
+            IPadChatListWorkspaceView(selection: $selection, focusesSearch: $focusesChatSearch)
         case .attention:
             IPadApprovalReviewWorkspaceView(selection: $selection)
         case .activity:

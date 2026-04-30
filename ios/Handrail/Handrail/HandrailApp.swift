@@ -34,6 +34,7 @@ struct HandrailApp: App {
     @State private var store = HandrailStore()
     @State private var iPadSelection = IPadWorkspaceSelection()
     @State private var showsIPadNewChat = false
+    @State private var focusesIPadChatSearch = false
 
     init() {
         HandrailNotificationCoordinator.shared.configure(remotePushEnabled: Self.remotePushEnabled)
@@ -41,7 +42,11 @@ struct HandrailApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(iPadSelection: $iPadSelection, showsIPadNewChat: $showsIPadNewChat)
+            RootView(
+                iPadSelection: $iPadSelection,
+                showsIPadNewChat: $showsIPadNewChat,
+                focusesIPadChatSearch: $focusesIPadChatSearch
+            )
                 .environment(store)
                 .preferredColorScheme(.dark)
                 .onAppear {
@@ -49,7 +54,12 @@ struct HandrailApp: App {
                 }
         }
         .commands {
-            HandrailCommands(store: store, selection: $iPadSelection, showsNewChat: $showsIPadNewChat)
+            HandrailCommands(
+                store: store,
+                selection: $iPadSelection,
+                showsNewChat: $showsIPadNewChat,
+                focusesChatSearch: $focusesIPadChatSearch
+            )
         }
     }
 

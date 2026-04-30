@@ -4,6 +4,7 @@ struct HandrailCommands: Commands {
     let store: HandrailStore
     @Binding var selection: IPadWorkspaceSelection
     @Binding var showsNewChat: Bool
+    @Binding var focusesChatSearch: Bool
     var supportsSelectedChatWindows = false
 
     var body: some Commands {
@@ -13,10 +14,19 @@ struct HandrailCommands: Commands {
             Button("New Chat") {
                 showsNewChat = true
             }
+            .keyboardShortcut("n", modifiers: .command)
             .disabled(!availability.canStartNewChat)
         }
 
         CommandMenu("View") {
+            Button("Search Chats") {
+                selection.selectSection(.chats)
+                focusesChatSearch = true
+            }
+            .keyboardShortcut("f", modifiers: .command)
+
+            Divider()
+
             ForEach(HandrailSection.allCases) { section in
                 Button(section.title) {
                     selection.selectSection(section)
@@ -29,6 +39,7 @@ struct HandrailCommands: Commands {
             Button("Refresh") {
                 store.refreshChats()
             }
+            .keyboardShortcut("r", modifiers: .command)
             .disabled(!availability.canRefresh)
 
             Button("Reconnect") {
@@ -41,6 +52,7 @@ struct HandrailCommands: Commands {
             Button("Stop Selected Chat") {
                 stopSelectedChat()
             }
+            .keyboardShortcut(".", modifiers: .command)
             .disabled(!availability.canStopSelectedChat)
 
             Button("Continue Selected Chat") {

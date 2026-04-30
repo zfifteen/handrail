@@ -26,6 +26,7 @@ struct IPadChatDetailWorkspaceView: View {
                     } label: {
                         Image(systemName: "stop.fill")
                     }
+                    .keyboardShortcut(".", modifiers: .command)
                     .accessibilityLabel("Stop selected chat")
                 }
                 if commandAvailability.canContinueSelectedChat {
@@ -38,6 +39,7 @@ struct IPadChatDetailWorkspaceView: View {
                 }
             }
         }
+        .background(dismissComposerShortcut)
         .onAppear {
             enterVisibleChatIfNeeded()
         }
@@ -325,6 +327,7 @@ struct IPadChatDetailWorkspaceView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(.purple)
+            .keyboardShortcut(.return, modifiers: .command)
             .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .accessibilityLabel("Send")
         }
@@ -349,10 +352,19 @@ struct IPadChatDetailWorkspaceView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(.purple)
+            .keyboardShortcut(.return, modifiers: .command)
             .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || pendingContinuePrompt != nil)
         }
         .padding()
         .background(Color.black)
+    }
+
+    private var dismissComposerShortcut: some View {
+        Button("Dismiss Composer Focus") {
+            isComposerFocused = false
+        }
+        .keyboardShortcut(.cancelAction)
+        .hidden()
     }
 
     private func readOnlyNotice(_ text: String) -> some View {
