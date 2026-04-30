@@ -29,6 +29,9 @@ struct ChatDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             store.enterChat(chatId: chatId)
+            if store.pairedMachine?.isOnline == true {
+                store.refreshChats()
+            }
         }
         .onDisappear {
             store.leaveChat(chatId: chatId)

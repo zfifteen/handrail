@@ -230,6 +230,65 @@ test("WebSocket server broadcasts chat list when thinking appears during polling
   }
 });
 
+test("WebSocket server broadcasts chat list when transcript content changes during polling", async () => {
+  let chat: ChatRecord = {
+    id: "codex:thread-1",
+    repo: "/Users/me/project",
+    title: "Desktop chat",
+    projectName: "project",
+    status: "running",
+    startedAt: "2026-04-29T00:00:00.000Z",
+    updatedAt: "2026-04-29T00:01:00.000Z",
+    transcript: ["User:\nHello  \n\n"]
+  };
+
+  const server = await createHandrailServer({
+    state,
+    port: 0,
+    getOptions: async () => options,
+    notificationPollIntervalMs: 20,
+    chats: {
+      list: async () => [chat],
+      startChat: async () => chat,
+      continue: async () => chat,
+      sendInput() {},
+      approve() {
+        throw new Error("unused");
+      },
+      deny() {
+        throw new Error("unused");
+      },
+      async stop() {}
+    }
+  });
+
+  try {
+    const ws = new WebSocket(`ws://127.0.0.1:${server.port}`);
+    await once(ws, "open");
+    const messages = new MessageInbox(ws);
+    ws.send(JSON.stringify({ type: "hello", token: state.pairingToken }));
+    assert.equal((await messages.next()).type, "machine_status");
+    assert.equal((await messages.next()).type, "new_chat_options");
+    assert.equal((await messages.next()).type, "chat_list");
+
+    chat = {
+      ...chat,
+      transcript: ["Codex:\nHello back.  \n\n"]
+    };
+
+    const updated = await messages.nextMatching(
+      (message) => message.type === "chat_list" && message.chats[0].transcript?.[0] === "Codex:\nHello back.  \n\n"
+    );
+    assert.equal(updated.type, "chat_list");
+
+    const close = once(ws, "close");
+    ws.close();
+    await close;
+  } finally {
+    await server.close();
+  }
+});
+
 class MessageInbox {
   private readonly queue: ServerMessage[] = [];
   private readonly waiters: Array<(message: ServerMessage) => void> = [];

@@ -271,7 +271,7 @@ final class HandrailStore {
             isRefreshingChats = false
             lastChatRefreshAt = Date()
             for chat in chats {
-                if let transcript = chat.transcript, !transcript.isEmpty {
+                if let transcript = chat.transcript {
                     transcripts[chat.id] = transcript
                 }
             }

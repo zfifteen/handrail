@@ -157,9 +157,25 @@ export async function createHandrailServer(options: {
 function visibleChatSignature(chats: ChatRecord[]): string {
   return JSON.stringify(chats.map((chat) => ({
     id: chat.id,
+    repo: chat.repo,
+    title: chat.title,
+    projectName: chat.projectName ?? null,
     status: chat.status,
-    transcriptLength: chat.transcript?.length ?? 0,
-    thinkingLength: chat.thinking?.length ?? 0
+    startedAt: chat.startedAt,
+    updatedAt: chat.updatedAt ?? null,
+    endedAt: chat.endedAt ?? null,
+    exitCode: chat.exitCode ?? null,
+    files: chat.files ?? [],
+    transcript: chat.transcript ?? [],
+    thinking: (chat.thinking ?? []).map((entry) => ({
+      id: entry.id,
+      round: entry.round,
+      text: entry.text,
+      at: entry.at ?? null
+    })),
+    acceptsInput: chat.acceptsInput ?? null,
+    isPinned: chat.isPinned ?? null,
+    pinnedOrder: chat.pinnedOrder ?? null
   })));
 }
 
