@@ -1,12 +1,24 @@
 import XCTest
+import SwiftUI
+import UIKit
 @testable import Handrail
 
 final class RootLayoutSelectionTests: XCTestCase {
-    func testCompactRootSelectionIsPending() throws {
-        throw XCTSkip("Phase Two will implement compact root selection.")
+    func testCompactRootSelectionUsesPhoneRoot() {
+        XCTAssertEqual(
+            HandrailRootLayoutResolver.mode(userInterfaceIdiom: .pad, horizontalSizeClass: .compact),
+            .phone
+        )
+        XCTAssertEqual(
+            HandrailRootLayoutResolver.mode(userInterfaceIdiom: .phone, horizontalSizeClass: .regular),
+            .phone
+        )
     }
 
-    func testRegularWidthIPadRootSelectionIsPending() throws {
-        throw XCTSkip("Phase Two will implement regular-width iPad root selection.")
+    func testRegularWidthIPadRootSelectionUsesIPadWorkspace() {
+        XCTAssertEqual(
+            HandrailRootLayoutResolver.mode(userInterfaceIdiom: .pad, horizontalSizeClass: .regular),
+            .iPadRegular
+        )
     }
 }

@@ -1,7 +1,11 @@
 import SwiftUI
 
 struct IPadWorkspaceRootView: View {
-    @State private var selection = IPadWorkspaceSelection()
+    @Binding var selection: IPadWorkspaceSelection
+
+    init(selection: Binding<IPadWorkspaceSelection> = .constant(IPadWorkspaceSelection())) {
+        self._selection = selection
+    }
 
     var body: some View {
         NavigationSplitView {
