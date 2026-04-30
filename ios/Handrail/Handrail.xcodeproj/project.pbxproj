@@ -28,7 +28,34 @@
 		100000000000000000000113 /* NotificationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000013 /* NotificationCoordinator.swift */; };
 		100000000000000000000114 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* KeychainStore.swift */; };
 		100000000000000000000115 /* LaunchSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000016 /* LaunchSplashView.swift */; };
+		200000000000000000000101 /* IPadWorkspaceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* IPadWorkspaceModels.swift */; };
+		200000000000000000000102 /* IPadWorkspaceRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* IPadWorkspaceRootView.swift */; };
+		200000000000000000000103 /* IPadSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* IPadSidebarView.swift */; };
+		200000000000000000000104 /* IPadDashboardWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000004 /* IPadDashboardWorkspaceView.swift */; };
+		200000000000000000000105 /* IPadChatListWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000005 /* IPadChatListWorkspaceView.swift */; };
+		200000000000000000000106 /* IPadChatDetailWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000006 /* IPadChatDetailWorkspaceView.swift */; };
+		200000000000000000000107 /* IPadApprovalReviewWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000007 /* IPadApprovalReviewWorkspaceView.swift */; };
+		200000000000000000000108 /* IPadSettingsWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000008 /* IPadSettingsWorkspaceView.swift */; };
+		200000000000000000000109 /* IPadNewChatPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000009 /* IPadNewChatPanel.swift */; };
+		20000000000000000000010A /* HandrailCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000A /* HandrailCommands.swift */; };
+		200000000000000000000201 /* HandrailTestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000021 /* HandrailTestFixtures.swift */; };
+		200000000000000000000202 /* ChatListQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000022 /* ChatListQueryTests.swift */; };
+		200000000000000000000203 /* HandrailCommandAvailabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000023 /* HandrailCommandAvailabilityTests.swift */; };
+		200000000000000000000204 /* RootLayoutSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000024 /* RootLayoutSelectionTests.swift */; };
+		200000000000000000000205 /* WindowSelectionStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000025 /* WindowSelectionStateTests.swift */; };
+		200000000000000000000206 /* TranscriptParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000026 /* TranscriptParsingTests.swift */; };
+		200000000000000000000302 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 200000000000000000000303 /* XCTest.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		200000000000000000000601 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 100000000000000000000701 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 100000000000000000000501;
+			remoteInfo = Handrail;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		100000000000000000000001 /* HandrailApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/HandrailApp.swift; sourceTree = "<group>"; };
@@ -54,6 +81,24 @@
 		100000000000000000000015 /* Handrail.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Handrail/Handrail.entitlements; sourceTree = "<group>"; };
 		100000000000000000000016 /* LaunchSplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/LaunchSplashView.swift; sourceTree = "<group>"; };
 		100000000000000000000201 /* Handrail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Handrail.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		200000000000000000000001 /* IPadWorkspaceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadWorkspaceModels.swift; sourceTree = "<group>"; };
+		200000000000000000000002 /* IPadWorkspaceRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadWorkspaceRootView.swift; sourceTree = "<group>"; };
+		200000000000000000000003 /* IPadSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadSidebarView.swift; sourceTree = "<group>"; };
+		200000000000000000000004 /* IPadDashboardWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadDashboardWorkspaceView.swift; sourceTree = "<group>"; };
+		200000000000000000000005 /* IPadChatListWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadChatListWorkspaceView.swift; sourceTree = "<group>"; };
+		200000000000000000000006 /* IPadChatDetailWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadChatDetailWorkspaceView.swift; sourceTree = "<group>"; };
+		200000000000000000000007 /* IPadApprovalReviewWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadApprovalReviewWorkspaceView.swift; sourceTree = "<group>"; };
+		200000000000000000000008 /* IPadSettingsWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadSettingsWorkspaceView.swift; sourceTree = "<group>"; };
+		200000000000000000000009 /* IPadNewChatPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadNewChatPanel.swift; sourceTree = "<group>"; };
+		20000000000000000000000A /* HandrailCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandrailCommands.swift; sourceTree = "<group>"; };
+		200000000000000000000021 /* HandrailTestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandrailTestFixtures.swift; sourceTree = "<group>"; };
+		200000000000000000000022 /* ChatListQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListQueryTests.swift; sourceTree = "<group>"; };
+		200000000000000000000023 /* HandrailCommandAvailabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandrailCommandAvailabilityTests.swift; sourceTree = "<group>"; };
+		200000000000000000000024 /* RootLayoutSelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootLayoutSelectionTests.swift; sourceTree = "<group>"; };
+		200000000000000000000025 /* WindowSelectionStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowSelectionStateTests.swift; sourceTree = "<group>"; };
+		200000000000000000000026 /* TranscriptParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptParsingTests.swift; sourceTree = "<group>"; };
+		200000000000000000000301 /* HandrailTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandrailTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		200000000000000000000303 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +106,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		200000000000000000000401 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200000000000000000000302 /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +145,8 @@
 				10000000000000000000000E /* SettingsView.swift */,
 				10000000000000000000000F /* QRScannerView.swift */,
 				100000000000000000000010 /* PreviewData.swift */,
+				200000000000000000000701 /* IPad */,
+				200000000000000000000702 /* HandrailTests */,
 				100000000000000000000402 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -100,8 +155,39 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000201 /* Handrail.app */,
+				200000000000000000000301 /* HandrailTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		200000000000000000000701 /* IPad */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000001 /* IPadWorkspaceModels.swift */,
+				200000000000000000000002 /* IPadWorkspaceRootView.swift */,
+				200000000000000000000003 /* IPadSidebarView.swift */,
+				200000000000000000000004 /* IPadDashboardWorkspaceView.swift */,
+				200000000000000000000005 /* IPadChatListWorkspaceView.swift */,
+				200000000000000000000006 /* IPadChatDetailWorkspaceView.swift */,
+				200000000000000000000007 /* IPadApprovalReviewWorkspaceView.swift */,
+				200000000000000000000008 /* IPadSettingsWorkspaceView.swift */,
+				200000000000000000000009 /* IPadNewChatPanel.swift */,
+				20000000000000000000000A /* HandrailCommands.swift */,
+			);
+			path = Handrail/Views/IPad;
+			sourceTree = "<group>";
+		};
+		200000000000000000000702 /* HandrailTests */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000021 /* HandrailTestFixtures.swift */,
+				200000000000000000000022 /* ChatListQueryTests.swift */,
+				200000000000000000000023 /* HandrailCommandAvailabilityTests.swift */,
+				200000000000000000000024 /* RootLayoutSelectionTests.swift */,
+				200000000000000000000025 /* WindowSelectionStateTests.swift */,
+				200000000000000000000026 /* TranscriptParsingTests.swift */,
+			);
+			path = HandrailTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -123,6 +209,23 @@
 			productReference = 100000000000000000000201 /* Handrail.app */;
 			productType = "com.apple.product-type.application";
 		};
+		200000000000000000000501 /* HandrailTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 200000000000000000000801 /* Build configuration list for PBXNativeTarget "HandrailTests" */;
+			buildPhases = (
+				200000000000000000000402 /* Sources */,
+				200000000000000000000401 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				200000000000000000000602 /* PBXTargetDependency */,
+			);
+			name = HandrailTests;
+			productName = HandrailTests;
+			productReference = 200000000000000000000301 /* HandrailTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -135,6 +238,10 @@
 				TargetAttributes = {
 					100000000000000000000501 = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					200000000000000000000501 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = 100000000000000000000501;
 					};
 				};
 			};
@@ -152,6 +259,7 @@
 			projectRoot = "";
 			targets = (
 				100000000000000000000501 /* Handrail */,
+				200000000000000000000501 /* HandrailTests */,
 			);
 		};
 /* End PBXProject section */
@@ -182,10 +290,41 @@
 				100000000000000000000113 /* NotificationCoordinator.swift in Sources */,
 				100000000000000000000114 /* KeychainStore.swift in Sources */,
 				100000000000000000000115 /* LaunchSplashView.swift in Sources */,
+				200000000000000000000101 /* IPadWorkspaceModels.swift in Sources */,
+				200000000000000000000102 /* IPadWorkspaceRootView.swift in Sources */,
+				200000000000000000000103 /* IPadSidebarView.swift in Sources */,
+				200000000000000000000104 /* IPadDashboardWorkspaceView.swift in Sources */,
+				200000000000000000000105 /* IPadChatListWorkspaceView.swift in Sources */,
+				200000000000000000000106 /* IPadChatDetailWorkspaceView.swift in Sources */,
+				200000000000000000000107 /* IPadApprovalReviewWorkspaceView.swift in Sources */,
+				200000000000000000000108 /* IPadSettingsWorkspaceView.swift in Sources */,
+				200000000000000000000109 /* IPadNewChatPanel.swift in Sources */,
+				20000000000000000000010A /* HandrailCommands.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		200000000000000000000402 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200000000000000000000201 /* HandrailTestFixtures.swift in Sources */,
+				200000000000000000000202 /* ChatListQueryTests.swift in Sources */,
+				200000000000000000000203 /* HandrailCommandAvailabilityTests.swift in Sources */,
+				200000000000000000000204 /* RootLayoutSelectionTests.swift in Sources */,
+				200000000000000000000205 /* WindowSelectionStateTests.swift in Sources */,
+				200000000000000000000206 /* TranscriptParsingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		200000000000000000000602 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 100000000000000000000501 /* Handrail */;
+			targetProxy = 200000000000000000000601 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		100000000000000000000901 /* Debug */ = {
@@ -360,6 +499,46 @@
 			};
 			name = Release;
 		};
+		200000000000000000000901 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 535MQ7U2FY;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.velocityworks.HandrailTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Handrail.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Handrail";
+			};
+			name = Debug;
+		};
+		200000000000000000000902 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 535MQ7U2FY;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.velocityworks.HandrailTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Handrail.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Handrail";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -377,6 +556,15 @@
 			buildConfigurations = (
 				100000000000000000000901 /* Debug */,
 				100000000000000000000902 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		200000000000000000000801 /* Build configuration list for PBXNativeTarget "HandrailTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				200000000000000000000901 /* Debug */,
+				200000000000000000000902 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
