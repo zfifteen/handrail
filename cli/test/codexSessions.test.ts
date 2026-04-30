@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { desktopProjectName, extractStatus, extractThinking, formatCodexTranscriptEntry, humanCodexTitle, readCodexSessionStatus, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
+import { desktopProjectName, extractStatus, extractThinking, formatCodexTranscriptEntry, humanCodexTitle, parseAutomationTargetThreadId, readCodexSessionStatus, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
 
 test("formats imported Codex transcript entries for rich mobile rendering", () => {
   const entry = formatCodexTranscriptEntry("assistant", [
@@ -97,6 +97,18 @@ test("uses Codex Desktop project names for imported chat metadata", () => {
 
   assert.equal(desktopProjectName("/Users/me/IdeaProjects/handrail", projects), "Build Handrail MVP");
   assert.equal(desktopProjectName("/Users/me/IdeaProjects/pgs_lab", projects), "pgs_lab");
+});
+
+test("extracts automation target thread ids from automation TOML", () => {
+  assert.equal(
+    parseAutomationTargetThreadId([
+      "version = 1",
+      "id = \"handrail-new-features\"",
+      "target_thread_id = \"019ddd78-6bd2-7133-b9eb-bbf561cdc100\""
+    ].join("\n")),
+    "019ddd78-6bd2-7133-b9eb-bbf561cdc100"
+  );
+  assert.equal(parseAutomationTargetThreadId("version = 1\nid = \"unbound\"\n"), null);
 });
 
 test("extracts desktop thinking summaries by visible chat round", () => {

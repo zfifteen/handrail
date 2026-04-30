@@ -82,6 +82,7 @@ enum ClientMessage: Encodable {
 enum ServerMessage: Decodable {
     case machineStatus(machineName: String, online: Bool, defaultRepo: String?)
     case newChatOptions(NewChatOptions)
+    case automationList([AutomationRecord])
     case chatList([CodexChat])
     case chatStarted(CodexChat)
     case chatEvent(chatId: String, event: ChatEvent)
@@ -94,6 +95,7 @@ enum ServerMessage: Decodable {
         case machineName
         case online
         case chats
+        case automations
         case chat
         case chatId
         case event
@@ -119,6 +121,8 @@ enum ServerMessage: Decodable {
             )
         case "new_chat_options":
             self = .newChatOptions(try container.decode(NewChatOptions.self, forKey: .options))
+        case "automation_list":
+            self = .automationList(try container.decode([AutomationRecord].self, forKey: .automations))
         case "chat_list":
             self = .chatList(try container.decode([CodexChat].self, forKey: .chats))
         case "chat_started":

@@ -30,6 +30,16 @@ const options: NewChatOptions = {
   defaultReasoningEffort: "high"
 };
 
+const automations = [{
+  id: "finish-handrail-ipad-app",
+  name: "Finish Handrail iPad App",
+  kind: "cron",
+  status: "ACTIVE",
+  scheduleText: "Hourly",
+  contextText: "handrail",
+  projectName: "handrail"
+} as const];
+
 test("WebSocket server pairs, refreshes chats, stops chats, and reports command errors", async () => {
   const chat: ChatRecord = {
     id: "codex:thread-1",
@@ -46,6 +56,7 @@ test("WebSocket server pairs, refreshes chats, stops chats, and reports command 
     state,
     port: 0,
     getOptions: async () => options,
+    getAutomations: async () => automations,
     chats: {
       list: async () => [chat],
       startChat: async (_options: StartChatOptions) => chat,
@@ -88,9 +99,14 @@ test("WebSocket server pairs, refreshes chats, stops chats, and reports command 
     assert.equal(initialList.type, "chat_list");
     assert.deepEqual(initialList.chats.map((item) => item.title), ["Desktop chat"]);
 
+    const initialAutomations = await messages.next();
+    assert.equal(initialAutomations.type, "automation_list");
+    assert.deepEqual(initialAutomations.automations.map((item) => item.name), ["Finish Handrail iPad App"]);
+
     ws.send(JSON.stringify({ type: "hello", token: state.pairingToken }));
     assert.equal((await messages.next()).type, "new_chat_options");
     assert.equal((await messages.next()).type, "chat_list");
+    assert.equal((await messages.next()).type, "automation_list");
 
     ws.send(JSON.stringify({ type: "stop_chat", chatId: chat.id }));
     assert.deepEqual(await messages.next(), {
@@ -120,6 +136,7 @@ test("WebSocket server accepts and persists push token registration", async () =
     state: { ...state },
     port: 0,
     getOptions: async () => options,
+    getAutomations: async () => [],
     persistState: async (nextState) => {
       savedState = JSON.parse(JSON.stringify(nextState)) as HandrailState;
     },
@@ -150,6 +167,7 @@ test("WebSocket server accepts and persists push token registration", async () =
     assert.equal((await messages.next()).type, "machine_status");
     assert.equal((await messages.next()).type, "new_chat_options");
     assert.equal((await messages.next()).type, "chat_list");
+    assert.equal((await messages.next()).type, "automation_list");
 
     ws.send(JSON.stringify({
       type: "register_push_token",
@@ -187,6 +205,7 @@ test("WebSocket server broadcasts chat list when thinking appears during polling
     state,
     port: 0,
     getOptions: async () => options,
+    getAutomations: async () => [],
     notificationPollIntervalMs: 20,
     chats: {
       list: async () => [chat],
@@ -211,6 +230,7 @@ test("WebSocket server broadcasts chat list when thinking appears during polling
     assert.equal((await messages.next()).type, "machine_status");
     assert.equal((await messages.next()).type, "new_chat_options");
     assert.equal((await messages.next()).type, "chat_list");
+    assert.equal((await messages.next()).type, "automation_list");
 
     chat = {
       ...chat,
@@ -246,6 +266,7 @@ test("WebSocket server broadcasts chat list when transcript content changes duri
     state,
     port: 0,
     getOptions: async () => options,
+    getAutomations: async () => [],
     notificationPollIntervalMs: 20,
     chats: {
       list: async () => [chat],
@@ -270,6 +291,7 @@ test("WebSocket server broadcasts chat list when transcript content changes duri
     assert.equal((await messages.next()).type, "machine_status");
     assert.equal((await messages.next()).type, "new_chat_options");
     assert.equal((await messages.next()).type, "chat_list");
+    assert.equal((await messages.next()).type, "automation_list");
 
     chat = {
       ...chat,

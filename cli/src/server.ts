@@ -2,11 +2,12 @@ import { createServer } from "node:http";
 import { networkInterfaces } from "node:os";
 import { Socket } from "node:net";
 import { WebSocketServer, WebSocket } from "ws";
-import type { ApprovalRequest, ChatRecord, ClientMessage, HandrailState, NewChatOptions, PairingPayload, ServerMessage, StartChatOptions } from "./types.js";
+import type { ApprovalRequest, AutomationRecord, ChatRecord, ClientMessage, HandrailState, NewChatOptions, PairingPayload, ServerMessage, StartChatOptions } from "./types.js";
 import { ensurePairingToken, saveState } from "./state.js";
 import { ChatManager } from "./chats.js";
 import { getNewChatOptions } from "./newChatOptions.js";
 import { NotificationDispatcher, type PersistState } from "./notifications.js";
+import { listDesktopAutomations } from "./automations.js";
 
 interface AuthedSocket extends WebSocket {
   isAuthed?: boolean;
@@ -76,6 +77,7 @@ export async function createHandrailServer(options: {
   state: HandrailState;
   chats?: ChatController;
   getOptions?: (projectPath?: string) => Promise<NewChatOptions>;
+  getAutomations?: () => Promise<AutomationRecord[]>;
   persistState?: PersistState;
   notificationDispatcher?: NotificationDispatcher;
   notificationPollIntervalMs?: number;
@@ -84,6 +86,7 @@ export async function createHandrailServer(options: {
   const httpServer = createServer();
   const wss = new WebSocketServer({ server: httpServer });
   const getOptions = options.getOptions ?? getNewChatOptions;
+  const getAutomations = options.getAutomations ?? listDesktopAutomations;
 
   const broadcast = (message: ServerMessage) => {
     const encoded = JSON.stringify(message);
@@ -98,6 +101,7 @@ export async function createHandrailServer(options: {
   const persistState = options.persistState ?? saveState;
   const notificationDispatcher = options.notificationDispatcher ?? new NotificationDispatcher(options.state, persistState);
   let lastVisibleChatSignature = "";
+  let lastAutomationSignature = "";
   let chats: ChatController;
   chats = options.chats ?? new ChatManager(broadcast);
   const observeNotifications = async () => {
@@ -111,6 +115,12 @@ export async function createHandrailServer(options: {
       lastVisibleChatSignature = signature;
       broadcast({ type: "chat_list", chats: visibleChats });
     }
+    const automations = await getAutomations();
+    const automationSignature = JSON.stringify(automations);
+    if (automationSignature !== lastAutomationSignature) {
+      lastAutomationSignature = automationSignature;
+      broadcast({ type: "automation_list", automations });
+    }
   };
   const observer = setInterval(() => {
     void observeNotifications().catch((error) => {
@@ -120,7 +130,7 @@ export async function createHandrailServer(options: {
 
   wss.on("connection", (socket: AuthedSocket) => {
     socket.on("message", (data) => {
-      void handleMessage(socket, data.toString(), options.state, chats, broadcast, getOptions, notificationDispatcher);
+      void handleMessage(socket, data.toString(), options.state, chats, broadcast, getOptions, getAutomations, notificationDispatcher);
     });
   });
 
@@ -169,7 +179,8 @@ function visibleChatSignature(chats: ChatRecord[]): string {
     })),
     acceptsInput: chat.acceptsInput ?? null,
     isPinned: chat.isPinned ?? null,
-    pinnedOrder: chat.pinnedOrder ?? null
+    pinnedOrder: chat.pinnedOrder ?? null,
+    isAutomationTarget: chat.isAutomationTarget ?? null
   })));
 }
 
@@ -180,6 +191,7 @@ async function handleMessage(
   chats: ChatController,
   broadcast: (message: ServerMessage) => void,
   getOptions: (projectPath?: string) => Promise<NewChatOptions> = getNewChatOptions,
+  getAutomations: () => Promise<AutomationRecord[]> = listDesktopAutomations,
   notificationDispatcher?: NotificationDispatcher
 ): Promise<void> {
   let message: ClientMessage;
@@ -204,6 +216,7 @@ async function handleMessage(
     } satisfies ServerMessage));
     socket.send(JSON.stringify({ type: "new_chat_options", options: await getOptions(state.defaultRepo) } satisfies ServerMessage));
     socket.send(JSON.stringify({ type: "chat_list", chats: await chats.list() } satisfies ServerMessage));
+    socket.send(JSON.stringify({ type: "automation_list", automations: await getAutomations() } satisfies ServerMessage));
     return;
   }
 
@@ -212,6 +225,7 @@ async function handleMessage(
       case "hello":
         socket.send(JSON.stringify({ type: "new_chat_options", options: await getOptions(state.defaultRepo) } satisfies ServerMessage));
         socket.send(JSON.stringify({ type: "chat_list", chats: await chats.list() } satisfies ServerMessage));
+        socket.send(JSON.stringify({ type: "automation_list", automations: await getAutomations() } satisfies ServerMessage));
         break;
       case "register_push_token":
         await notificationDispatcher?.registerPushToken(message);

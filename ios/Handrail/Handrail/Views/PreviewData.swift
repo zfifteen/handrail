@@ -33,6 +33,38 @@ enum PreviewData {
         store.latestApproval = ApprovalRequest(chatId: "preview-chat", approvalId: "approval", title: "Approval Required", summary: "2 files changed", files: ["cli/src/server.ts", "cli/src/chats.ts"], diff: "diff --git a/cli/src/server.ts b/cli/src/server.ts\n")
         store.activity = [ActivityItem(title: "Approval requested", detail: "2 files changed", date: Date())]
         store.notifications = [HandrailNotification(title: "Approval required", detail: "API Refactor", date: Date(), chatId: "preview-chat")]
+        store.automations = [
+            AutomationRecord(
+                id: "finish-handrail-ipad-app",
+                name: "Finish Handrail iPad App",
+                kind: "cron",
+                status: .active,
+                scheduleText: "Hourly",
+                contextText: "handrail",
+                projectName: "handrail",
+                targetThreadId: nil
+            ),
+            AutomationRecord(
+                id: "handrail-bug-fix",
+                name: "Handrail Bug Fix",
+                kind: "heartbeat",
+                status: .active,
+                scheduleText: "Every 240m",
+                contextText: "Heartbeat • Handrail Bug Fixes",
+                projectName: nil,
+                targetThreadId: "019dddba-dd9c-7140-b913-09bb7d645043"
+            ),
+            AutomationRecord(
+                id: "gwr-dni",
+                name: "GWR/DNI",
+                kind: "cron",
+                status: .paused,
+                scheduleText: "Paused",
+                contextText: "prime-gap-structure",
+                projectName: "prime-gap-structure",
+                targetThreadId: nil
+            )
+        ]
         store.connectionText = "Online"
         return store
     }

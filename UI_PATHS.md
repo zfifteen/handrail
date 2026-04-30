@@ -14,9 +14,6 @@ Captured from the iPhone simulator and cross-checked against the SwiftUI route m
 - If a machine is paired:
   - View the machine status card.
   - View sync status.
-  - View the `Today` summary.
-  - View `Needs attention`.
-  - View `Running now`.
   - View `Pinned`.
   - View `All chats`.
 - Pull down on the dashboard.
@@ -26,13 +23,14 @@ Captured from the iPhone simulator and cross-checked against the SwiftUI route m
   - If offline, reconnect.
 - Tap the top-left `+` button.
   - Open `New chat`.
+- Tap `Automations`.
+  - Open `Automations`.
+  - View `Current`.
+  - View `Paused`.
 - Tap the top-right QR button.
   - Open the pairing scanner.
-- Tap any chat row in `Needs attention`, `Running now`, `Pinned`, or `All chats`.
+- Tap any chat row in `Pinned` or `All chats`.
   - Open `Chat Detail`.
-- Long-press a `Needs attention` row.
-  - Show the context menu.
-  - Tap `Dismiss`.
 
 ## Chats
 

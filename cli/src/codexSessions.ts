@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { access, open, readFile, stat } from "node:fs/promises";
+import { access, open, readFile, readdir, stat } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { homedir } from "node:os";
 import { promisify } from "node:util";
@@ -56,6 +56,7 @@ interface CodexSessionLine {
 export async function listCodexChats(): Promise<ChatRecord[]> {
   const desktopThreads = await readDesktopThreads();
   const pinnedThreadIds = await readDesktopPinnedThreadIds();
+  const automationTargetThreadIds = await readDesktopAutomationTargetThreadIds();
   const projectNames = new Map(
     (await discoverDesktopProjects())
       .filter((project) => project.path)
@@ -63,7 +64,7 @@ export async function listCodexChats(): Promise<ChatRecord[]> {
   );
   const records: ChatRecord[] = [];
   for (const thread of desktopThreads) {
-    const record = await readCodexSession(thread, pinnedThreadIds, projectNames);
+    const record = await readCodexSession(thread, pinnedThreadIds, automationTargetThreadIds, projectNames);
     if (record) {
       records.push(record);
     }
@@ -135,7 +136,41 @@ export function parseDesktopPinnedThreadIds(raw: string): Map<string, number> {
   return pinned;
 }
 
-async function readCodexSession(thread: CodexDesktopThread, pinnedThreadIds: Map<string, number>, projectNames: Map<string, string>): Promise<ChatRecord | null> {
+async function readDesktopAutomationTargetThreadIds(): Promise<Set<string>> {
+  const automationRoot = join(process.env.CODEX_HOME ?? join(homedir(), ".codex"), "automations");
+  try {
+    await access(automationRoot);
+  } catch {
+    return new Set();
+  }
+
+  const entries = await readdir(automationRoot, { withFileTypes: true });
+  const targets = new Set<string>();
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const targetId = parseAutomationTargetThreadId(
+      await readFile(join(automationRoot, entry.name, "automation.toml"), "utf8")
+    );
+    if (targetId) {
+      targets.add(targetId);
+    }
+  }
+  return targets;
+}
+
+export function parseAutomationTargetThreadId(raw: string): string | null {
+  const match = raw.match(/^target_thread_id = "([^"\n]+)"$/m);
+  return match ? match[1] : null;
+}
+
+async function readCodexSession(
+  thread: CodexDesktopThread,
+  pinnedThreadIds: Map<string, number>,
+  automationTargetThreadIds: Set<string>,
+  projectNames: Map<string, string>
+): Promise<ChatRecord | null> {
   const lines = await readRolloutLines(thread.rollout_path);
   const firstLine = lines[0];
   if (!firstLine) {
@@ -160,7 +195,8 @@ async function readCodexSession(thread: CodexDesktopThread, pinnedThreadIds: Map
     transcript: extractTranscript(lines.slice(1)),
     thinking: extractThinking(lines.slice(1)),
     isPinned: pinnedThreadIds.has(parsed.payload.id),
-    pinnedOrder: pinnedThreadIds.get(parsed.payload.id)
+    pinnedOrder: pinnedThreadIds.get(parsed.payload.id),
+    isAutomationTarget: automationTargetThreadIds.has(parsed.payload.id)
   };
 }
 

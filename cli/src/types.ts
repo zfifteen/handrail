@@ -16,6 +16,20 @@ export interface ChatRecord {
   acceptsInput?: boolean;
   isPinned?: boolean;
   pinnedOrder?: number;
+  isAutomationTarget?: boolean;
+}
+
+export type AutomationStatus = "ACTIVE" | "PAUSED";
+
+export interface AutomationRecord {
+  id: string;
+  name: string;
+  kind: string;
+  status: AutomationStatus;
+  scheduleText: string;
+  contextText: string;
+  projectName?: string;
+  targetThreadId?: string;
 }
 
 export interface ThinkingEntry {
@@ -126,6 +140,7 @@ export interface NotificationEvent {
 export type ServerMessage =
   | { type: "machine_status"; machineName: string; online: boolean; defaultRepo?: string }
   | { type: "new_chat_options"; options: NewChatOptions }
+  | { type: "automation_list"; automations: AutomationRecord[] }
   | { type: "chat_list"; chats: ChatRecord[] }
   | { type: "chat_started"; chat: ChatRecord }
   | { type: "chat_event"; chatId: string; event: { kind: string; text?: string; status?: ChatStatus; at?: string } }

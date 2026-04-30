@@ -6,6 +6,7 @@ import Observation
 final class HandrailStore {
     var pairedMachine: PairedMachine?
     var chats: [CodexChat] = []
+    var automations: [AutomationRecord] = []
     var transcripts: [String: [String]] = [:]
     var latestApproval: ApprovalRequest?
     var activity: [ActivityItem] = []
@@ -270,6 +271,8 @@ final class HandrailStore {
             sendPushTokenIfConnected()
         case .newChatOptions(let options):
             newChatOptions = options
+        case .automationList(let automations):
+            self.automations = automations
         case .chatList(let chats):
             self.chats = chats
             pruneDismissedAttentionChats(against: chats)

@@ -1,13 +1,112 @@
 import SwiftUI
 
+struct DashboardMenuSnapshot: Equatable {
+    let shortcuts: [DashboardMenuShortcut]
+    let pinnedRows: [DashboardMenuChatRow]
+    let allChatRows: [DashboardMenuChatRow]
+}
+
+enum DashboardMenuShortcut: String, CaseIterable, Equatable {
+    case newChat
+    case search
+    case plugins
+    case automations
+
+    var title: String {
+        switch self {
+        case .newChat: "New chat"
+        case .search: "Search"
+        case .plugins: "Plugins"
+        case .automations: "Automations"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .newChat: "square.and.pencil"
+        case .search: "magnifyingglass"
+        case .plugins: "puzzlepiece.extension"
+        case .automations: "clock"
+        }
+    }
+
+    var isEnabled: Bool {
+        self == .newChat || self == .automations
+    }
+}
+
+struct DashboardMenuChatRow: Identifiable, Equatable {
+    let chat: CodexChat
+    let displayTitle: String
+    let projectName: String
+    let timeText: String
+    let leadingSystemImage: String
+    let showsRunningIndicator: Bool
+    let showsAutomationIndicator: Bool
+
+    var id: String { chat.id }
+}
+
+enum DashboardMenuQuery {
+    static func snapshot(from chats: [CodexChat], now: Date = Date()) -> DashboardMenuSnapshot {
+        DashboardMenuSnapshot(
+            shortcuts: DashboardMenuShortcut.allCases,
+            pinnedRows: pinnedRows(from: chats, now: now),
+            allChatRows: allChatRows(from: chats, now: now)
+        )
+    }
+
+    private static func pinnedRows(from chats: [CodexChat], now: Date) -> [DashboardMenuChatRow] {
+        chats
+            .filter { $0.isPinned == true }
+            .sorted { left, right in
+                let leftOrder = left.pinnedOrder ?? Int.max
+                let rightOrder = right.pinnedOrder ?? Int.max
+                if leftOrder != rightOrder {
+                    return leftOrder < rightOrder
+                }
+                return sortDate(for: left) > sortDate(for: right)
+            }
+            .map { row(for: $0, now: now, leadingSystemImage: "pin.fill") }
+    }
+
+    private static func allChatRows(from chats: [CodexChat], now: Date) -> [DashboardMenuChatRow] {
+        chats
+            .filter { $0.isPinned != true }
+            .sorted { sortDate(for: $0) > sortDate(for: $1) }
+            .map { row(for: $0, now: now, leadingSystemImage: "message.fill") }
+    }
+
+    private static func row(for chat: CodexChat, now: Date, leadingSystemImage: String) -> DashboardMenuChatRow {
+        DashboardMenuChatRow(
+            chat: chat,
+            displayTitle: IPadChatListQuery.displayTitle(for: chat),
+            projectName: IPadChatListQuery.projectName(for: chat),
+            timeText: HandrailFormatters.relativeAge(since: sortDate(for: chat), to: now),
+            leadingSystemImage: leadingSystemImage,
+            showsRunningIndicator: chat.status == .running || chat.status == .waitingForApproval,
+            showsAutomationIndicator: chat.isAutomationTarget == true
+        )
+    }
+
+    private static func sortDate(for chat: CodexChat) -> Date {
+        chat.updatedAt ?? chat.endedAt ?? chat.startedAt
+    }
+}
+
 struct DashboardView: View {
     @Environment(HandrailStore.self) private var store
     @State private var showsScanner = false
     @State private var showsStart = false
+    @State private var showsAutomations = false
     let navigateToChat: (String) -> Void
 
     init(navigateToChat: @escaping (String) -> Void = { _ in }) {
         self.navigateToChat = navigateToChat
+    }
+
+    private var dashboardSnapshot: DashboardMenuSnapshot {
+        DashboardMenuQuery.snapshot(from: store.chats)
     }
 
     var body: some View {
@@ -21,11 +120,7 @@ struct DashboardView: View {
                         isOnline: machine.isOnline,
                         refresh: store.refreshChats
                     )
-                    todaySummary
-                    attentionSection
-                    sectionDivider
-                    runningNowSection
-                    sectionDivider
+                    shortcutSection
                     pinnedChatsSection
                     sectionDivider
                     allChatsSection
@@ -80,6 +175,9 @@ struct DashboardView: View {
         .navigationDestination(for: String.self) { id in
             ChatDetailView(chatId: id)
         }
+        .navigationDestination(isPresented: $showsAutomations) {
+            AutomationsView()
+        }
         .sheet(isPresented: $showsScanner) {
             QRScannerView { payload in
                 store.pair(with: payload)
@@ -121,87 +219,45 @@ struct DashboardView: View {
         }
     }
 
-    private var todaySummary: some View {
-        Card {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    Label("Today", systemImage: "sun.max.fill")
-                        .font(.headline)
-                    Spacer()
-                    Text(HandrailFormatters.time.string(from: Date()))
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack(spacing: 10) {
-                    metric("Running", activeChats.count, .green, "play.fill")
-                    metric("Needs attention", visibleAttentionChats.count, .orange, "exclamationmark.triangle.fill")
-                    metric("Done", completedToday.count, .blue, "checkmark.circle.fill")
-                }
+    private var shortcutSection: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 132), spacing: 8)], spacing: 8) {
+            ForEach(dashboardSnapshot.shortcuts, id: \.rawValue) { shortcut in
+                shortcutButton(shortcut)
             }
         }
     }
 
-    private func metric(_ title: String, _ value: Int, _ color: Color, _ icon: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: icon)
-                .font(.caption.weight(.bold))
-                .foregroundStyle(color)
-            Text("\(value)")
-                .font(.title2.weight(.bold))
-                .monospacedDigit()
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(Color.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-    }
-
-    private var attentionSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            sectionTitle("Needs attention")
-            if visibleAttentionChats.isEmpty {
-                quietRow("No approvals or failures")
-            } else {
-                ForEach(visibleAttentionChats.prefix(3)) { chat in
-                    dashboardRow(chat, icon: attentionIcon(for: chat), color: attentionColor(for: chat))
-                    .contextMenu {
-                        Button {
-                                store.dismissAttention(chatId: chat.id)
-                        } label: {
-                                Label("Dismiss", systemImage: "xmark.circle")
-                            }
-                        }
-                }
+    private func shortcutButton(_ shortcut: DashboardMenuShortcut) -> some View {
+        Button {
+            switch shortcut {
+            case .newChat:
+                showsStart = true
+            case .automations:
+                showsAutomations = true
+            case .search, .plugins:
+                break
             }
+        } label: {
+            Label(shortcut.title, systemImage: shortcut.systemImage)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(shortcut.isEnabled ? .primary : .secondary)
+                .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
+                .padding(.horizontal, 12)
+                .background(Color.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
-    }
-
-    private var runningNowSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            sectionTitle("Running now")
-            if activeChats.isEmpty {
-                quietRow("No running Codex chats")
-            } else {
-                ForEach(activeChats.prefix(3)) { chat in
-                    dashboardRow(chat, icon: "play.fill", color: .green)
-                }
-            }
-        }
+        .buttonStyle(.plain)
+        .disabled((shortcut == .newChat && store.pairedMachine?.isOnline != true) || !shortcut.isEnabled)
+        .accessibilityLabel(shortcut.title)
     }
 
     private var pinnedChatsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionTitle("Pinned")
-            if pinnedChats.isEmpty {
+            if dashboardSnapshot.pinnedRows.isEmpty {
                 quietRow("No pinned chats")
             } else {
-                ForEach(pinnedChats.prefix(5)) { chat in
-                    dashboardRow(chat, icon: "pin.fill", color: .secondary)
+                ForEach(dashboardSnapshot.pinnedRows.prefix(5)) { row in
+                    dashboardRow(row)
                 }
             }
         }
@@ -210,11 +266,11 @@ struct DashboardView: View {
     private var allChatsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionTitle("All chats")
-            if allChats.isEmpty {
+            if dashboardSnapshot.allChatRows.isEmpty {
                 quietRow("No Codex chats found")
             } else {
-                ForEach(allChats.prefix(5)) { chat in
-                    dashboardRow(chat, icon: "message.fill", color: .purple)
+                ForEach(dashboardSnapshot.allChatRows.prefix(5)) { row in
+                    dashboardRow(row)
                 }
             }
         }
@@ -243,20 +299,20 @@ struct DashboardView: View {
             .padding(.horizontal, 8)
     }
 
-    private func dashboardRow(_ chat: CodexChat, icon: String, color: Color) -> some View {
-        NavigationLink(value: chat.id) {
+    private func dashboardRow(_ row: DashboardMenuChatRow) -> some View {
+        NavigationLink(value: row.id) {
             HStack(spacing: 12) {
-                Image(systemName: icon)
+                Image(systemName: row.leadingSystemImage)
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(color)
+                    .foregroundStyle(rowIconColor(for: row))
                     .frame(width: 24)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(displayTitle(for: chat))
+                    Text(row.displayTitle)
                         .font(.body.weight(.semibold))
                         .foregroundStyle(.primary)
                         .lineLimit(1)
-                    Text(projectName(for: chat))
+                    Text(row.projectName)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -264,10 +320,30 @@ struct DashboardView: View {
 
                 Spacer()
 
-                Text(HandrailFormatters.relativeAge(since: sortDate(for: chat)))
+                if row.showsAutomationIndicator {
+                    Image(systemName: "clock")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel("Automation target")
+                }
+
+                if row.showsRunningIndicator {
+                    TimelineView(.animation) { timeline in
+                        let phase = timeline.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1)
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.green)
+                            .rotationEffect(.degrees(phase * 360))
+                    }
+                    .frame(width: 18, height: 18)
+                    .accessibilityLabel("Running")
+                }
+
+                Text(row.timeText)
                     .font(.body.weight(.medium))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
+                    .frame(minWidth: 34, alignment: .trailing)
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 8)
@@ -276,75 +352,123 @@ struct DashboardView: View {
         .buttonStyle(.plain)
     }
 
-    private var activeChats: [CodexChat] {
-        sorted(store.chats.filter {
-            ($0.status == .running || $0.status == .waitingForApproval)
-        })
+    private func rowIconColor(for row: DashboardMenuChatRow) -> Color {
+        row.leadingSystemImage == "pin.fill" ? .secondary : .purple
     }
+}
 
-    private var attentionChats: [CodexChat] {
-        sorted(store.chats.filter { store.needsAttention($0) })
-    }
+struct AutomationsView: View {
+    @Environment(HandrailStore.self) private var store
 
-    private var visibleAttentionChats: [CodexChat] {
-        attentionChats.filter { !store.isAttentionDismissed(chatId: $0.id) }
-    }
-
-    private var completedToday: [CodexChat] {
-        let startOfToday = Calendar.current.startOfDay(for: Date())
-        return store.chats.filter {
-            $0.status == .completed && sortDate(for: $0) >= startOfToday
-        }
-    }
-
-    private var pinnedChats: [CodexChat] {
-        store.chats
-            .filter { store.isPinned(chatId: $0.id) }
-            .sorted {
-                let leftOrder = $0.pinnedOrder ?? Int.max
-                let rightOrder = $1.pinnedOrder ?? Int.max
-                if leftOrder != rightOrder {
-                    return leftOrder < rightOrder
+    private var currentAutomations: [AutomationRecord] {
+        store.automations
+            .filter { $0.status == .active }
+            .sorted { left, right in
+                if left.kind != right.kind {
+                    return left.kind == "cron"
                 }
-                return sortDate(for: $0) > sortDate(for: $1)
+                return false
             }
     }
 
-    private var allChats: [CodexChat] {
-        sorted(store.chats.filter { !store.isPinned(chatId: $0.id) })
+    private var pausedAutomations: [AutomationRecord] {
+        store.automations.filter { $0.status == .paused }
     }
 
-    private func sorted(_ chats: [CodexChat]) -> [CodexChat] {
-        chats.sorted { sortDate(for: $0) > sortDate(for: $1) }
-    }
-
-    private func displayTitle(for chat: CodexChat) -> String {
-        if chat.title.hasPrefix("Codex: ") {
-            return String(chat.title.dropFirst("Codex: ".count))
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 34) {
+                automationSection(title: "Current", automations: currentAutomations)
+                automationSection(title: "Paused", automations: pausedAutomations)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 24)
+            .safeAreaPadding(.bottom, 32)
         }
-        return chat.title
+        .background(Color.black.ignoresSafeArea())
+        .navigationTitle("Automations")
+        .navigationBarTitleDisplayMode(.large)
+        .refreshable {
+            store.refreshChats()
+        }
     }
 
-    private func projectName(for chat: CodexChat) -> String {
-        chat.projectName ?? URL(fileURLWithPath: chat.repo).lastPathComponent
+    private func automationSection(title: String, automations: [AutomationRecord]) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.primary)
+                .padding(.bottom, 18)
+
+            sectionDivider
+
+            if automations.isEmpty {
+                Text("No \(title.lowercased()) automations")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 20)
+            } else {
+                ForEach(automations) { automation in
+                    automationRow(automation)
+                }
+            }
+        }
     }
 
-    private func sortDate(for chat: CodexChat) -> Date {
-        chat.updatedAt ?? chat.endedAt ?? chat.startedAt
+    private var sectionDivider: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.08))
+            .frame(height: 1)
     }
 
-    private func attentionIcon(for chat: CodexChat) -> String {
-        chat.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill"
+    private func automationRow(_ automation: AutomationRecord) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon(for: automation))
+                .font(.title3.weight(.regular))
+                .foregroundStyle(.secondary)
+                .frame(width: 24)
+
+            HStack(spacing: 8) {
+                Text(automation.name)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+
+                Text(automation.contextText)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text(automation.scheduleText)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+        }
+        .padding(.vertical, 18)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(automation.name), \(automation.contextText), \(automation.scheduleText)")
     }
 
-    private func attentionColor(for chat: CodexChat) -> Color {
-        chat.status == .failed ? .red : .orange
+    private func icon(for automation: AutomationRecord) -> String {
+        automation.status == .active ? "circle" : "pause.circle"
     }
 }
 
 #Preview {
     NavigationStack {
         DashboardView()
+    }
+    .environment(PreviewData.store)
+    .preferredColorScheme(.dark)
+}
+
+#Preview("Automations") {
+    NavigationStack {
+        AutomationsView()
     }
     .environment(PreviewData.store)
     .preferredColorScheme(.dark)

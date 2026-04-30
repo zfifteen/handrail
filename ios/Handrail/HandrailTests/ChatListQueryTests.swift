@@ -2,6 +2,42 @@ import XCTest
 @testable import Handrail
 
 final class ChatListQueryTests: XCTestCase {
+    func testDashboardMenuSnapshotEntryPointIncludesDesktopShortcutOrder() {
+        let snapshot = DashboardMenuQuery.snapshot(from: HandrailTestFixtures.pinnedChats, now: HandrailTestFixtures.baseDate)
+
+        XCTAssertEqual(snapshot.shortcuts, [.newChat, .search, .plugins, .automations])
+    }
+
+    func testDashboardMenuShortcutsUseDesktopMenuLabelsAndIcons() {
+        XCTAssertEqual(DashboardMenuShortcut.allCases.map(\.title), ["New chat", "Search", "Plugins", "Automations"])
+        XCTAssertEqual(
+            DashboardMenuShortcut.allCases.map(\.systemImage),
+            ["square.and.pencil", "magnifyingglass", "puzzlepiece.extension", "clock"]
+        )
+    }
+
+    func testDashboardMenuRowsUsePinnedAndAllChatsDisplayConventions() {
+        let snapshot = DashboardMenuQuery.snapshot(
+            from: HandrailTestFixtures.dashboardMenuChats,
+            now: HandrailTestFixtures.baseDate
+        )
+
+        XCTAssertEqual(snapshot.pinnedRows.map(\.id), ["pinned-running", "pinned-old"])
+        XCTAssertEqual(snapshot.allChatRows.map(\.id), ["all-running", "all-completed"])
+        XCTAssertEqual(snapshot.pinnedRows.map(\.leadingSystemImage), ["pin.fill", "pin.fill"])
+        XCTAssertEqual(snapshot.allChatRows.map(\.leadingSystemImage), ["message.fill", "message.fill"])
+        XCTAssertEqual(snapshot.pinnedRows.map(\.showsAutomationIndicator), [false, false])
+        XCTAssertEqual(snapshot.allChatRows.map(\.showsAutomationIndicator), [true, false])
+        XCTAssertEqual(snapshot.pinnedRows[0].timeText, "1m")
+        XCTAssertEqual(snapshot.pinnedRows[1].timeText, "1d")
+        XCTAssertEqual(snapshot.allChatRows[0].timeText, "59m")
+        XCTAssertEqual(snapshot.allChatRows[1].timeText, "1h")
+        XCTAssertEqual(snapshot.pinnedRows[0].displayTitle, "Pinned Running")
+        XCTAssertEqual(snapshot.pinnedRows[1].displayTitle, "Pinned Old")
+        XCTAssertTrue(snapshot.allChatRows[0].showsRunningIndicator)
+        XCTAssertFalse(snapshot.allChatRows[1].showsRunningIndicator)
+    }
+
     func testSearchByTitleProjectAndStatus() {
         let chats = HandrailTestFixtures.allStatusChats
 

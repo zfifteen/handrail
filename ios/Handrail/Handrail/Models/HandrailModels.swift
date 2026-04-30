@@ -54,6 +54,23 @@ struct CodexChat: Codable, Identifiable, Hashable {
     var acceptsInput: Bool? = nil
     var isPinned: Bool? = nil
     var pinnedOrder: Int? = nil
+    var isAutomationTarget: Bool? = nil
+}
+
+enum AutomationStatus: String, Codable {
+    case active = "ACTIVE"
+    case paused = "PAUSED"
+}
+
+struct AutomationRecord: Codable, Identifiable, Hashable {
+    let id: String
+    let name: String
+    let kind: String
+    let status: AutomationStatus
+    let scheduleText: String
+    let contextText: String
+    let projectName: String?
+    let targetThreadId: String?
 }
 
 struct ThinkingEntry: Codable, Identifiable, Hashable {

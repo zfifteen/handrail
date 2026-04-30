@@ -42,6 +42,12 @@ enum HandrailTestFixtures {
         chat(id: "pinned-zero", title: "Pinned Zero", status: .running, offset: -50, isPinned: true, pinnedOrder: 0),
         chat(id: "unpinned", title: "Unpinned", status: .idle, offset: -40)
     ]
+    static let dashboardMenuChats = [
+        chat(id: "pinned-old", title: "Codex: Pinned Old", status: .completed, offset: -90_000, projectName: "Pinned Project", isPinned: true, pinnedOrder: 1),
+        chat(id: "pinned-running", title: "Pinned Running", status: .running, offset: -120, projectName: "Pinned Project", isPinned: true, pinnedOrder: 0),
+        chat(id: "all-running", title: "All Running", status: .running, offset: -3_600, projectName: "All Project", isAutomationTarget: true),
+        chat(id: "all-completed", title: "All Completed", status: .completed, offset: -7_200, projectName: "All Project")
+    ]
     static let dateSortedChats = [
         chat(id: "created-new", title: "Created New", status: .completed, offset: -10, updatedOffset: -90),
         chat(id: "updated-new", title: "Updated New", status: .completed, offset: -200, updatedOffset: -5),
@@ -82,7 +88,8 @@ enum HandrailTestFixtures {
         updatedOffset: TimeInterval? = nil,
         projectName: String = "Project",
         isPinned: Bool? = nil,
-        pinnedOrder: Int? = nil
+        pinnedOrder: Int? = nil,
+        isAutomationTarget: Bool? = nil
     ) -> CodexChat {
         CodexChat(
             id: id,
@@ -99,7 +106,8 @@ enum HandrailTestFixtures {
             thinking: nil,
             acceptsInput: status == .running,
             isPinned: isPinned,
-            pinnedOrder: pinnedOrder
+            pinnedOrder: pinnedOrder,
+            isAutomationTarget: isAutomationTarget
         )
     }
 }
