@@ -61,17 +61,75 @@ final class HandrailCommandAvailabilityTests: XCTestCase {
         XCTAssertFalse(commands.canDenySelectedRequest)
     }
 
+    func testSelectedChatWindowCommandRequiresSceneSupportAndSelection() {
+        XCTAssertTrue(
+            availability(
+                selectedChat: HandrailTestFixtures.runningChat,
+                supportsSelectedChatWindows: true
+            ).canOpenSelectedChatWindow
+        )
+        XCTAssertFalse(
+            availability(
+                selectedChat: HandrailTestFixtures.runningChat,
+                supportsSelectedChatWindows: false
+            ).canOpenSelectedChatWindow
+        )
+        XCTAssertFalse(
+            availability(
+                selectedChat: nil,
+                supportsSelectedChatWindows: true
+            ).canOpenSelectedChatWindow
+        )
+    }
+
+    func testCommandTargetResolvesApprovalFromSelectedChat() {
+        let target = HandrailCommandTarget.resolve(
+            pairedMachine: HandrailTestFixtures.pairedOnlineMachine,
+            chats: [HandrailTestFixtures.waitingForApprovalChat],
+            latestApproval: HandrailTestFixtures.approval,
+            selection: IPadWorkspaceSelection(
+                selectedSection: .chats,
+                selectedChatId: HandrailTestFixtures.waitingForApprovalChat.id
+            )
+        )
+
+        XCTAssertEqual(target.selectedChat?.id, HandrailTestFixtures.waitingForApprovalChat.id)
+        XCTAssertEqual(target.selectedApprovalId, HandrailTestFixtures.approval.approvalId)
+        XCTAssertTrue(target.availability.canApproveSelectedRequest)
+        XCTAssertTrue(target.availability.canDenySelectedRequest)
+    }
+
+    func testCommandTargetPrefersExplicitApprovalSelection() {
+        let target = HandrailCommandTarget.resolve(
+            pairedMachine: HandrailTestFixtures.pairedOnlineMachine,
+            chats: HandrailTestFixtures.allStatusChats,
+            latestApproval: HandrailTestFixtures.approval,
+            selection: IPadWorkspaceSelection(
+                selectedSection: .attention,
+                selectedChatId: HandrailTestFixtures.completedChat.id,
+                selectedApprovalId: HandrailTestFixtures.approval.approvalId
+            )
+        )
+
+        XCTAssertEqual(target.selectedChat?.id, HandrailTestFixtures.completedChat.id)
+        XCTAssertEqual(target.selectedApprovalId, HandrailTestFixtures.approval.approvalId)
+        XCTAssertTrue(target.availability.canApproveSelectedRequest)
+        XCTAssertTrue(target.availability.canDenySelectedRequest)
+    }
+
     private func availability(
         pairedMachine: PairedMachine? = HandrailTestFixtures.pairedOnlineMachine,
         selectedChat: CodexChat? = nil,
         selectedApprovalId: String? = nil,
-        latestApproval: ApprovalRequest? = nil
+        latestApproval: ApprovalRequest? = nil,
+        supportsSelectedChatWindows: Bool = false
     ) -> HandrailCommandAvailability {
         HandrailCommandAvailability.resolve(
             pairedMachine: pairedMachine,
             selectedChat: selectedChat,
             selectedApprovalId: selectedApprovalId,
-            latestApproval: latestApproval
+            latestApproval: latestApproval,
+            supportsSelectedChatWindows: supportsSelectedChatWindows
         )
     }
 }

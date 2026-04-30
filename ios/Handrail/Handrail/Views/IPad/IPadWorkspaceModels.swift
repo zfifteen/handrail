@@ -88,12 +88,14 @@ struct HandrailCommandAvailability: Hashable {
     var canContinueSelectedChat = false
     var canApproveSelectedRequest = false
     var canDenySelectedRequest = false
+    var canOpenSelectedChatWindow = false
 
     static func resolve(
         pairedMachine: PairedMachine?,
         selectedChat: CodexChat?,
         selectedApprovalId: String?,
-        latestApproval: ApprovalRequest?
+        latestApproval: ApprovalRequest?,
+        supportsSelectedChatWindows: Bool = false
     ) -> HandrailCommandAvailability {
         let isOnline = pairedMachine?.isOnline == true
         let matchingApprovalIsSelected = selectedApprovalId != nil
@@ -106,7 +108,41 @@ struct HandrailCommandAvailability: Hashable {
             canStopSelectedChat: isOnline && selectedChat?.canStopFromIPad == true,
             canContinueSelectedChat: isOnline && selectedChat?.canContinueFromIPad == true,
             canApproveSelectedRequest: isOnline && matchingApprovalIsSelected,
-            canDenySelectedRequest: isOnline && matchingApprovalIsSelected
+            canDenySelectedRequest: isOnline && matchingApprovalIsSelected,
+            canOpenSelectedChatWindow: supportsSelectedChatWindows && selectedChat != nil
+        )
+    }
+}
+
+struct HandrailCommandTarget: Hashable {
+    let selectedChat: CodexChat?
+    let selectedApprovalId: String?
+    let availability: HandrailCommandAvailability
+
+    static func resolve(
+        pairedMachine: PairedMachine?,
+        chats: [CodexChat],
+        latestApproval: ApprovalRequest?,
+        selection: IPadWorkspaceSelection,
+        supportsSelectedChatWindows: Bool = false
+    ) -> HandrailCommandTarget {
+        let selectedChat = selection.selectedChatId.flatMap { chatId in
+            chats.first { $0.id == chatId }
+        }
+        let selectedApprovalId = selection.selectedApprovalId
+            ?? (latestApproval?.chatId == selectedChat?.id ? latestApproval?.approvalId : nil)
+        let availability = HandrailCommandAvailability.resolve(
+            pairedMachine: pairedMachine,
+            selectedChat: selectedChat,
+            selectedApprovalId: selectedApprovalId,
+            latestApproval: latestApproval,
+            supportsSelectedChatWindows: supportsSelectedChatWindows
+        )
+
+        return HandrailCommandTarget(
+            selectedChat: selectedChat,
+            selectedApprovalId: selectedApprovalId,
+            availability: availability
         )
     }
 }

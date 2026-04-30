@@ -4,11 +4,20 @@ import UIKit
 struct RootView: View {
     @Environment(HandrailStore.self) private var store
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Binding var iPadSelection: IPadWorkspaceSelection
+    @Binding var showsIPadNewChat: Bool
     @State private var showsLaunchSplash = true
     @State private var launchSplashOpacity = 1.0
     @State private var phoneRoute: PhoneRootRoute?
     @State private var phoneRouteToken = 0
-    @State private var iPadSelection = IPadWorkspaceSelection()
+
+    init(
+        iPadSelection: Binding<IPadWorkspaceSelection> = .constant(IPadWorkspaceSelection()),
+        showsIPadNewChat: Binding<Bool> = .constant(false)
+    ) {
+        self._iPadSelection = iPadSelection
+        self._showsIPadNewChat = showsIPadNewChat
+    }
 
     var body: some View {
         @Bindable var store = store
@@ -37,6 +46,12 @@ struct RootView: View {
                 ApprovalRequiredView()
             }
         }
+        .sheet(isPresented: $showsIPadNewChat) {
+            NavigationStack {
+                IPadNewChatPanel()
+            }
+            .environment(store)
+        }
         .task {
             try? await Task.sleep(for: .seconds(2))
             withAnimation(.easeOut(duration: 0.5)) {
@@ -56,7 +71,7 @@ struct RootView: View {
         case .phone:
             PhoneRootView(route: $phoneRoute)
         case .iPadRegular:
-            IPadWorkspaceRootView(selection: $iPadSelection)
+            IPadWorkspaceRootView(selection: $iPadSelection, showsNewChat: $showsIPadNewChat)
         }
     }
 

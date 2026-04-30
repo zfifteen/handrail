@@ -32,6 +32,8 @@ final class HandrailAppDelegate: NSObject, UIApplicationDelegate {
 struct HandrailApp: App {
     @UIApplicationDelegateAdaptor(HandrailAppDelegate.self) private var appDelegate
     @State private var store = HandrailStore()
+    @State private var iPadSelection = IPadWorkspaceSelection()
+    @State private var showsIPadNewChat = false
 
     init() {
         HandrailNotificationCoordinator.shared.configure(remotePushEnabled: Self.remotePushEnabled)
@@ -39,12 +41,15 @@ struct HandrailApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView(iPadSelection: $iPadSelection, showsIPadNewChat: $showsIPadNewChat)
                 .environment(store)
                 .preferredColorScheme(.dark)
                 .onAppear {
                     HandrailNotificationCoordinator.shared.attach(store: store)
                 }
+        }
+        .commands {
+            HandrailCommands(store: store, selection: $iPadSelection, showsNewChat: $showsIPadNewChat)
         }
     }
 

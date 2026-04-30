@@ -3,10 +3,14 @@ import SwiftUI
 struct IPadDashboardWorkspaceView: View {
     @Environment(HandrailStore.self) private var store
     @Binding var selection: IPadWorkspaceSelection
-    @State private var showsNewChat = false
+    @Binding var showsNewChat: Bool
 
-    init(selection: Binding<IPadWorkspaceSelection> = .constant(IPadWorkspaceSelection())) {
+    init(
+        selection: Binding<IPadWorkspaceSelection> = .constant(IPadWorkspaceSelection()),
+        showsNewChat: Binding<Bool> = .constant(false)
+    ) {
         self._selection = selection
+        self._showsNewChat = showsNewChat
     }
 
     var body: some View {
@@ -41,12 +45,6 @@ struct IPadDashboardWorkspaceView: View {
                 .disabled(store.pairedMachine?.isOnline != true)
                 .accessibilityLabel("New chat")
             }
-        }
-        .sheet(isPresented: $showsNewChat) {
-            NavigationStack {
-                IPadNewChatPanel()
-            }
-            .environment(store)
         }
     }
 

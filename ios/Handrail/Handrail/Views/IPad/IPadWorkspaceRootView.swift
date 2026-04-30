@@ -2,9 +2,14 @@ import SwiftUI
 
 struct IPadWorkspaceRootView: View {
     @Binding var selection: IPadWorkspaceSelection
+    @Binding var showsNewChat: Bool
 
-    init(selection: Binding<IPadWorkspaceSelection> = .constant(IPadWorkspaceSelection())) {
+    init(
+        selection: Binding<IPadWorkspaceSelection> = .constant(IPadWorkspaceSelection()),
+        showsNewChat: Binding<Bool> = .constant(false)
+    ) {
         self._selection = selection
+        self._showsNewChat = showsNewChat
     }
 
     var body: some View {
@@ -22,7 +27,7 @@ struct IPadWorkspaceRootView: View {
     private var placeholderContent: some View {
         switch selection.selectedSection {
         case .dashboard:
-            IPadDashboardWorkspaceView(selection: $selection)
+            IPadDashboardWorkspaceView(selection: $selection, showsNewChat: $showsNewChat)
         case .chats:
             IPadChatListWorkspaceView(selection: $selection)
         case .attention:
