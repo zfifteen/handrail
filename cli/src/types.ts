@@ -17,6 +17,7 @@ export interface ChatRecord {
   isPinned?: boolean;
   pinnedOrder?: number;
   isAutomationTarget?: boolean;
+  hasUnreadTurn?: boolean;
 }
 
 export type AutomationStatus = "ACTIVE" | "PAUSED";
@@ -26,10 +27,16 @@ export interface AutomationRecord {
   name: string;
   kind: string;
   status: AutomationStatus;
+  prompt: string;
+  rrule: string;
   scheduleText: string;
   contextText: string;
   projectName?: string;
   targetThreadId?: string;
+  model?: string;
+  reasoningEffort?: NewChatReasoning;
+  executionEnvironment?: string;
+  cwds: string[];
 }
 
 export interface ThinkingEntry {
@@ -110,12 +117,16 @@ export interface PairingPayload {
 export type ClientMessage =
   | { type: "hello"; token: string }
   | { type: "register_push_token"; deviceToken: string; environment: PushEnvironment; deviceName?: string }
+  | { type: "get_chat_detail"; chatId: string }
   | ({ type: "start_chat" } & StartChatOptions)
   | { type: "continue_chat"; chatId: string; prompt: string }
   | { type: "send_chat_input"; chatId: string; text: string }
   | { type: "approve"; chatId: string; approvalId: string }
   | { type: "deny"; chatId: string; approvalId: string; reason?: string }
-  | { type: "stop_chat"; chatId: string };
+  | { type: "stop_chat"; chatId: string }
+  | { type: "run_automation"; automationId: string }
+  | { type: "pause_automation"; automationId: string }
+  | { type: "delete_automation"; automationId: string };
 
 export interface ApprovalRequest {
   chatId: string;
@@ -142,6 +153,7 @@ export type ServerMessage =
   | { type: "new_chat_options"; options: NewChatOptions }
   | { type: "automation_list"; automations: AutomationRecord[] }
   | { type: "chat_list"; chats: ChatRecord[] }
+  | { type: "chat_detail"; chat: ChatRecord }
   | { type: "chat_started"; chat: ChatRecord }
   | { type: "chat_event"; chatId: string; event: { kind: string; text?: string; status?: ChatStatus; at?: string } }
   | ({ type: "approval_required" } & ApprovalRequest)

@@ -15,8 +15,7 @@ const MAX_THINKING_CHARS = 12_000;
 const MAX_THINKING_ENTRY_CHARS = 2_500;
 const ROLLOUT_HEAD_BYTES = 64 * 1024;
 const ROLLOUT_TAIL_BYTES = 2 * 1024 * 1024;
-const STATUS_SCAN_CHUNK_BYTES = 64 * 1024;
-const LINE_FEED = 10;
+const STATUS_TAIL_BYTES = 256 * 1024;
 const execFileAsync = promisify(execFile);
 
 interface CodexSessionMeta {
@@ -41,6 +40,14 @@ export interface CodexDesktopThreadRow extends CodexDesktopThread {
   first_user_message: string;
 }
 
+export interface CodexLogStatusRow {
+  thread_id: string;
+  status: ChatRecord["status"];
+  ts: number;
+  ts_nanos: number;
+  id: number;
+}
+
 interface CodexSessionLine {
   timestamp?: string;
   type?: string;
@@ -55,6 +62,7 @@ interface CodexSessionLine {
 
 export async function listCodexChats(): Promise<ChatRecord[]> {
   const desktopThreads = await readDesktopThreads();
+  const threadStatuses = await readDesktopThreadStatuses(desktopThreads.map((thread) => thread.id));
   const pinnedThreadIds = await readDesktopPinnedThreadIds();
   const automationTargetThreadIds = await readDesktopAutomationTargetThreadIds();
   const projectNames = new Map(
@@ -62,17 +70,25 @@ export async function listCodexChats(): Promise<ChatRecord[]> {
       .filter((project) => project.path)
       .map((project) => [project.path!, project.name])
   );
-  const records: ChatRecord[] = [];
-  for (const thread of desktopThreads) {
-    const record = await readCodexSession(thread, pinnedThreadIds, automationTargetThreadIds, projectNames);
-    if (record) {
-      records.push(record);
-    }
-    if (records.length >= MAX_CODEX_SESSIONS) {
-      break;
-    }
+  return desktopThreads.map((thread) =>
+    readCodexSessionRow(thread, pinnedThreadIds, automationTargetThreadIds, projectNames, threadStatuses)
+  );
+}
+
+export async function readCodexChatDetail(chatId: string): Promise<ChatRecord | null> {
+  const threadId = chatId.replace(/^codex:/, "");
+  const thread = (await readDesktopThreads()).find((item) => item.id === threadId);
+  if (!thread) {
+    return null;
   }
-  return records;
+  const pinnedThreadIds = await readDesktopPinnedThreadIds();
+  const automationTargetThreadIds = await readDesktopAutomationTargetThreadIds();
+  const projectNames = new Map(
+    (await discoverDesktopProjects())
+      .filter((project) => project.path)
+      .map((project) => [project.path!, project.name])
+  );
+  return readCodexSessionDetail(thread, pinnedThreadIds, automationTargetThreadIds, projectNames);
 }
 
 async function readDesktopThreads(): Promise<CodexDesktopThread[]> {
@@ -89,6 +105,60 @@ async function readDesktopThreads(): Promise<CodexDesktopThread[]> {
   ].join(" ");
   const { stdout } = await execFileAsync("sqlite3", ["-json", databasePath, sql], { maxBuffer: 5_000_000 });
   return visibleDesktopThreads(JSON.parse(stdout || "[]") as CodexDesktopThreadRow[]);
+}
+
+async function readDesktopThreadStatuses(threadIds: string[]): Promise<Map<string, ChatRecord["status"]>> {
+  if (threadIds.length === 0) {
+    return new Map();
+  }
+
+  const databasePath = join(homedir(), ".codex", "logs_2.sqlite");
+  await access(databasePath);
+  const ids = threadIds.map(sqlString).join(",");
+  const sql = [
+    "SELECT id, ts, ts_nanos, thread_id, status FROM (",
+    "SELECT id, ts, ts_nanos, thread_id,",
+    "CASE",
+    "WHEN feedback_log_body LIKE '%\"type\":\"response.failed\"%' THEN 'failed'",
+    "WHEN feedback_log_body LIKE '%\"type\":\"response.completed\"%' THEN 'completed'",
+    "WHEN feedback_log_body LIKE '%\"type\":\"response.in_progress\"%' THEN 'running'",
+    "WHEN feedback_log_body LIKE '%\"type\":\"response.created\"%' THEN 'running'",
+    "END AS status,",
+    "ROW_NUMBER() OVER (PARTITION BY thread_id ORDER BY ts DESC, ts_nanos DESC, id DESC) AS row_number",
+    "FROM logs",
+    `WHERE thread_id IN (${ids})`,
+    "AND target = 'codex_api::endpoint::responses_websocket'",
+    "AND (",
+    "feedback_log_body LIKE '%\"type\":\"response.failed\"%'",
+    "OR feedback_log_body LIKE '%\"type\":\"response.completed\"%'",
+    "OR feedback_log_body LIKE '%\"type\":\"response.in_progress\"%'",
+    "OR feedback_log_body LIKE '%\"type\":\"response.created\"%'",
+    ")",
+    ") WHERE row_number = 1"
+  ].join(" ");
+  const { stdout } = await execFileAsync("sqlite3", ["-json", databasePath, sql], { maxBuffer: 5_000_000 });
+  return latestCodexLogStatuses(JSON.parse(stdout || "[]") as CodexLogStatusRow[]);
+}
+
+export function latestCodexLogStatuses(rows: CodexLogStatusRow[]): Map<string, ChatRecord["status"]> {
+  const statuses = new Map<string, ChatRecord["status"]>();
+  const latestRows = new Map<string, CodexLogStatusRow>();
+  for (const row of rows) {
+    const current = latestRows.get(row.thread_id);
+    if (!current || compareCodexLogStatusRows(row, current) > 0) {
+      latestRows.set(row.thread_id, row);
+      statuses.set(row.thread_id, row.status);
+    }
+  }
+  return statuses;
+}
+
+function compareCodexLogStatusRows(left: CodexLogStatusRow, right: CodexLogStatusRow): number {
+  return left.ts - right.ts || left.ts_nanos - right.ts_nanos || left.id - right.id;
+}
+
+function sqlString(value: string): string {
+  return `'${value.replace(/'/g, "''")}'`;
 }
 
 export function visibleDesktopThreads(rows: CodexDesktopThreadRow[]): CodexDesktopThread[] {
@@ -165,7 +235,30 @@ export function parseAutomationTargetThreadId(raw: string): string | null {
   return match ? match[1] : null;
 }
 
-async function readCodexSession(
+function readCodexSessionRow(
+  thread: CodexDesktopThread,
+  pinnedThreadIds: Map<string, number>,
+  automationTargetThreadIds: Set<string>,
+  projectNames: Map<string, string>,
+  threadStatuses: Map<string, ChatRecord["status"]>
+): ChatRecord {
+  const repo = thread.cwd || homedir();
+  return {
+    id: `codex:${thread.id}`,
+    repo,
+    title: humanCodexTitle(thread.title, null, thread.first_user_message, repo),
+    projectName: desktopProjectName(repo, projectNames),
+    status: threadStatuses.get(thread.id) ?? "idle",
+    startedAt: unixSecondsToIso(thread.created_at) || new Date(0).toISOString(),
+    updatedAt: unixSecondsToIso(thread.updated_at) || undefined,
+    isPinned: pinnedThreadIds.has(thread.id),
+    pinnedOrder: pinnedThreadIds.get(thread.id),
+    isAutomationTarget: automationTargetThreadIds.has(thread.id),
+    hasUnreadTurn: false
+  };
+}
+
+async function readCodexSessionDetail(
   thread: CodexDesktopThread,
   pinnedThreadIds: Map<string, number>,
   automationTargetThreadIds: Set<string>,
@@ -182,21 +275,22 @@ async function readCodexSession(
     return null;
   }
 
+  const sessionId = parsed.payload.id || thread.id;
   const repo = thread.cwd || parsed.payload.cwd || homedir();
-  const status = await readCodexSessionStatus(thread.rollout_path);
   return {
-    id: `codex:${parsed.payload.id}`,
+    id: `codex:${sessionId}`,
     repo,
     title: humanCodexTitle(thread.title, extractTitle(lines.slice(1)), thread.first_user_message, repo),
     projectName: desktopProjectName(repo, projectNames),
-    status,
+    status: extractStatus(lines.slice(1)),
     startedAt: unixSecondsToIso(thread.created_at) || parsed.payload.timestamp,
     updatedAt: unixSecondsToIso(thread.updated_at) || extractUpdatedAt(lines) || parsed.payload.timestamp,
     transcript: extractTranscript(lines.slice(1)),
     thinking: extractThinking(lines.slice(1)),
-    isPinned: pinnedThreadIds.has(parsed.payload.id),
-    pinnedOrder: pinnedThreadIds.get(parsed.payload.id),
-    isAutomationTarget: automationTargetThreadIds.has(parsed.payload.id)
+    isPinned: pinnedThreadIds.has(sessionId),
+    pinnedOrder: pinnedThreadIds.get(sessionId),
+    isAutomationTarget: automationTargetThreadIds.has(sessionId),
+    hasUnreadTurn: false
   };
 }
 
@@ -234,6 +328,21 @@ export async function readRolloutLines(path: string): Promise<string[]> {
       ...headLines.slice(0, 1),
       ...tailLines.slice(1)
     ].filter(Boolean);
+  } finally {
+    await file.close();
+  }
+}
+
+export async function readRolloutTailLines(path: string, byteLimit: number = STATUS_TAIL_BYTES): Promise<string[]> {
+  const info = await stat(path);
+  const start = Math.max(0, info.size - byteLimit);
+  const length = info.size - start;
+  const file = await open(path, "r");
+  try {
+    const buffer = Buffer.alloc(length);
+    const result = await file.read(buffer, 0, length, start);
+    const lines = buffer.subarray(0, result.bytesRead).toString("utf8").split("\n");
+    return (start > 0 ? lines.slice(1) : lines).filter(Boolean);
   } finally {
     await file.close();
   }
@@ -284,54 +393,29 @@ function isRawCodexIdentifier(value: string): boolean {
 }
 
 export async function readCodexSessionStatus(path: string): Promise<ChatRecord["status"]> {
-  const info = await stat(path);
-  const file = await open(path, "r");
-  try {
-    let position = info.size;
-    let suffix = Buffer.alloc(0);
-
-    while (position > 0) {
-      const chunkSize = Math.min(STATUS_SCAN_CHUNK_BYTES, position);
-      position -= chunkSize;
-
-      const buffer = Buffer.alloc(chunkSize);
-      const result = await file.read(buffer, 0, chunkSize, position);
-      const combined = Buffer.concat([buffer.subarray(0, result.bytesRead), suffix]);
-      let lineEnd = combined.length;
-
-      for (let index = combined.length - 1; index >= 0; index -= 1) {
-        if (combined[index] !== LINE_FEED) {
-          continue;
-        }
-
-        const status = extractStatusFromLine(combined.subarray(index + 1, lineEnd).toString("utf8"));
-        if (status) {
-          return status;
-        }
-        lineEnd = index;
-      }
-
-      suffix = combined.subarray(0, lineEnd);
-    }
-
-    return extractStatusFromLine(suffix.toString("utf8")) ?? "idle";
-  } finally {
-    await file.close();
-  }
+  return extractStatus(await readRolloutTailLines(path));
 }
 
 export function extractStatus(lines: string[]): ChatRecord["status"] {
+  let sawTurnActivity = false;
   for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const status = extractStatusFromLine(lines[index]);
+    const parsed = parseLine<CodexSessionLine>(lines[index]);
+    const status = statusFromParsedLine(parsed);
     if (status) {
       return status;
     }
+    if (isTurnActivity(parsed)) {
+      sawTurnActivity = true;
+    }
   }
-  return "idle";
+  return sawTurnActivity ? "running" : "idle";
 }
 
 function extractStatusFromLine(line: string): ChatRecord["status"] | null {
-  const parsed = parseLine<CodexSessionLine>(line);
+  return statusFromParsedLine(parseLine<CodexSessionLine>(line));
+}
+
+function statusFromParsedLine(parsed: CodexSessionLine): ChatRecord["status"] | null {
   if (parsed.type !== "event_msg") {
     return null;
   }
@@ -347,6 +431,13 @@ function extractStatusFromLine(line: string): ChatRecord["status"] | null {
     default:
       return null;
   }
+}
+
+function isTurnActivity(parsed: CodexSessionLine): boolean {
+  if (parsed.type === "response_item") {
+    return true;
+  }
+  return parsed.type === "event_msg" && parsed.payload?.type !== "thread_name_updated";
 }
 
 export function extractTranscript(lines: string[]): string[] {

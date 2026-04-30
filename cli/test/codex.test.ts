@@ -105,6 +105,7 @@ test("new chat creation starts a Desktop-owned conversation", async () => {
 
   const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
     listCodexChats: async () => desktopChats,
+    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
     prepareChatWorkspace: async (options) => {
       assert.equal(options.projectPath, "/Users/me/project");
       assert.equal(options.branch, "main");
@@ -159,6 +160,7 @@ test("new chat creation fails instead of broadcasting an orphan when Desktop doe
   const messages: unknown[] = [];
   const manager = new ChatManager((message) => messages.push(message), {
     listCodexChats: async () => [],
+    readCodexChatDetail: async () => null,
     prepareChatWorkspace: async () => "/Users/me/project",
     startCodexDesktopConversation: async () => "019dc424-e857-76e0-8229-589ecf107eb4",
     startCodexDesktopTurn: async () => {},
@@ -186,6 +188,7 @@ test("projectless new chat provides a Desktop projectless workspace", async () =
   let desktopChats = [] as Awaited<ReturnType<ChatManager["list"]>>;
   const manager = new ChatManager(() => {}, {
     listCodexChats: async () => desktopChats,
+    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
     prepareChatWorkspace: async (options) => {
       assert.equal(options.projectPath, null);
       return "/Users/me/Documents/Codex";
@@ -245,6 +248,7 @@ test("continued Codex chats route through Codex Desktop IPC", async () => {
 
   const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
     listCodexChats: async () => [desktopChat],
+    readCodexChatDetail: async (chatId) => chatId === desktopChat.id ? desktopChat : null,
     prepareChatWorkspace: async () => "/Users/me/project",
     startCodexDesktopConversation: async () => {
       throw new Error("New-conversation route should not be used for continued chats.");

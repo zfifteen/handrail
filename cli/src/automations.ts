@@ -1,10 +1,15 @@
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { homedir } from "node:os";
-import type { AutomationRecord, AutomationStatus } from "./types.js";
+import type { AutomationRecord, AutomationStatus, ChatRecord, NewChatReasoning, StartChatOptions } from "./types.js";
+
+interface AutomationChatController {
+  startChat(options: StartChatOptions): Promise<ChatRecord>;
+  continue(chatId: string, prompt: string): Promise<ChatRecord>;
+}
 
 export async function listDesktopAutomations(): Promise<AutomationRecord[]> {
-  const automationRoot = join(process.env.CODEX_HOME ?? join(homedir(), ".codex"), "automations");
+  const automationRoot = desktopAutomationRoot();
   try {
     await access(automationRoot);
   } catch {
@@ -35,6 +40,46 @@ export async function listDesktopAutomations(): Promise<AutomationRecord[]> {
   return records;
 }
 
+export async function runDesktopAutomationNow(id: string, chats: AutomationChatController): Promise<void> {
+  const automation = await readDesktopAutomation(id);
+  if (automation.targetThreadId) {
+    await chats.continue(`codex:${automation.targetThreadId}`, automation.prompt);
+    return;
+  }
+  if (!automation.model || !automation.reasoningEffort || automation.cwds.length === 0) {
+    throw new Error(`Automation ${id} is missing the model, reasoning effort, or workspace required to run now.`);
+  }
+  if ((automation.executionEnvironment ?? "local") !== "local") {
+    throw new Error(`Automation ${id} uses unsupported execution environment ${automation.executionEnvironment}.`);
+  }
+  await chats.startChat({
+    prompt: automation.prompt,
+    projectId: automation.cwds[0],
+    projectPath: automation.cwds[0],
+    workMode: "local",
+    branch: "",
+    accessPreset: "full_access",
+    model: automation.model,
+    reasoningEffort: automation.reasoningEffort
+  });
+}
+
+export async function pauseDesktopAutomation(id: string): Promise<void> {
+  const path = desktopAutomationTomlPath(id);
+  const raw = await readFile(path, "utf8");
+  if (!/^status = "(ACTIVE|PAUSED)"$/m.test(raw)) {
+    throw new Error(`Automation ${id} has no status field.`);
+  }
+  const updated = raw
+    .replace(/^status = "ACTIVE"$/m, "status = \"PAUSED\"")
+    .replace(/^updated_at = \d+$/m, `updated_at = ${Date.now()}`);
+  await writeFile(path, updated, "utf8");
+}
+
+export async function deleteDesktopAutomation(id: string): Promise<void> {
+  await rm(desktopAutomationPath(id), { recursive: true });
+}
+
 export function parseAutomationToml(
   raw: string,
   targetThreads: Map<string, AutomationTargetThread> = new Map()
@@ -42,14 +87,18 @@ export function parseAutomationToml(
   const id = readString(raw, "id");
   const name = readString(raw, "name");
   const kind = readString(raw, "kind");
+  const prompt = readString(raw, "prompt");
   const status = readString(raw, "status");
   const rrule = readString(raw, "rrule");
-  if (!id || !name || !kind || !status || !rrule || !isAutomationStatus(status)) {
+  if (!id || !name || !kind || !prompt || !status || !rrule || !isAutomationStatus(status)) {
     return null;
   }
 
   const cwds = readStringArray(raw, "cwds");
   const targetThreadId = readString(raw, "target_thread_id");
+  const model = readString(raw, "model");
+  const reasoningEffort = readString(raw, "reasoning_effort");
+  const executionEnvironment = readString(raw, "execution_environment");
   const targetThread = targetThreadId ? targetThreads.get(targetThreadId) : undefined;
   const projectPath = cwds[0] ?? targetThread?.cwd ?? null;
   return {
@@ -57,10 +106,16 @@ export function parseAutomationToml(
     name,
     kind,
     status,
+    prompt,
+    rrule,
     scheduleText: scheduleText(status, rrule),
     contextText: contextText(kind, cwds[0] ?? null, targetThreadId, targetThread?.title),
     projectName: projectPath ? basename(projectPath) : undefined,
-    targetThreadId: targetThreadId ?? undefined
+    targetThreadId: targetThreadId ?? undefined,
+    model: model ?? undefined,
+    reasoningEffort: isNewChatReasoning(reasoningEffort) ? reasoningEffort : undefined,
+    executionEnvironment: executionEnvironment ?? undefined,
+    cwds
   };
 }
 
@@ -93,8 +148,15 @@ async function readAutomationTargetThreads(): Promise<Map<string, AutomationTarg
 }
 
 function readString(raw: string, key: string): string | null {
-  const match = raw.match(new RegExp(`^${key} = "([^"\\n]*)"$`, "m"));
-  return match ? match[1] : null;
+  const match = raw.match(new RegExp(`^${key} = "((?:\\\\.|[^"\\\\\\n])*)"$`, "m"));
+  if (!match) {
+    return null;
+  }
+  try {
+    return JSON.parse(`"${match[1]}"`) as string;
+  } catch {
+    return null;
+  }
 }
 
 function readStringArray(raw: string, key: string): string[] {
@@ -102,11 +164,21 @@ function readStringArray(raw: string, key: string): string[] {
   if (!match) {
     return [];
   }
-  return [...match[1].matchAll(/"([^"\n]*)"/g)].map((item) => item[1]);
+  return [...match[1].matchAll(/"((?:\\.|[^"\\\n])*)"/g)].map((item) => {
+    try {
+      return JSON.parse(`"${item[1]}"`) as string;
+    } catch {
+      return "";
+    }
+  }).filter(Boolean);
 }
 
 function isAutomationStatus(value: string): value is AutomationStatus {
   return value === "ACTIVE" || value === "PAUSED";
+}
+
+function isNewChatReasoning(value: string | null): value is NewChatReasoning {
+  return value === "low" || value === "medium" || value === "high" || value === "xhigh";
 }
 
 function contextText(kind: string, projectPath: string | null, targetThreadId: string | null, targetThreadTitle?: string): string {
@@ -155,4 +227,27 @@ function titleCase(value: string): string {
 
 function abbreviated(value: string): string {
   return value.length > 18 ? `${value.slice(0, 18)}...` : value;
+}
+
+async function readDesktopAutomation(id: string): Promise<AutomationRecord> {
+  const record = parseAutomationToml(await readFile(desktopAutomationTomlPath(id), "utf8"), await readAutomationTargetThreads());
+  if (!record) {
+    throw new Error(`Automation ${id} could not be read.`);
+  }
+  return record;
+}
+
+function desktopAutomationRoot(): string {
+  return join(process.env.CODEX_HOME ?? join(homedir(), ".codex"), "automations");
+}
+
+function desktopAutomationPath(id: string): string {
+  if (id.includes("/") || id.includes("\\")) {
+    throw new Error(`Invalid automation id ${id}.`);
+  }
+  return join(desktopAutomationRoot(), id);
+}
+
+function desktopAutomationTomlPath(id: string): string {
+  return join(desktopAutomationPath(id), "automation.toml");
 }

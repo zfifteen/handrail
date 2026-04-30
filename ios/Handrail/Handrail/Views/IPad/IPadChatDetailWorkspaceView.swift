@@ -513,7 +513,7 @@ struct IPadChatDetailWorkspaceView: View {
             enteredChatId = chatId
         }
         if store.pairedMachine?.isOnline == true {
-            store.refreshChats()
+            store.refreshChatDetail(chatId: chatId)
         }
     }
 
@@ -529,7 +529,7 @@ struct IPadChatDetailWorkspaceView: View {
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             guard let chatId = selection.selectedChatId else { continue }
             if store.pairedMachine?.isOnline == true && store.isViewingChat(chatId: chatId) {
-                store.refreshChats()
+                store.refreshChatDetail(chatId: chatId)
             }
         }
     }

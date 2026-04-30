@@ -55,6 +55,7 @@ struct CodexChat: Codable, Identifiable, Hashable {
     var isPinned: Bool? = nil
     var pinnedOrder: Int? = nil
     var isAutomationTarget: Bool? = nil
+    var hasUnreadTurn: Bool? = nil
 }
 
 enum AutomationStatus: String, Codable {
@@ -67,10 +68,83 @@ struct AutomationRecord: Codable, Identifiable, Hashable {
     let name: String
     let kind: String
     let status: AutomationStatus
+    let prompt: String
+    let rrule: String
     let scheduleText: String
     let contextText: String
     let projectName: String?
     let targetThreadId: String?
+    let model: String?
+    let reasoningEffort: String?
+    let executionEnvironment: String?
+    let cwds: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case kind
+        case status
+        case prompt
+        case rrule
+        case scheduleText
+        case contextText
+        case projectName
+        case targetThreadId
+        case model
+        case reasoningEffort
+        case executionEnvironment
+        case cwds
+    }
+
+    init(
+        id: String,
+        name: String,
+        kind: String,
+        status: AutomationStatus,
+        prompt: String,
+        rrule: String,
+        scheduleText: String,
+        contextText: String,
+        projectName: String?,
+        targetThreadId: String?,
+        model: String?,
+        reasoningEffort: String?,
+        executionEnvironment: String?,
+        cwds: [String]
+    ) {
+        self.id = id
+        self.name = name
+        self.kind = kind
+        self.status = status
+        self.prompt = prompt
+        self.rrule = rrule
+        self.scheduleText = scheduleText
+        self.contextText = contextText
+        self.projectName = projectName
+        self.targetThreadId = targetThreadId
+        self.model = model
+        self.reasoningEffort = reasoningEffort
+        self.executionEnvironment = executionEnvironment
+        self.cwds = cwds
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        kind = try container.decode(String.self, forKey: .kind)
+        status = try container.decode(AutomationStatus.self, forKey: .status)
+        prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
+        rrule = try container.decodeIfPresent(String.self, forKey: .rrule) ?? ""
+        scheduleText = try container.decode(String.self, forKey: .scheduleText)
+        contextText = try container.decode(String.self, forKey: .contextText)
+        projectName = try container.decodeIfPresent(String.self, forKey: .projectName)
+        targetThreadId = try container.decodeIfPresent(String.self, forKey: .targetThreadId)
+        model = try container.decodeIfPresent(String.self, forKey: .model)
+        reasoningEffort = try container.decodeIfPresent(String.self, forKey: .reasoningEffort)
+        executionEnvironment = try container.decodeIfPresent(String.self, forKey: .executionEnvironment)
+        cwds = try container.decodeIfPresent([String].self, forKey: .cwds) ?? []
+    }
 }
 
 struct ThinkingEntry: Codable, Identifiable, Hashable {

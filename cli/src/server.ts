@@ -7,7 +7,7 @@ import { ensurePairingToken, saveState } from "./state.js";
 import { ChatManager } from "./chats.js";
 import { getNewChatOptions } from "./newChatOptions.js";
 import { NotificationDispatcher, type PersistState } from "./notifications.js";
-import { listDesktopAutomations } from "./automations.js";
+import { deleteDesktopAutomation, listDesktopAutomations, pauseDesktopAutomation, runDesktopAutomationNow } from "./automations.js";
 
 interface AuthedSocket extends WebSocket {
   isAuthed?: boolean;
@@ -15,6 +15,7 @@ interface AuthedSocket extends WebSocket {
 
 interface ChatController {
   list(): Promise<ChatRecord[]>;
+  detail(chatId: string): Promise<ChatRecord>;
   startChat(options: StartChatOptions): Promise<ChatRecord>;
   continue(chatId: string, prompt: string): Promise<ChatRecord>;
   sendInput(chatId: string, text: string): void;
@@ -26,6 +27,12 @@ interface ChatController {
 export interface HandrailServerHandle {
   port: number;
   close(): Promise<void>;
+}
+
+interface AutomationActions {
+  runNow(id: string, chats: ChatController): Promise<void>;
+  pause(id: string): Promise<void>;
+  delete(id: string): Promise<void>;
 }
 
 export function localNetworkHost(): string {
@@ -78,6 +85,7 @@ export async function createHandrailServer(options: {
   chats?: ChatController;
   getOptions?: (projectPath?: string) => Promise<NewChatOptions>;
   getAutomations?: () => Promise<AutomationRecord[]>;
+  automationActions?: AutomationActions;
   persistState?: PersistState;
   notificationDispatcher?: NotificationDispatcher;
   notificationPollIntervalMs?: number;
@@ -87,6 +95,11 @@ export async function createHandrailServer(options: {
   const wss = new WebSocketServer({ server: httpServer });
   const getOptions = options.getOptions ?? getNewChatOptions;
   const getAutomations = options.getAutomations ?? listDesktopAutomations;
+  const automationActions = options.automationActions ?? {
+    runNow: runDesktopAutomationNow,
+    pause: pauseDesktopAutomation,
+    delete: deleteDesktopAutomation
+  };
 
   const broadcast = (message: ServerMessage) => {
     const encoded = JSON.stringify(message);
@@ -130,7 +143,7 @@ export async function createHandrailServer(options: {
 
   wss.on("connection", (socket: AuthedSocket) => {
     socket.on("message", (data) => {
-      void handleMessage(socket, data.toString(), options.state, chats, broadcast, getOptions, getAutomations, notificationDispatcher);
+      void handleMessage(socket, data.toString(), options.state, chats, broadcast, getOptions, getAutomations, automationActions, notificationDispatcher);
     });
   });
 
@@ -180,7 +193,8 @@ function visibleChatSignature(chats: ChatRecord[]): string {
     acceptsInput: chat.acceptsInput ?? null,
     isPinned: chat.isPinned ?? null,
     pinnedOrder: chat.pinnedOrder ?? null,
-    isAutomationTarget: chat.isAutomationTarget ?? null
+    isAutomationTarget: chat.isAutomationTarget ?? null,
+    hasUnreadTurn: chat.hasUnreadTurn ?? null
   })));
 }
 
@@ -192,6 +206,11 @@ async function handleMessage(
   broadcast: (message: ServerMessage) => void,
   getOptions: (projectPath?: string) => Promise<NewChatOptions> = getNewChatOptions,
   getAutomations: () => Promise<AutomationRecord[]> = listDesktopAutomations,
+  automationActions: AutomationActions = {
+    runNow: runDesktopAutomationNow,
+    pause: pauseDesktopAutomation,
+    delete: deleteDesktopAutomation
+  },
   notificationDispatcher?: NotificationDispatcher
 ): Promise<void> {
   let message: ClientMessage;
@@ -230,6 +249,9 @@ async function handleMessage(
       case "register_push_token":
         await notificationDispatcher?.registerPushToken(message);
         break;
+      case "get_chat_detail":
+        socket.send(JSON.stringify({ type: "chat_detail", chat: await chats.detail(message.chatId) } satisfies ServerMessage));
+        break;
       case "start_chat":
         await chats.startChat(message);
         break;
@@ -250,6 +272,20 @@ async function handleMessage(
       case "stop_chat":
         await chats.stop(message.chatId);
         socket.send(JSON.stringify({ type: "command_result", ok: true, message: "Chat stop requested." } satisfies ServerMessage));
+        break;
+      case "run_automation":
+        await automationActions.runNow(message.automationId, chats);
+        socket.send(JSON.stringify({ type: "command_result", ok: true, message: "Automation run requested." } satisfies ServerMessage));
+        break;
+      case "pause_automation":
+        await automationActions.pause(message.automationId);
+        socket.send(JSON.stringify({ type: "command_result", ok: true, message: "Automation paused." } satisfies ServerMessage));
+        socket.send(JSON.stringify({ type: "automation_list", automations: await getAutomations() } satisfies ServerMessage));
+        break;
+      case "delete_automation":
+        await automationActions.delete(message.automationId);
+        socket.send(JSON.stringify({ type: "command_result", ok: true, message: "Automation deleted." } satisfies ServerMessage));
+        socket.send(JSON.stringify({ type: "automation_list", automations: await getAutomations() } satisfies ServerMessage));
         break;
     }
   } catch (error) {

@@ -80,7 +80,7 @@ enum HandrailTestFixtures {
 
     static let emptyChats: [CodexChat] = []
 
-    private static func chat(
+    static func chat(
         id: String,
         title: String,
         status: ChatStatus,
@@ -89,7 +89,8 @@ enum HandrailTestFixtures {
         projectName: String = "Project",
         isPinned: Bool? = nil,
         pinnedOrder: Int? = nil,
-        isAutomationTarget: Bool? = nil
+        isAutomationTarget: Bool? = nil,
+        hasUnreadTurn: Bool? = nil
     ) -> CodexChat {
         CodexChat(
             id: id,
@@ -107,7 +108,8 @@ enum HandrailTestFixtures {
             acceptsInput: status == .running,
             isPinned: isPinned,
             pinnedOrder: pinnedOrder,
-            isAutomationTarget: isAutomationTarget
+            isAutomationTarget: isAutomationTarget,
+            hasUnreadTurn: hasUnreadTurn
         )
     }
 }

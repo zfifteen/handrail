@@ -19,12 +19,17 @@ struct StatusBadge: View {
     let status: ChatStatus
 
     var body: some View {
-        Label(status.title, systemImage: icon)
-            .font(.caption.weight(.semibold))
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+            Text(status.title)
+                .lineLimit(1)
+        }
+        .font(.caption.weight(.semibold))
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(color.opacity(0.18), in: Capsule())
             .foregroundStyle(color)
+            .fixedSize(horizontal: true, vertical: false)
     }
 
     private var color: Color {

@@ -1,17 +1,30 @@
 import Foundation
 
+protocol HandrailWebSocketTask: AnyObject {
+    func resume()
+    func cancel(with closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?)
+    func send(_ message: URLSessionWebSocketTask.Message, completionHandler: @escaping @Sendable (Error?) -> Void)
+    func receive(completionHandler: @escaping @Sendable (Result<URLSessionWebSocketTask.Message, Error>) -> Void)
+}
+
+extension URLSessionWebSocketTask: HandrailWebSocketTask {}
+
 final class HandrailWebSocketClient {
+    typealias TaskFactory = (URL) -> HandrailWebSocketTask
+
     var onMessage: ((ServerMessage) -> Void)?
     var onConnectionChange: ((Bool) -> Void)?
 
-    private var task: URLSessionWebSocketTask?
+    private let taskFactory: TaskFactory
+    private var task: HandrailWebSocketTask?
     private var machine: PairedMachine?
     private var connectionGeneration = 0
     private var reconnectWorkItem: DispatchWorkItem?
     private let decoder = JSONDecoder()
     private let encoder = JSONEncoder()
 
-    init() {
+    init(taskFactory: @escaping TaskFactory = { URLSession.shared.webSocketTask(with: $0) }) {
+        self.taskFactory = taskFactory
         decoder.dateDecodingStrategy = .iso8601
         encoder.dateEncodingStrategy = .iso8601
     }
@@ -24,7 +37,7 @@ final class HandrailWebSocketClient {
         reconnectWorkItem = nil
         let url = URL(string: "ws://\(machine.host):\(machine.port)")!
         task?.cancel(with: .goingAway, reason: nil)
-        let nextTask = URLSession.shared.webSocketTask(with: url)
+        let nextTask = taskFactory(url)
         task = nextTask
         nextTask.resume()
         send(.hello(token: machine.token))
@@ -41,24 +54,28 @@ final class HandrailWebSocketClient {
     }
 
     func send(_ message: ClientMessage) {
-        guard let task else {
+        guard let currentTask = task else {
+            onConnectionChange?(false)
             onMessage?(.error("Handrail is not connected to the Mac."))
             return
         }
+        let generation = connectionGeneration
         do {
             let data = try encoder.encode(message)
             let text = String(decoding: data, as: UTF8.self)
-            task.send(.string(text)) { [weak self] error in
-                if let error {
-                    self?.onMessage?(.error(error.localizedDescription))
-                }
+            currentTask.send(.string(text)) { [weak self] error in
+                guard let self, self.task === currentTask, self.connectionGeneration == generation else { return }
+                guard let error else { return }
+                self.onMessage?(.error(error.localizedDescription))
+                self.onConnectionChange?(false)
+                self.scheduleReconnect(generation: generation)
             }
         } catch {
             onMessage?(.error(error.localizedDescription))
         }
     }
 
-    private func receive(on currentTask: URLSessionWebSocketTask, generation: Int) {
+    private func receive(on currentTask: HandrailWebSocketTask, generation: Int) {
         currentTask.receive { [weak self] result in
             guard let self else { return }
             guard self.task === currentTask, self.connectionGeneration == generation else { return }

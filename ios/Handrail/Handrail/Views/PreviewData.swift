@@ -39,30 +39,48 @@ enum PreviewData {
                 name: "Finish Handrail iPad App",
                 kind: "cron",
                 status: .active,
+                prompt: "Continue the GitHub issue #6 iPad Handrail implementation using the incremental-coder process.",
+                rrule: "FREQ=HOURLY;INTERVAL=1",
                 scheduleText: "Hourly",
                 contextText: "handrail",
                 projectName: "handrail",
-                targetThreadId: nil
+                targetThreadId: nil,
+                model: "gpt-5.2",
+                reasoningEffort: "high",
+                executionEnvironment: "local",
+                cwds: ["/Users/me/IdeaProjects/handrail"]
             ),
             AutomationRecord(
                 id: "handrail-bug-fix",
                 name: "Handrail Bug Fix",
                 kind: "heartbeat",
                 status: .active,
+                prompt: "Identify the highest severity unblocked bug, reproduce it, fix it, and verify it in the simulator.",
+                rrule: "RRULE:FREQ=MINUTELY;INTERVAL=240",
                 scheduleText: "Every 240m",
                 contextText: "Heartbeat • Handrail Bug Fixes",
                 projectName: nil,
-                targetThreadId: "019dddba-dd9c-7140-b913-09bb7d645043"
+                targetThreadId: "019dddba-dd9c-7140-b913-09bb7d645043",
+                model: nil,
+                reasoningEffort: nil,
+                executionEnvironment: nil,
+                cwds: []
             ),
             AutomationRecord(
                 id: "gwr-dni",
                 name: "GWR/DNI",
                 kind: "cron",
                 status: .paused,
+                prompt: "Advance the prime gap structure experiment and summarize the next narrow result.",
+                rrule: "FREQ=HOURLY;INTERVAL=8",
                 scheduleText: "Paused",
                 contextText: "prime-gap-structure",
                 projectName: "prime-gap-structure",
-                targetThreadId: nil
+                targetThreadId: nil,
+                model: "gpt-5.2",
+                reasoningEffort: "high",
+                executionEnvironment: "local",
+                cwds: ["/Users/me/IdeaProjects/prime-gap-structure"]
             )
         ]
         store.connectionText = "Online"

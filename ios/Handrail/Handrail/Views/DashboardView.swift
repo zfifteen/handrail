@@ -40,11 +40,14 @@ struct DashboardMenuChatRow: Identifiable, Equatable {
     let displayTitle: String
     let projectName: String
     let timeText: String
-    let leadingSystemImage: String
+    let leadingSystemImage: String?
     let showsRunningIndicator: Bool
     let showsAutomationIndicator: Bool
+    let hasUnreadTurn: Bool
 
     var id: String { chat.id }
+    var pinActionTitle: String { chat.isPinned == true ? "Unpin chat" : "Pin chat" }
+    var readActionTitle: String { hasUnreadTurn ? "Mark as read" : "Mark as unread" }
 }
 
 enum DashboardMenuQuery {
@@ -74,18 +77,19 @@ enum DashboardMenuQuery {
         chats
             .filter { $0.isPinned != true }
             .sorted { sortDate(for: $0) > sortDate(for: $1) }
-            .map { row(for: $0, now: now, leadingSystemImage: "message.fill") }
+            .map { row(for: $0, now: now, leadingSystemImage: nil) }
     }
 
-    private static func row(for chat: CodexChat, now: Date, leadingSystemImage: String) -> DashboardMenuChatRow {
+    private static func row(for chat: CodexChat, now: Date, leadingSystemImage: String?) -> DashboardMenuChatRow {
         DashboardMenuChatRow(
             chat: chat,
             displayTitle: IPadChatListQuery.displayTitle(for: chat),
             projectName: IPadChatListQuery.projectName(for: chat),
             timeText: HandrailFormatters.relativeAge(since: sortDate(for: chat), to: now),
             leadingSystemImage: leadingSystemImage,
-            showsRunningIndicator: chat.status == .running || chat.status == .waitingForApproval,
-            showsAutomationIndicator: chat.isAutomationTarget == true
+            showsRunningIndicator: chat.status == .running,
+            showsAutomationIndicator: chat.isAutomationTarget == true,
+            hasUnreadTurn: chat.hasUnreadTurn == true
         )
     }
 
@@ -99,6 +103,8 @@ struct DashboardView: View {
     @State private var showsScanner = false
     @State private var showsStart = false
     @State private var showsAutomations = false
+    @State private var renamedRow: DashboardMenuChatRow?
+    @State private var renamedTitle = ""
     let navigateToChat: (String) -> Void
 
     init(navigateToChat: @escaping (String) -> Void = { _ in }) {
@@ -186,6 +192,28 @@ struct DashboardView: View {
         }
         .sheet(isPresented: $showsStart) {
             NewChatView()
+        }
+        .alert("Rename chat", isPresented: Binding(
+            get: { renamedRow != nil },
+            set: { isPresented in
+                if !isPresented {
+                    renamedRow = nil
+                    renamedTitle = ""
+                }
+            }
+        )) {
+            TextField("Name", text: $renamedTitle)
+            Button("Cancel", role: .cancel) {
+                renamedRow = nil
+                renamedTitle = ""
+            }
+            Button("Rename") {
+                if let renamedRow {
+                    store.renameChat(chatId: renamedRow.id, title: renamedTitle)
+                }
+                renamedRow = nil
+                renamedTitle = ""
+            }
         }
         .onChange(of: store.lastStartedChatId) { _, chatId in
             if chatId != nil {
@@ -302,10 +330,7 @@ struct DashboardView: View {
     private func dashboardRow(_ row: DashboardMenuChatRow) -> some View {
         NavigationLink(value: row.id) {
             HStack(spacing: 12) {
-                Image(systemName: row.leadingSystemImage)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(rowIconColor(for: row))
-                    .frame(width: 24)
+                rowLeadingIndicator(row)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(row.displayTitle)
@@ -350,15 +375,62 @@ struct DashboardView: View {
             .background(Color.white.opacity(0.001), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            chatActionMenu(for: row)
+        }
     }
 
-    private func rowIconColor(for row: DashboardMenuChatRow) -> Color {
-        row.leadingSystemImage == "pin.fill" ? .secondary : .purple
+    @ViewBuilder
+    private func rowLeadingIndicator(_ row: DashboardMenuChatRow) -> some View {
+        if let leadingSystemImage = row.leadingSystemImage {
+            Image(systemName: leadingSystemImage)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 24)
+        } else {
+            Circle()
+                .fill(row.hasUnreadTurn ? Color.blue : Color.clear)
+                .frame(width: 11, height: 11)
+                .frame(width: 24)
+                .accessibilityLabel(row.hasUnreadTurn ? "Unread" : "Read")
+        }
+    }
+
+    @ViewBuilder
+    private func chatActionMenu(for row: DashboardMenuChatRow) -> some View {
+        Button {
+            store.togglePin(chatId: row.id)
+        } label: {
+            Label(row.pinActionTitle, systemImage: "pin")
+        }
+
+        Button {
+            renamedRow = row
+            renamedTitle = row.displayTitle
+        } label: {
+            Label("Rename chat", systemImage: "pencil")
+        }
+
+        Button {
+            store.archiveChat(chatId: row.id)
+        } label: {
+            Label("Archive chat", systemImage: "archivebox")
+        }
+
+        Button {
+            store.setChatReadState(chatId: row.id, isRead: row.hasUnreadTurn)
+        } label: {
+            Label(
+                row.readActionTitle,
+                systemImage: row.hasUnreadTurn ? "envelope.open" : "envelope.badge"
+            )
+        }
     }
 }
 
 struct AutomationsView: View {
     @Environment(HandrailStore.self) private var store
+    @State private var editedAutomation: AutomationRecord?
 
     private var currentAutomations: [AutomationRecord] {
         store.automations
@@ -388,6 +460,9 @@ struct AutomationsView: View {
         .background(Color.black.ignoresSafeArea())
         .navigationTitle("Automations")
         .navigationBarTitleDisplayMode(.large)
+        .navigationDestination(item: $editedAutomation) { automation in
+            AutomationConfigurationView(automation: automation)
+        }
         .refreshable {
             store.refreshChats()
         }
@@ -451,10 +526,169 @@ struct AutomationsView: View {
         .padding(.vertical, 18)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(automation.name), \(automation.contextText), \(automation.scheduleText)")
+        .contextMenu {
+            automationActionMenu(for: automation)
+        }
+    }
+
+    @ViewBuilder
+    private func automationActionMenu(for automation: AutomationRecord) -> some View {
+        Button {
+            store.runAutomationNow(id: automation.id)
+        } label: {
+            Label("Run now", systemImage: "play")
+        }
+
+        Button {
+            editedAutomation = automation
+        } label: {
+            Label("Edit", systemImage: "pencil")
+        }
+
+        Button {
+            store.pauseAutomation(id: automation.id)
+        } label: {
+            Label("Pause", systemImage: "pause.circle")
+        }
+        .disabled(automation.status == .paused)
+
+        Button(role: .destructive) {
+            store.deleteAutomation(id: automation.id)
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
     }
 
     private func icon(for automation: AutomationRecord) -> String {
         automation.status == .active ? "circle" : "pause.circle"
+    }
+}
+
+private struct AutomationConfigurationView: View {
+    let automation: AutomationRecord
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: 24) {
+                    Text("Status")
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    optionRow("Status", value: statusTitle, badgeColor: automation.status == .active ? .green : .secondary)
+                }
+
+                VStack(alignment: .leading, spacing: 24) {
+                    Text("Details")
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    optionRow("Runs in", value: runsInTitle)
+                    optionRow("Project", value: projectTitle)
+                    optionRow("Repeats", value: repeatsTitle)
+                    optionRow("Model", value: automation.model ?? "Not set")
+                    optionRow("Reasoning", value: reasoningTitle)
+                }
+
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Prompt")
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    Text(automation.prompt)
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .lineSpacing(6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 24)
+            .safeAreaPadding(.bottom, 120)
+        }
+        .background(Color.black.ignoresSafeArea())
+        .navigationTitle(automation.name)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var statusTitle: String {
+        automation.status == .active ? "Active" : "Paused"
+    }
+
+    private var runsInTitle: String {
+        titleCase(automation.executionEnvironment ?? automation.kind)
+    }
+
+    private var projectTitle: String {
+        automation.projectName ?? automation.contextText
+    }
+
+    private var repeatsTitle: String {
+        automation.status == .paused ? scheduleTitle(from: automation.rrule) : automation.scheduleText
+    }
+
+    private var reasoningTitle: String {
+        guard let reasoningEffort = automation.reasoningEffort else {
+            return "Not set"
+        }
+        return titleCase(reasoningEffort)
+    }
+
+    private func optionRow(_ title: String, value: String, badgeColor: Color? = nil) -> some View {
+        HStack(spacing: 16) {
+            Text(title)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.primary)
+
+            Spacer(minLength: 24)
+
+            HStack(spacing: 10) {
+                if let badgeColor {
+                    Circle()
+                        .fill(badgeColor)
+                        .frame(width: 12, height: 12)
+                }
+                Text(value)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(Color.white.opacity(0.06), in: Capsule())
+        }
+    }
+
+    private func scheduleTitle(from rrule: String) -> String {
+        let normalized = rrule.replacingOccurrences(of: "RRULE:", with: "")
+        let fields = Dictionary(uniqueKeysWithValues: normalized.split(separator: ";").compactMap { field -> (String, String)? in
+            let parts = field.split(separator: "=", maxSplits: 1)
+            guard parts.count == 2 else { return nil }
+            return (String(parts[0]), String(parts[1]))
+        })
+        let frequency = fields["FREQ"] ?? "scheduled"
+        let interval = Int(fields["INTERVAL"] ?? "1") ?? 1
+        switch frequency {
+        case "HOURLY":
+            return interval == 1 ? "Hourly" : "Every \(interval)h"
+        case "MINUTELY":
+            return "Every \(interval)m"
+        case "WEEKLY":
+            return "Weekly"
+        default:
+            return titleCase(frequency)
+        }
+    }
+
+    private func titleCase(_ value: String) -> String {
+        value
+            .replacingOccurrences(of: "_", with: " ")
+            .split(separator: " ")
+            .map { part in
+                let lowercased = part.lowercased()
+                return lowercased.prefix(1).uppercased() + String(lowercased.dropFirst())
+            }
+            .joined(separator: " ")
     }
 }
 

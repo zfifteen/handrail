@@ -110,6 +110,13 @@ final class HandrailStore {
         client.send(.hello(token: token))
     }
 
+    func refreshChatDetail(chatId: String) {
+        guard pairedMachine?.isOnline == true else {
+            return
+        }
+        client.send(.getChatDetail(chatId: chatId))
+    }
+
     func reconnect() {
         guard let pairedMachine else {
             isRefreshingChats = false
@@ -142,6 +149,30 @@ final class HandrailStore {
         client.send(.stopChat(chatId: chatId))
     }
 
+    func runAutomationNow(id: String) {
+        guard pairedMachine?.isOnline == true else {
+            reportError("Mac is offline. Reconnect before running an automation.")
+            return
+        }
+        client.send(.runAutomation(automationId: id))
+    }
+
+    func pauseAutomation(id: String) {
+        guard pairedMachine?.isOnline == true else {
+            reportError("Mac is offline. Reconnect before pausing an automation.")
+            return
+        }
+        client.send(.pauseAutomation(automationId: id))
+    }
+
+    func deleteAutomation(id: String) {
+        guard pairedMachine?.isOnline == true else {
+            reportError("Mac is offline. Reconnect before deleting an automation.")
+            return
+        }
+        client.send(.deleteAutomation(automationId: id))
+    }
+
     func deleteNotifications(at offsets: IndexSet) {
         for index in offsets.sorted(by: >) {
             notifications.remove(at: index)
@@ -162,6 +193,23 @@ final class HandrailStore {
 
     func togglePin(chatId: String) {
         reportError("Pinning is owned by Codex Desktop. Change pinned chats in Codex Desktop, then refresh Handrail.")
+    }
+
+    func renameChat(chatId: String, title: String) {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        reportError("Renaming is owned by Codex Desktop. Rename chats in Codex Desktop, then refresh Handrail.")
+    }
+
+    func archiveChat(chatId: String) {
+        reportError("Archiving is owned by Codex Desktop. Archive chats in Codex Desktop, then refresh Handrail.")
+    }
+
+    func setChatReadState(chatId: String, isRead: Bool) {
+        guard let index = chats.firstIndex(where: { $0.id == chatId }) else {
+            return
+        }
+        chats[index].hasUnreadTurn = !isRead
     }
 
     func isAttentionDismissed(chatId: String) -> Bool {
@@ -274,7 +322,7 @@ final class HandrailStore {
         case .automationList(let automations):
             self.automations = automations
         case .chatList(let chats):
-            self.chats = chats
+            self.chats = mergeChatListSummaries(chats, into: self.chats)
             pruneDismissedAttentionChats(against: chats)
             isRefreshingChats = false
             lastChatRefreshAt = Date()
@@ -283,6 +331,8 @@ final class HandrailStore {
                     transcripts[chat.id] = transcript
                 }
             }
+        case .chatDetail(let chat):
+            upsert(chat)
         case .chatStarted(let chat):
             lastError = nil
             newChatError = nil
@@ -531,6 +581,29 @@ final class HandrailStore {
         let activeAttentionIds = Set(chats.filter(needsAttention).map(\.id))
         dismissedAttentionChatIds = dismissedAttentionChatIds.intersection(activeAttentionIds)
         saveDismissedAttentionChats()
+    }
+}
+
+func mergeChatListSummaries(_ summaries: [CodexChat], into existingChats: [CodexChat]) -> [CodexChat] {
+    let existingById = Dictionary(uniqueKeysWithValues: existingChats.map { ($0.id, $0) })
+    return summaries.map { summary in
+        guard let existing = existingById[summary.id] else {
+            return summary
+        }
+        var merged = summary
+        if merged.files == nil {
+            merged.files = existing.files
+        }
+        if merged.transcript == nil {
+            merged.transcript = existing.transcript
+        }
+        if merged.thinking == nil {
+            merged.thinking = existing.thinking
+        }
+        if merged.acceptsInput == nil {
+            merged.acceptsInput = existing.acceptsInput
+        }
+        return merged
     }
 }
 

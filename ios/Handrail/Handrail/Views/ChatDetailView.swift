@@ -30,7 +30,7 @@ struct ChatDetailView: View {
         .onAppear {
             store.enterChat(chatId: chatId)
             if store.pairedMachine?.isOnline == true {
-                store.refreshChats()
+                store.refreshChatDetail(chatId: chatId)
             }
         }
         .onDisappear {
@@ -414,7 +414,7 @@ struct ChatDetailView: View {
         while !Task.isCancelled {
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             if store.pairedMachine?.isOnline == true && store.isViewingChat(chatId: chatId) {
-                store.refreshChats()
+                store.refreshChatDetail(chatId: chatId)
             }
         }
     }

@@ -1,7 +1,7 @@
 import { setTimeout as delay } from "node:timers/promises";
 import { prepareChatWorkspace } from "./newChatOptions.js";
 import type { ApprovalRequest, ChatRecord, ServerMessage, StartChatOptions } from "./types.js";
-import { formatCodexTranscriptEntry, listCodexChats } from "./codexSessions.js";
+import { formatCodexTranscriptEntry, listCodexChats, readCodexChatDetail } from "./codexSessions.js";
 import { interruptCodexDesktopTurn, startCodexDesktopConversation, startCodexDesktopTurn } from "./codexDesktopIpc.js";
 
 type Broadcast = (message: ServerMessage) => void;
@@ -10,6 +10,7 @@ const DESKTOP_VISIBLE_WAIT_MS = 250;
 
 interface ChatManagerDeps {
   listCodexChats: typeof listCodexChats;
+  readCodexChatDetail: typeof readCodexChatDetail;
   prepareChatWorkspace: typeof prepareChatWorkspace;
   startCodexDesktopConversation: typeof startCodexDesktopConversation;
   startCodexDesktopTurn: typeof startCodexDesktopTurn;
@@ -18,6 +19,7 @@ interface ChatManagerDeps {
 
 const defaultDeps: ChatManagerDeps = {
   listCodexChats,
+  readCodexChatDetail,
   prepareChatWorkspace,
   startCodexDesktopConversation,
   startCodexDesktopTurn,
@@ -34,6 +36,14 @@ export class ChatManager {
     return (await this.deps.listCodexChats()).sort(
       (left, right) => this.sortTime(right) - this.sortTime(left)
     );
+  }
+
+  async detail(chatId: string): Promise<ChatRecord> {
+    const chat = await this.deps.readCodexChatDetail(chatId);
+    if (!chat) {
+      throw new Error(`No Codex chat with id ${chatId}. Refresh chats and try again.`);
+    }
+    return chat;
   }
 
   async startChat(options: StartChatOptions): Promise<ChatRecord> {

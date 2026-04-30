@@ -42,12 +42,14 @@
 		20000000000000000000010A /* HandrailCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000A /* HandrailCommands.swift */; };
 		20000000000000000000010B /* IPadChatListQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000B /* IPadChatListQuery.swift */; };
 		20000000000000000000010C /* IPadSelectedChatWindowScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000C /* IPadSelectedChatWindowScene.swift */; };
+		20000000000000000000010D /* IPadActivityWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000D /* IPadActivityWorkspaceView.swift */; };
 		200000000000000000000201 /* HandrailTestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000021 /* HandrailTestFixtures.swift */; };
 		200000000000000000000202 /* ChatListQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000022 /* ChatListQueryTests.swift */; };
 		200000000000000000000203 /* HandrailCommandAvailabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000023 /* HandrailCommandAvailabilityTests.swift */; };
 		200000000000000000000204 /* RootLayoutSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000024 /* RootLayoutSelectionTests.swift */; };
 		200000000000000000000205 /* WindowSelectionStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000025 /* WindowSelectionStateTests.swift */; };
 		200000000000000000000206 /* TranscriptParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000026 /* TranscriptParsingTests.swift */; };
+		200000000000000000000207 /* HandrailWebSocketClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000027 /* HandrailWebSocketClientTests.swift */; };
 		200000000000000000000302 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 200000000000000000000303 /* XCTest.framework */; };
 /* End PBXBuildFile section */
 
@@ -99,12 +101,14 @@
 		20000000000000000000000A /* HandrailCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandrailCommands.swift; sourceTree = "<group>"; };
 		20000000000000000000000B /* IPadChatListQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadChatListQuery.swift; sourceTree = "<group>"; };
 		20000000000000000000000C /* IPadSelectedChatWindowScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadSelectedChatWindowScene.swift; sourceTree = "<group>"; };
+		20000000000000000000000D /* IPadActivityWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadActivityWorkspaceView.swift; sourceTree = "<group>"; };
 		200000000000000000000021 /* HandrailTestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandrailTestFixtures.swift; sourceTree = "<group>"; };
 		200000000000000000000022 /* ChatListQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListQueryTests.swift; sourceTree = "<group>"; };
 		200000000000000000000023 /* HandrailCommandAvailabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandrailCommandAvailabilityTests.swift; sourceTree = "<group>"; };
 		200000000000000000000024 /* RootLayoutSelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootLayoutSelectionTests.swift; sourceTree = "<group>"; };
 		200000000000000000000025 /* WindowSelectionStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowSelectionStateTests.swift; sourceTree = "<group>"; };
 		200000000000000000000026 /* TranscriptParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptParsingTests.swift; sourceTree = "<group>"; };
+		200000000000000000000027 /* HandrailWebSocketClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandrailWebSocketClientTests.swift; sourceTree = "<group>"; };
 		200000000000000000000301 /* HandrailTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandrailTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		200000000000000000000303 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -185,6 +189,7 @@
 				20000000000000000000000A /* HandrailCommands.swift */,
 				20000000000000000000000B /* IPadChatListQuery.swift */,
 				20000000000000000000000C /* IPadSelectedChatWindowScene.swift */,
+				20000000000000000000000D /* IPadActivityWorkspaceView.swift */,
 			);
 			path = Handrail/Views/IPad;
 			sourceTree = "<group>";
@@ -198,6 +203,7 @@
 				200000000000000000000024 /* RootLayoutSelectionTests.swift */,
 				200000000000000000000025 /* WindowSelectionStateTests.swift */,
 				200000000000000000000026 /* TranscriptParsingTests.swift */,
+				200000000000000000000027 /* HandrailWebSocketClientTests.swift */,
 			);
 			path = HandrailTests;
 			sourceTree = "<group>";
@@ -316,6 +322,7 @@
 				20000000000000000000010A /* HandrailCommands.swift in Sources */,
 				20000000000000000000010B /* IPadChatListQuery.swift in Sources */,
 				20000000000000000000010C /* IPadSelectedChatWindowScene.swift in Sources */,
+				20000000000000000000010D /* IPadActivityWorkspaceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -329,6 +336,7 @@
 				200000000000000000000204 /* RootLayoutSelectionTests.swift in Sources */,
 				200000000000000000000205 /* WindowSelectionStateTests.swift in Sources */,
 				200000000000000000000206 /* TranscriptParsingTests.swift in Sources */,
+				200000000000000000000207 /* HandrailWebSocketClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

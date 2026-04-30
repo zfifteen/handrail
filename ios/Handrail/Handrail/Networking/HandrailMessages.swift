@@ -3,12 +3,16 @@ import Foundation
 enum ClientMessage: Encodable {
     case hello(token: String)
     case registerPushToken(PushTokenRegistration)
+    case getChatDetail(chatId: String)
     case startChat(StartChatPayload)
     case continueChat(chatId: String, prompt: String)
     case sendChatInput(chatId: String, text: String)
     case approve(chatId: String, approvalId: String)
     case deny(chatId: String, approvalId: String, reason: String)
     case stopChat(chatId: String)
+    case runAutomation(automationId: String)
+    case pauseAutomation(automationId: String)
+    case deleteAutomation(automationId: String)
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -31,6 +35,7 @@ enum ClientMessage: Encodable {
         case deviceToken
         case environment
         case deviceName
+        case automationId
     }
 
     func encode(to encoder: Encoder) throws {
@@ -44,6 +49,9 @@ enum ClientMessage: Encodable {
             try container.encode(registration.deviceToken, forKey: .deviceToken)
             try container.encode(registration.environment, forKey: .environment)
             try container.encodeIfPresent(registration.deviceName, forKey: .deviceName)
+        case .getChatDetail(let chatId):
+            try container.encode("get_chat_detail", forKey: .type)
+            try container.encode(chatId, forKey: .chatId)
         case .startChat(let payload):
             try container.encode("start_chat", forKey: .type)
             try container.encode(payload.prompt, forKey: .prompt)
@@ -75,6 +83,15 @@ enum ClientMessage: Encodable {
         case .stopChat(let chatId):
             try container.encode("stop_chat", forKey: .type)
             try container.encode(chatId, forKey: .chatId)
+        case .runAutomation(let automationId):
+            try container.encode("run_automation", forKey: .type)
+            try container.encode(automationId, forKey: .automationId)
+        case .pauseAutomation(let automationId):
+            try container.encode("pause_automation", forKey: .type)
+            try container.encode(automationId, forKey: .automationId)
+        case .deleteAutomation(let automationId):
+            try container.encode("delete_automation", forKey: .type)
+            try container.encode(automationId, forKey: .automationId)
         }
     }
 }
@@ -84,6 +101,7 @@ enum ServerMessage: Decodable {
     case newChatOptions(NewChatOptions)
     case automationList([AutomationRecord])
     case chatList([CodexChat])
+    case chatDetail(CodexChat)
     case chatStarted(CodexChat)
     case chatEvent(chatId: String, event: ChatEvent)
     case approvalRequired(ApprovalRequest)
@@ -125,6 +143,8 @@ enum ServerMessage: Decodable {
             self = .automationList(try container.decode([AutomationRecord].self, forKey: .automations))
         case "chat_list":
             self = .chatList(try container.decode([CodexChat].self, forKey: .chats))
+        case "chat_detail":
+            self = .chatDetail(try container.decode(CodexChat.self, forKey: .chat))
         case "chat_started":
             self = .chatStarted(try container.decode(CodexChat.self, forKey: .chat))
         case "chat_event":

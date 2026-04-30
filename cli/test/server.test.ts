@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import WebSocket from "ws";
 import { once } from "node:events";
 import { createHandrailServer } from "../src/server.js";
-import type { ChatRecord, HandrailState, NewChatOptions, ServerMessage, StartChatOptions } from "../src/types.js";
+import type { AutomationRecord, ChatRecord, HandrailState, NewChatOptions, ServerMessage, StartChatOptions } from "../src/types.js";
 
 const state: HandrailState = {
   protocolVersion: 1,
@@ -30,15 +30,21 @@ const options: NewChatOptions = {
   defaultReasoningEffort: "high"
 };
 
-const automations = [{
+const automations: AutomationRecord[] = [{
   id: "finish-handrail-ipad-app",
   name: "Finish Handrail iPad App",
   kind: "cron",
   status: "ACTIVE",
+  prompt: "Continue the iPad app.",
+  rrule: "FREQ=HOURLY;INTERVAL=1",
   scheduleText: "Hourly",
   contextText: "handrail",
-  projectName: "handrail"
-} as const];
+  projectName: "handrail",
+  model: "gpt-5.2",
+  reasoningEffort: "high",
+  executionEnvironment: "local",
+  cwds: ["/Users/me/project"]
+}];
 
 test("WebSocket server pairs, refreshes chats, stops chats, and reports command errors", async () => {
   const chat: ChatRecord = {
@@ -51,14 +57,29 @@ test("WebSocket server pairs, refreshes chats, stops chats, and reports command 
     updatedAt: "2026-04-29T00:01:00.000Z"
   };
   let stoppedChatId = "";
+  let ranAutomationId = "";
+  let pausedAutomationId = "";
+  let deletedAutomationId = "";
 
   const server = await createHandrailServer({
     state,
     port: 0,
     getOptions: async () => options,
     getAutomations: async () => automations,
+    automationActions: {
+      async runNow(id) {
+        ranAutomationId = id;
+      },
+      async pause(id) {
+        pausedAutomationId = id;
+      },
+      async delete(id) {
+        deletedAutomationId = id;
+      }
+    },
     chats: {
       list: async () => [chat],
+      detail: async () => chat,
       startChat: async (_options: StartChatOptions) => chat,
       continue: async () => {
         throw new Error("No Codex chat with id codex:missing.");
@@ -116,6 +137,32 @@ test("WebSocket server pairs, refreshes chats, stops chats, and reports command 
     } satisfies ServerMessage);
     assert.equal(stoppedChatId, chat.id);
 
+    ws.send(JSON.stringify({ type: "run_automation", automationId: "finish-handrail-ipad-app" }));
+    assert.deepEqual(await messages.next(), {
+      type: "command_result",
+      ok: true,
+      message: "Automation run requested."
+    } satisfies ServerMessage);
+    assert.equal(ranAutomationId, "finish-handrail-ipad-app");
+
+    ws.send(JSON.stringify({ type: "pause_automation", automationId: "finish-handrail-ipad-app" }));
+    assert.deepEqual(await messages.next(), {
+      type: "command_result",
+      ok: true,
+      message: "Automation paused."
+    } satisfies ServerMessage);
+    assert.equal((await messages.next()).type, "automation_list");
+    assert.equal(pausedAutomationId, "finish-handrail-ipad-app");
+
+    ws.send(JSON.stringify({ type: "delete_automation", automationId: "finish-handrail-ipad-app" }));
+    assert.deepEqual(await messages.next(), {
+      type: "command_result",
+      ok: true,
+      message: "Automation deleted."
+    } satisfies ServerMessage);
+    assert.equal((await messages.next()).type, "automation_list");
+    assert.equal(deletedAutomationId, "finish-handrail-ipad-app");
+
     ws.send(JSON.stringify({ type: "continue_chat", chatId: "codex:missing", prompt: "Hello" }));
     assert.deepEqual(await messages.next(), {
       type: "error",
@@ -142,6 +189,9 @@ test("WebSocket server accepts and persists push token registration", async () =
     },
     chats: {
       list: async () => [],
+      detail: async () => {
+        throw new Error("unused");
+      },
       startChat: async () => {
         throw new Error("unused");
       },
@@ -209,6 +259,7 @@ test("WebSocket server broadcasts chat list when thinking appears during polling
     notificationPollIntervalMs: 20,
     chats: {
       list: async () => [chat],
+      detail: async () => chat,
       startChat: async () => chat,
       continue: async () => chat,
       sendInput() {},
@@ -270,6 +321,7 @@ test("WebSocket server broadcasts chat list when transcript content changes duri
     notificationPollIntervalMs: 20,
     chats: {
       list: async () => [chat],
+      detail: async () => chat,
       startChat: async () => chat,
       continue: async () => chat,
       sendInput() {},

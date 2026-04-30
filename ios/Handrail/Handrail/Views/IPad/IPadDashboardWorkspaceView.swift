@@ -17,11 +17,7 @@ struct IPadDashboardWorkspaceView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 if let machine = store.pairedMachine {
-                    machineStatus(machine)
-                    summaryGrid
-                    activeChatsSection
-                    attentionSection
-                    recentOutcomesSection
+                    dashboardContent(machine)
                 } else {
                     EmptyState(
                         title: "No machine paired",
@@ -49,6 +45,33 @@ struct IPadDashboardWorkspaceView: View {
         }
     }
 
+    private func dashboardContent(_ machine: PairedMachine) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: 20) {
+                VStack(alignment: .leading, spacing: 16) {
+                    machineStatus(machine)
+                    summaryGrid
+                    attentionSection
+                }
+                .frame(minWidth: 360, idealWidth: 420, maxWidth: 520, alignment: .topLeading)
+
+                VStack(alignment: .leading, spacing: 16) {
+                    activeChatsSection
+                    recentOutcomesSection
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
+
+            VStack(alignment: .leading, spacing: 16) {
+                machineStatus(machine)
+                summaryGrid
+                activeChatsSection
+                attentionSection
+                recentOutcomesSection
+            }
+        }
+    }
+
     private func machineStatus(_ machine: PairedMachine) -> some View {
         Card {
             HStack(alignment: .top, spacing: 14) {
@@ -60,14 +83,13 @@ struct IPadDashboardWorkspaceView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(machine.machineName)
                         .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                     Text("\(machine.host):\(machine.port)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                    Text("Commands run on this paired Mac over the local Handrail connection. No cloud execution is used.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
+                .layoutPriority(1)
 
                 Spacer(minLength: 16)
 
@@ -84,13 +106,11 @@ struct IPadDashboardWorkspaceView: View {
     }
 
     private var summaryGrid: some View {
-        Grid(horizontalSpacing: 12, verticalSpacing: 12) {
-            GridRow {
-                metric("Running", runningChats.count, "play.fill", .green)
-                metric("Attention", visibleAttentionChats.count, "exclamationmark.triangle.fill", .orange)
-                metric("Failed", failedChats.count, "xmark.octagon.fill", .red)
-                metric("Completed Today", completedToday.count, "checkmark.circle.fill", .blue)
-            }
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 132), spacing: 12)], alignment: .leading, spacing: 12) {
+            metric("Running", runningChats.count, "play.fill", .green)
+            metric("Attention", visibleAttentionChats.count, "exclamationmark.triangle.fill", .orange)
+            metric("Failed", failedChats.count, "xmark.octagon.fill", .red)
+            metric("Completed Today", completedToday.count, "checkmark.circle.fill", .blue)
         }
     }
 
@@ -201,11 +221,13 @@ struct IPadDashboardWorkspaceView: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(.primary)
                         .lineLimit(1)
+                        .layoutPriority(1)
                     Text(IPadChatListQuery.projectName(for: chat))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
+                .layoutPriority(1)
 
                 Spacer()
 

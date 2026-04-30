@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { desktopProjectName, extractStatus, extractThinking, formatCodexTranscriptEntry, humanCodexTitle, parseAutomationTargetThreadId, readCodexSessionStatus, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
+import { desktopProjectName, extractStatus, extractThinking, formatCodexTranscriptEntry, humanCodexTitle, latestCodexLogStatuses, parseAutomationTargetThreadId, readCodexSessionStatus, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
 
 test("formats imported Codex transcript entries for rich mobile rendering", () => {
   const entry = formatCodexTranscriptEntry("assistant", [
@@ -99,6 +99,20 @@ test("uses Codex Desktop project names for imported chat metadata", () => {
   assert.equal(desktopProjectName("/Users/me/IdeaProjects/pgs_lab", projects), "pgs_lab");
 });
 
+test("uses the newest SQLite lifecycle status per Codex thread", () => {
+  assert.deepEqual(latestCodexLogStatuses([
+    { thread_id: "active", status: "completed", ts: 10, ts_nanos: 0, id: 1 },
+    { thread_id: "done", status: "running", ts: 7, ts_nanos: 0, id: 2 },
+    { thread_id: "active", status: "running", ts: 11, ts_nanos: 0, id: 3 },
+    { thread_id: "done", status: "completed", ts: 7, ts_nanos: 1, id: 4 },
+    { thread_id: "failed", status: "failed", ts: 12, ts_nanos: 0, id: 5 }
+  ]), new Map([
+    ["active", "running"],
+    ["done", "completed"],
+    ["failed", "failed"]
+  ]));
+});
+
 test("extracts automation target thread ids from automation TOML", () => {
   assert.equal(
     parseAutomationTargetThreadId([
@@ -192,7 +206,7 @@ test("reads large Codex rollout files from bounded head and tail", async () => {
   }
 });
 
-test("reads active Codex status when the bounded tail omits task_started", async () => {
+test("infers active Codex status when the bounded tail omits task_started", async () => {
   const tempDir = await mkdtemp(join(tmpdir(), "handrail-rollout-status-"));
   const path = join(tempDir, "rollout.jsonl");
   const first = JSON.stringify({ type: "session_meta", payload: { id: "abc", timestamp: "2026-04-28T00:00:00.000Z" } });
@@ -203,7 +217,7 @@ test("reads active Codex status when the bounded tail omits task_started", async
 
   try {
     const boundedLines = await readRolloutLines(path);
-    assert.equal(extractStatus(boundedLines.slice(1)), "idle");
+    assert.equal(extractStatus(boundedLines.slice(1)), "running");
     assert.equal(await readCodexSessionStatus(path), "running");
   } finally {
     await rm(tempDir, { recursive: true, force: true });

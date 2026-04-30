@@ -70,52 +70,94 @@ struct IPadChatListWorkspaceView: View {
     }
 
     private var controls: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                TextField("Search chats", text: $searchText)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .focused($searchFocused)
-                    .submitLabel(.search)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                searchField
+                    .frame(maxWidth: 280)
+                filterMenu
+                sortPicker
+                    .frame(maxWidth: 260)
+                Spacer()
+                groupToggle(showTitle: true)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
-            .frame(maxWidth: 280)
-            .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(searchFocused ? Color.purple.opacity(0.7) : Color.white.opacity(0.10), lineWidth: 1)
-            )
 
-            Menu {
-                Picker("Status", selection: $filter) {
-                    ForEach(ChatListFilter.allCases) { filter in
-                        Label(filterTitle(filter), systemImage: filterIcon(filter)).tag(filter)
-                    }
+            VStack(alignment: .leading, spacing: 10) {
+                searchField
+                HStack(spacing: 8) {
+                    filterMenu
+                    sortMenu
+                    groupToggle(showTitle: false)
+                    Spacer(minLength: 0)
                 }
-            } label: {
-                Label(filterTitle(filter), systemImage: "line.3.horizontal.decrease.circle")
             }
-            .buttonStyle(.bordered)
+        }
+        .padding(14)
+    }
 
+    private var searchField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search chats", text: $searchText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .focused($searchFocused)
+                .submitLabel(.search)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(searchFocused ? Color.purple.opacity(0.7) : Color.white.opacity(0.10), lineWidth: 1)
+        )
+    }
+
+    private var filterMenu: some View {
+        Menu {
+            Picker("Status", selection: $filter) {
+                ForEach(ChatListFilter.allCases) { filter in
+                    Label(filterTitle(filter), systemImage: filterIcon(filter)).tag(filter)
+                }
+            }
+        } label: {
+            Label(filterTitle(filter), systemImage: "line.3.horizontal.decrease.circle")
+        }
+        .buttonStyle(.bordered)
+    }
+
+    private var sortPicker: some View {
+        Picker("Sort", selection: $sort) {
+            ForEach(ChatListSort.allCases) { sort in
+                Text(sortTitle(sort)).tag(sort)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    private var sortMenu: some View {
+        Menu {
             Picker("Sort", selection: $sort) {
                 ForEach(ChatListSort.allCases) { sort in
                     Text(sortTitle(sort)).tag(sort)
                 }
             }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 260)
-
-            Spacer()
-
-            Toggle(isOn: $groupsByProject) {
-                Label("Group by project", systemImage: "folder")
-            }
-            .toggleStyle(.button)
+        } label: {
+            Label(sortTitle(sort), systemImage: "arrow.up.arrow.down")
         }
-        .padding(14)
+        .buttonStyle(.bordered)
+    }
+
+    private func groupToggle(showTitle: Bool) -> some View {
+        Toggle(isOn: $groupsByProject) {
+            if showTitle {
+                Label("Group by project", systemImage: "folder")
+            } else {
+                Image(systemName: "folder")
+            }
+        }
+        .toggleStyle(.button)
+        .accessibilityLabel("Group by project")
     }
 
     private var flatList: some View {
