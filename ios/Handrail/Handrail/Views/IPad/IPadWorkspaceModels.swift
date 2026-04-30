@@ -26,6 +26,28 @@ struct IPadWorkspaceSelection: Hashable {
     var selectedSection: HandrailSection = .dashboard
     var selectedChatId: String?
     var selectedApprovalId: String?
+
+    var hasDetailSelection: Bool {
+        selectedChatId != nil || selectedApprovalId != nil
+    }
+
+    mutating func selectSection(_ section: HandrailSection) {
+        selectedSection = section
+    }
+
+    mutating func selectChat(id chatId: String) {
+        selectedSection = .chats
+        selectedChatId = chatId
+        selectedApprovalId = nil
+    }
+
+    mutating func selectApproval(id approvalId: String, chatId: String?) {
+        selectedSection = .attention
+        selectedApprovalId = approvalId
+        if let chatId {
+            selectedChatId = chatId
+        }
+    }
 }
 
 struct IPadSelectedChatWindow: Identifiable, Hashable, Codable {

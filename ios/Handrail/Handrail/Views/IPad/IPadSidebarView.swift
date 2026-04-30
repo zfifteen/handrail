@@ -7,11 +7,15 @@ struct IPadSidebarView: View {
         List {
             ForEach(HandrailSection.allCases) { section in
                 Button {
-                    selection.selectedSection = section
+                    selection.selectSection(section)
                 } label: {
                     Label(section.title, systemImage: systemImage(for: section))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .foregroundStyle(selection.selectedSection == section ? Color.accentColor : Color.primary)
+                .listRowBackground(selection.selectedSection == section ? Color.accentColor.opacity(0.16) : Color.clear)
             }
         }
         .navigationTitle("Handrail")

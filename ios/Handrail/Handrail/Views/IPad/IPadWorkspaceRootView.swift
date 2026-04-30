@@ -15,6 +15,7 @@ struct IPadWorkspaceRootView: View {
         } detail: {
             placeholderDetail
         }
+        .navigationSplitViewStyle(.balanced)
     }
 
     @ViewBuilder
@@ -37,7 +38,9 @@ struct IPadWorkspaceRootView: View {
 
     @ViewBuilder
     private var placeholderDetail: some View {
-        if selection.selectedChatId != nil {
+        if selection.selectedApprovalId != nil {
+            IPadApprovalReviewWorkspaceView(selection: $selection)
+        } else if selection.selectedChatId != nil {
             IPadChatDetailWorkspaceView(selection: $selection)
         } else {
             ContentUnavailableView("No Selection", systemImage: "rectangle.split.3x1", description: Text("Select a chat or approval after Phase Three implementation."))
