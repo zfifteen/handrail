@@ -97,6 +97,7 @@ export async function createHandrailServer(options: {
 
   const persistState = options.persistState ?? saveState;
   const notificationDispatcher = options.notificationDispatcher ?? new NotificationDispatcher(options.state, persistState);
+  let lastVisibleChatSignature = "";
   let chats: ChatController;
   const notifyChatById = async (chatId: string) => {
     const chat = (await chats.list()).find((item) => item.id === chatId);
@@ -111,6 +112,11 @@ export async function createHandrailServer(options: {
       visibleChats,
       (message) => broadcast({ type: "error", message })
     );
+    const signature = visibleChatSignature(visibleChats);
+    if (signature !== lastVisibleChatSignature) {
+      lastVisibleChatSignature = signature;
+      broadcast({ type: "chat_list", chats: visibleChats });
+    }
   };
   const observer = setInterval(() => {
     void observeNotifications().catch((error) => {
@@ -146,6 +152,15 @@ export async function createHandrailServer(options: {
       });
     }
   };
+}
+
+function visibleChatSignature(chats: ChatRecord[]): string {
+  return JSON.stringify(chats.map((chat) => ({
+    id: chat.id,
+    status: chat.status,
+    transcriptLength: chat.transcript?.length ?? 0,
+    thinkingLength: chat.thinking?.length ?? 0
+  })));
 }
 
 async function handleMessage(

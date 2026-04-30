@@ -3,13 +3,16 @@ import { access, open, readFile, stat } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { homedir } from "node:os";
 import { promisify } from "node:util";
-import type { ChatRecord } from "./types.js";
+import type { ChatRecord, ThinkingEntry } from "./types.js";
 import { discoverDesktopProjects } from "./newChatOptions.js";
 
 const MAX_CODEX_SESSIONS = 50;
 const MAX_TRANSCRIPT_LINES = 40;
 const MAX_TRANSCRIPT_CHARS = 12_000;
 const MAX_TRANSCRIPT_ENTRY_CHARS = 2_500;
+const MAX_THINKING_ENTRIES = 40;
+const MAX_THINKING_CHARS = 12_000;
+const MAX_THINKING_ENTRY_CHARS = 2_500;
 const ROLLOUT_HEAD_BYTES = 64 * 1024;
 const ROLLOUT_TAIL_BYTES = 2 * 1024 * 1024;
 const execFileAsync = promisify(execFile);
@@ -43,6 +46,7 @@ interface CodexSessionLine {
     type?: string;
     role?: string;
     thread_name?: string;
+    text?: string;
     content?: Array<{ type?: string; text?: string }>;
   };
 }
@@ -151,6 +155,7 @@ async function readCodexSession(thread: CodexDesktopThread, pinnedThreadIds: Map
     startedAt: unixSecondsToIso(thread.created_at) || parsed.payload.timestamp,
     updatedAt: unixSecondsToIso(thread.updated_at) || extractUpdatedAt(lines) || parsed.payload.timestamp,
     transcript: extractTranscript(lines.slice(1)),
+    thinking: extractThinking(lines.slice(1)),
     isPinned: pinnedThreadIds.has(parsed.payload.id),
     pinnedOrder: pinnedThreadIds.get(parsed.payload.id)
   };
@@ -259,7 +264,7 @@ export function extractStatus(lines: string[]): ChatRecord["status"] {
   return "idle";
 }
 
-function extractTranscript(lines: string[]): string[] {
+export function extractTranscript(lines: string[]): string[] {
   const entries: string[] = [];
 
   for (const line of lines) {
@@ -272,11 +277,7 @@ function extractTranscript(lines: string[]): string[] {
       continue;
     }
 
-    const text = (payload.content ?? [])
-      .filter((item) => item.type === "input_text" || item.type === "output_text")
-      .map((item) => item.text?.trim() ?? "")
-      .filter(Boolean)
-      .join("\n\n");
+    const text = messageText(payload);
     if (!text || isSessionContext(text)) {
       continue;
     }
@@ -300,6 +301,63 @@ function extractTranscript(lines: string[]): string[] {
   }
 
   return transcript;
+}
+
+export function extractThinking(lines: string[]): ThinkingEntry[] {
+  const entries: ThinkingEntry[] = [];
+  let round = 0;
+
+  lines.forEach((line, index) => {
+    const parsed = parseLine<CodexSessionLine>(line);
+    const payload = parsed.payload;
+    if (parsed.type === "response_item" && payload?.type === "message" && payload.role === "user") {
+      const text = messageText(payload);
+      if (text && !isSessionContext(text)) {
+        round += 1;
+      }
+      return;
+    }
+
+    if (parsed.type !== "event_msg" || payload?.type !== "agent_reasoning") {
+      return;
+    }
+
+    const text = payload.text?.trim();
+    if (!text) {
+      return;
+    }
+
+    const visibleText =
+      text.length > MAX_THINKING_ENTRY_CHARS
+        ? `${text.slice(0, MAX_THINKING_ENTRY_CHARS)}\n[truncated]`
+        : text;
+    entries.push({
+      id: `thinking:${index}:${parsed.timestamp ?? "unknown"}`,
+      round: Math.max(round, 1),
+      text: markdownWithHardLineBreaks(visibleText),
+      at: parsed.timestamp
+    });
+  });
+
+  const thinking: ThinkingEntry[] = [];
+  let usedChars = 0;
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index];
+    if (usedChars + entry.text.length > MAX_THINKING_CHARS || thinking.length >= MAX_THINKING_ENTRIES) {
+      break;
+    }
+    thinking.unshift(entry);
+    usedChars += entry.text.length;
+  }
+  return thinking;
+}
+
+function messageText(payload: NonNullable<CodexSessionLine["payload"]>): string {
+  return (payload.content ?? [])
+    .filter((item) => item.type === "input_text" || item.type === "output_text")
+    .map((item) => item.text?.trim() ?? "")
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 function parseLine<T>(line: string): T {

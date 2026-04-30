@@ -6,6 +6,7 @@ struct ChatDetailView: View {
     @State private var input = ""
     @State private var showJumpToLatest = false
     @State private var pendingContinuePrompt: String?
+    @State private var expandedThinkingRounds: Set<Int> = []
     @FocusState private var isComposerFocused: Bool
 
     var body: some View {
@@ -16,8 +17,6 @@ struct ChatDetailView: View {
                     composer(placeholder: "Send input") { text in
                         store.sendInput(chatId: chatId, text: text)
                     }
-                } else {
-                    readOnlyNotice("Codex is working.")
                 }
             } else if canStartFollowUp {
                 followUpComposer
@@ -84,6 +83,9 @@ struct ChatDetailView: View {
                     clearCompletedContinuePromptIfNeeded()
                     scrollToLatest(proxy, animated: true)
                 }
+                .onChange(of: thinkingSignature) { _, _ in
+                    scrollToLatest(proxy, animated: true)
+                }
                 .onChange(of: chatError) { _, error in
                     if error != nil {
                         pendingContinuePrompt = nil
@@ -142,16 +144,7 @@ struct ChatDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 8) {
                 StatusBadge(status: chat.status)
-                if chat.status == .running {
-                    HStack(spacing: 6) {
-                        ProgressView()
-                            .controlSize(.small)
-                            .tint(.green)
-                        Text("Codex is working")
-                    }
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.green)
-                } else if chat.status != .waitingForApproval {
+                if chat.status != .running && chat.status != .waitingForApproval {
                     Text("Ready for follow-up")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
@@ -282,8 +275,8 @@ struct ChatDetailView: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 48)
-                if isChatWorking {
-                    CodexWorkingIndicator()
+                if isChatWorking || !thinkingEntries.isEmpty {
+                    thinkingDisclosure(round: latestRound, isWorking: isChatWorking)
                 }
                 if let error = chatError {
                     Text(error)
@@ -297,11 +290,14 @@ struct ChatDetailView: View {
                     if block.startsRound {
                         roundDivider(block.round)
                     }
+                    if block.role == .codex && isFirstCodexBlock(index: index, round: block.round) {
+                        thinkingDisclosure(round: block.round, isWorking: isChatWorking && block.round == latestRound)
+                    }
                     ChatMessageBubble(block: block, isLatest: index == chatBlocks.count - 1)
                 }
                 chatErrorView
-                if isChatWorking {
-                    CodexWorkingIndicator()
+                if isChatWorking && !hasCodexBlock(round: latestRound) {
+                    thinkingDisclosure(round: latestRound, isWorking: true)
                 }
             }
         }
@@ -396,6 +392,18 @@ struct ChatDetailView: View {
         ChatBlock.parse(transcriptText)
     }
 
+    private var thinkingEntries: [ThinkingEntry] {
+        store.chat(id: chatId)?.thinking ?? []
+    }
+
+    private var thinkingSignature: String {
+        thinkingEntries.map { "\($0.id):\($0.round):\($0.text.count)" }.joined(separator: "|")
+    }
+
+    private var latestRound: Int {
+        chatBlocks.last?.round ?? thinkingEntries.last?.round ?? 1
+    }
+
     private var bottomId: String {
         "bottom-\(chatId)"
     }
@@ -422,6 +430,36 @@ struct ChatDetailView: View {
 
     private func dismissComposerKeyboard() {
         isComposerFocused = false
+    }
+
+    private func thinkingEntries(round: Int) -> [ThinkingEntry] {
+        thinkingEntries.filter { $0.round == round }
+    }
+
+    private func isFirstCodexBlock(index: Int, round: Int) -> Bool {
+        !chatBlocks.prefix(index).contains { $0.role == .codex && $0.round == round }
+    }
+
+    private func hasCodexBlock(round: Int) -> Bool {
+        chatBlocks.contains { $0.role == .codex && $0.round == round }
+    }
+
+    private func thinkingDisclosure(round: Int, isWorking: Bool) -> some View {
+        ThinkingDisclosure(
+            title: isWorking ? "Codex is working" : "Thinking",
+            isWorking: isWorking,
+            entries: thinkingEntries(round: round),
+            isExpanded: Binding(
+                get: { expandedThinkingRounds.contains(round) },
+                set: { isExpanded in
+                    if isExpanded {
+                        expandedThinkingRounds.insert(round)
+                    } else {
+                        expandedThinkingRounds.remove(round)
+                    }
+                }
+            )
+        )
     }
 
     private var chatErrorView: some View {
@@ -503,19 +541,56 @@ private struct ChatMessageBubble: View {
     }
 }
 
-private struct CodexWorkingIndicator: View {
+private struct ThinkingDisclosure: View {
+    let title: String
+    let isWorking: Bool
+    let entries: [ThinkingEntry]
+    @Binding var isExpanded: Bool
+
     var body: some View {
-        HStack(spacing: 10) {
-            ProgressView()
-                .controlSize(.small)
-                .tint(.green)
-            Text("Codex is working")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.green)
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(alignment: .leading, spacing: 10) {
+                if entries.isEmpty {
+                    Text("No thinking messages yet.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    ForEach(entries) { entry in
+                        MarkdownBody(text: entry.text)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(10)
+                            .background(Color.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+                }
+            }
+            .padding(.top, 8)
+        } label: {
+            HStack(spacing: 8) {
+                if isWorking {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(.green)
+                }
+                Image(systemName: "brain.head.profile")
+                    .font(.caption.weight(.semibold))
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                if !entries.isEmpty {
+                    Text("\(entries.count)")
+                        .font(.caption2.weight(.bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.green.opacity(0.18), in: Capsule())
+                }
+            }
+            .foregroundStyle(isWorking ? .green : .secondary)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(Color.green.opacity(0.12), in: Capsule())
+        .background(Color.green.opacity(isWorking ? 0.12 : 0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .tint(.green)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

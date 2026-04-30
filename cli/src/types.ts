@@ -12,9 +12,17 @@ export interface ChatRecord {
   exitCode?: number | null;
   files?: string[];
   transcript?: string[];
+  thinking?: ThinkingEntry[];
   acceptsInput?: boolean;
   isPinned?: boolean;
   pinnedOrder?: number;
+}
+
+export interface ThinkingEntry {
+  id: string;
+  round: number;
+  text: string;
+  at?: string;
 }
 
 export type NewChatWorkMode = "local" | "worktree";

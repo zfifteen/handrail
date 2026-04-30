@@ -50,9 +50,17 @@ struct CodexChat: Codable, Identifiable, Hashable {
     var exitCode: Int?
     var files: [String]?
     var transcript: [String]? = nil
+    var thinking: [ThinkingEntry]? = nil
     var acceptsInput: Bool? = nil
     var isPinned: Bool? = nil
     var pinnedOrder: Int? = nil
+}
+
+struct ThinkingEntry: Codable, Identifiable, Hashable {
+    let id: String
+    let round: Int
+    let text: String
+    let at: Date?
 }
 
 struct ChatEvent: Codable, Hashable {

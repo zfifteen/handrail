@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { desktopProjectName, formatCodexTranscriptEntry, humanCodexTitle, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
+import { desktopProjectName, extractThinking, formatCodexTranscriptEntry, humanCodexTitle, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
 
 test("formats imported Codex transcript entries for rich mobile rendering", () => {
   const entry = formatCodexTranscriptEntry("assistant", [
@@ -97,6 +97,69 @@ test("uses Codex Desktop project names for imported chat metadata", () => {
 
   assert.equal(desktopProjectName("/Users/me/IdeaProjects/handrail", projects), "Build Handrail MVP");
   assert.equal(desktopProjectName("/Users/me/IdeaProjects/pgs_lab", projects), "pgs_lab");
+});
+
+test("extracts desktop thinking summaries by visible chat round", () => {
+  const lines = [
+    JSON.stringify({
+      type: "response_item",
+      payload: { type: "message", role: "user", content: [{ type: "input_text", text: "First prompt" }] }
+    }),
+    JSON.stringify({
+      timestamp: "2026-04-30T00:00:01.000Z",
+      type: "event_msg",
+      payload: { type: "agent_reasoning", text: "Thinking about the first prompt." }
+    }),
+    JSON.stringify({
+      type: "response_item",
+      payload: {
+        type: "reasoning",
+        summary: [{ type: "summary_text", text: "Duplicate reasoning item." }],
+        encrypted_content: "ignored"
+      }
+    }),
+    JSON.stringify({
+      type: "response_item",
+      payload: { type: "message", role: "assistant", content: [{ type: "output_text", text: "First answer" }] }
+    }),
+    JSON.stringify({
+      type: "response_item",
+      payload: { type: "message", role: "user", content: [{ type: "input_text", text: "Second prompt" }] }
+    }),
+    JSON.stringify({
+      timestamp: "2026-04-30T00:00:02.000Z",
+      type: "event_msg",
+      payload: { type: "agent_reasoning", text: "Thinking about the second prompt." }
+    })
+  ];
+
+  assert.deepEqual(extractThinking(lines), [
+    {
+      id: "thinking:1:2026-04-30T00:00:01.000Z",
+      round: 1,
+      text: "Thinking about the first prompt.  ",
+      at: "2026-04-30T00:00:01.000Z"
+    },
+    {
+      id: "thinking:5:2026-04-30T00:00:02.000Z",
+      round: 2,
+      text: "Thinking about the second prompt.  ",
+      at: "2026-04-30T00:00:02.000Z"
+    }
+  ]);
+});
+
+test("bounds extracted thinking summaries", () => {
+  const lines = Array.from({ length: 45 }, (_, index) => JSON.stringify({
+    timestamp: `2026-04-30T00:00:${String(index).padStart(2, "0")}.000Z`,
+    type: "event_msg",
+    payload: { type: "agent_reasoning", text: `thinking ${index} ${"x".repeat(400)}` }
+  }));
+
+  const thinking = extractThinking(lines);
+  assert.ok(thinking.length < 40);
+  assert.ok(thinking.reduce((total, entry) => total + entry.text.length, 0) <= 12_000);
+  assert.equal(thinking.at(-1)?.round, 1);
 });
 
 test("reads large Codex rollout files from bounded head and tail", async () => {
