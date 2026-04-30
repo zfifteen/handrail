@@ -27,6 +27,7 @@ struct IPadChatDetailWorkspaceView: View {
                         Image(systemName: "stop.fill")
                     }
                     .keyboardShortcut(".", modifiers: .command)
+                    .hoverEffect(.highlight)
                     .accessibilityLabel("Stop selected chat")
                 }
                 if commandAvailability.canContinueSelectedChat {
@@ -35,6 +36,7 @@ struct IPadChatDetailWorkspaceView: View {
                     } label: {
                         Image(systemName: "text.bubble")
                     }
+                    .hoverEffect(.highlight)
                     .accessibilityLabel("Focus follow-up composer")
                 }
             }
@@ -127,6 +129,7 @@ struct IPadChatDetailWorkspaceView: View {
                     .buttonStyle(.borderedProminent)
                     .buttonBorderShape(.circle)
                     .tint(.purple)
+                    .hoverEffect(.highlight)
                     .padding(.trailing, 22)
                     .padding(.bottom, 14)
                     .accessibilityLabel("Jump to latest message")
@@ -193,6 +196,7 @@ struct IPadChatDetailWorkspaceView: View {
                         }
                         .buttonStyle(.bordered)
                         .tint(.red)
+                        .hoverEffect(.highlight)
                     }
 
                     if commandAvailability.canContinueSelectedChat {
@@ -203,6 +207,7 @@ struct IPadChatDetailWorkspaceView: View {
                         }
                         .buttonStyle(.bordered)
                         .tint(.purple)
+                        .hoverEffect(.highlight)
                     }
                 }
             }
@@ -296,6 +301,7 @@ struct IPadChatDetailWorkspaceView: View {
                     }
                     .buttonStyle(.bordered)
                     .disabled(!canDecide)
+                    .hoverEffect(.highlight)
 
                     Button {
                         store.approve(approval)
@@ -306,6 +312,7 @@ struct IPadChatDetailWorkspaceView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(.purple)
                     .disabled(!canDecide)
+                    .hoverEffect(.highlight)
                 }
             }
         }
@@ -329,6 +336,7 @@ struct IPadChatDetailWorkspaceView: View {
             .tint(.purple)
             .keyboardShortcut(.return, modifiers: .command)
             .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .hoverEffect(.highlight)
             .accessibilityLabel("Send")
         }
         .padding()
@@ -354,6 +362,7 @@ struct IPadChatDetailWorkspaceView: View {
             .tint(.purple)
             .keyboardShortcut(.return, modifiers: .command)
             .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || pendingContinuePrompt != nil)
+            .hoverEffect(.highlight)
         }
         .padding()
         .background(Color.black)

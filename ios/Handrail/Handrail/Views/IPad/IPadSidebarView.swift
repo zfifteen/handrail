@@ -14,6 +14,7 @@ struct IPadSidebarView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .hoverEffect(.highlight)
                 .foregroundStyle(selection.selectedSection == section ? Color.accentColor : Color.primary)
                 .listRowBackground(selection.selectedSection == section ? Color.accentColor.opacity(0.16) : Color.clear)
             }

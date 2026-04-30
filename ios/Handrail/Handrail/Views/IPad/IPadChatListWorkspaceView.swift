@@ -44,6 +44,7 @@ struct IPadChatListWorkspaceView: View {
                     Image(systemName: "magnifyingglass")
                 }
                 .keyboardShortcut("f", modifiers: .command)
+                .hoverEffect(.highlight)
                 .accessibilityLabel("Search chats")
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -54,6 +55,7 @@ struct IPadChatListWorkspaceView: View {
                 }
                 .keyboardShortcut("r", modifiers: .command)
                 .disabled(store.pairedMachine == nil)
+                .hoverEffect(.highlight)
                 .accessibilityLabel("Refresh chats")
             }
         }
@@ -185,6 +187,7 @@ struct IPadChatListWorkspaceView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .hoverEffect(.highlight)
         .contextMenu {
             Label(row.isPinned ? "Pinned in Codex Desktop" : "Pin in Codex Desktop", systemImage: "pin")
         }

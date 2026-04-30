@@ -84,6 +84,7 @@ struct IPadApprovalReviewWorkspaceView: View {
                     }
                     .buttonStyle(.bordered)
                     .disabled(!canDecide(approval))
+                    .hoverEffect(.highlight)
 
                     Button {
                         approve(approval)
@@ -94,6 +95,7 @@ struct IPadApprovalReviewWorkspaceView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(.purple)
                     .disabled(!canDecide(approval))
+                    .hoverEffect(.highlight)
                 }
             }
         }

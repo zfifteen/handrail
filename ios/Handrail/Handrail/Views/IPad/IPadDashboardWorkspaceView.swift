@@ -43,6 +43,7 @@ struct IPadDashboardWorkspaceView: View {
                     Image(systemName: "square.and.pencil")
                 }
                 .disabled(store.pairedMachine?.isOnline != true)
+                .hoverEffect(.highlight)
                 .accessibilityLabel("New chat")
             }
         }
@@ -175,6 +176,7 @@ struct IPadDashboardWorkspaceView: View {
                 }
                 .buttonStyle(.bordered)
                 .tint(.red)
+                .hoverEffect(.highlight)
                 .accessibilityLabel("Stop \(IPadChatListQuery.displayTitle(for: chat))")
             }
         }
@@ -220,6 +222,7 @@ struct IPadDashboardWorkspaceView: View {
             .background(Color.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
+        .hoverEffect(.highlight)
     }
 
     private func syncText(machine: PairedMachine) -> String {

@@ -55,6 +55,7 @@ struct IPadNewChatPanel: View {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
                     .keyboardShortcut(.cancelAction)
+                    .hoverEffect(.highlight)
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Start") {
@@ -63,6 +64,7 @@ struct IPadNewChatPanel: View {
                 }
                 .keyboardShortcut(.return, modifiers: .command)
                 .disabled(!canStart || isStarting)
+                .hoverEffect(.highlight)
             }
         }
     }
@@ -199,6 +201,7 @@ struct IPadNewChatPanel: View {
             .padding(.vertical, 11)
         }
         .buttonStyle(.plain)
+        .hoverEffect(.highlight)
         .simultaneousGesture(TapGesture().onEnded(dismissPromptKeyboard))
     }
 
@@ -211,6 +214,7 @@ struct IPadNewChatPanel: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.white.opacity(0.10), in: Capsule())
             .foregroundStyle(.secondary)
+            .hoverEffect(.highlight)
             .simultaneousGesture(TapGesture().onEnded(dismissPromptKeyboard))
     }
 
