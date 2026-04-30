@@ -14,7 +14,7 @@ Handrail is not production-ready for App Store submission across any of its thre
 
 | Platform | Implementation | Known Open Bugs | App Store Blockers | Status |
 |---|---|---|---|---|
-| iOS (iPhone) | Feature-complete MVP | 11 open | 4 | NOT READY |
+| iOS (iPhone) | Feature-complete MVP | 11 open | 5 | NOT READY |
 | iPad | Partial (split-view scaffolding) | 6 open | 6 | NOT READY |
 | watchOS | None (spec only) | N/A | All | NOT STARTED |
 
@@ -35,10 +35,10 @@ These items will cause Apple review rejection or provisioning failure regardless
 **Finding:** All device install attempts used a personal development team (`com.velocityworks.Handrail`). App Store submission requires an Apple Developer Program membership ($99/year). Push Notifications, HealthKit (if watchOS adds it), and distribution certificates all require the paid program.  
 **Action:** Enroll in the Apple Developer Program at developer.apple.com before any other distribution work proceeds. Assign the paid team to the Xcode project's Signing & Capabilities for all targets.
 
-### 1.3 No Local Network Usage Description in Info.plist
+### 1.3 Verify Local Network Usage Description is Shipped
 
-**Finding:** Handrail connects to `ws://` on the local network. iOS 14+ requires `NSLocalNetworkUsageDescription` in `Info.plist` with a human-readable reason. Absence causes the system to deny the connection without a prompt, breaking pairing on a fresh install. Apple review also checks for this key when the app uses local network APIs.  
-**Action:** Add `NSLocalNetworkUsageDescription` to `ios/Handrail/Handrail/Info.plist` with a value such as: `"Handrail connects to your Mac over the local network to display and control Codex Desktop chats."`
+**Finding:** Handrail connects to `ws://` on the local network. iOS 14+ requires `NSLocalNetworkUsageDescription` in the built Info.plist with a human-readable reason. The project currently uses a generated Info.plist (`GENERATE_INFOPLIST_FILE = YES`) and already sets `INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Handrail connects to the desktop CLI on your local network."` in `ios/Handrail/Handrail.xcodeproj/project.pbxproj`.  
+**Action:** Verify the key is present in the Release archive’s Info.plist and that a fresh install prompts for Local Network access before the first WebSocket connection attempt.
 
 ### 1.4 No Privacy Policy URL
 
@@ -202,7 +202,7 @@ Additionally, the iPad app has not been launched on a physical iPad device. Phys
 Execute in this order:
 
 1. **[BLOCKER]** Fix `Handrail.entitlements`: set `aps-environment` to `production` for Release.
-2. **[BLOCKER]** Add `NSLocalNetworkUsageDescription` to `Info.plist`.
+2. **[VERIFY]** Confirm `NSLocalNetworkUsageDescription` is present in the Release build Info.plist.
 3. **[DATA]** Fix `HandrailStore` chat_list merge to preserve detail-only fields (issues #14, #20).
 4. **[DATA]** Fix WebSocket send failure to mark connection offline (issue #15).
 5. **[DATA]** Fix `refreshChatDetail` offline no-op (issue #16).

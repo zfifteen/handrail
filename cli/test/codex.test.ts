@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { join } from "node:path";
 import { extractStatus, parseDesktopPinnedThreadIds } from "../src/codexSessions.js";
-import { codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame } from "../src/codexDesktopIpc.js";
+import { codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame } from "../src/codexDesktopIpc.js";
 import { discoverProjects } from "../src/newChatOptions.js";
 import { ChatManager } from "../src/chats.js";
 
@@ -57,6 +58,21 @@ test("builds Codex Desktop thread deeplinks", () => {
     codexDesktopThreadUrl("019dc424-e857-76e0-8229-589ecf107eb4"),
     "codex://threads/019dc424-e857-76e0-8229-589ecf107eb4"
   );
+});
+
+test("uses the Darwin user temp dir for Codex Desktop IPC", () => {
+  const previousTmpdir = process.env.TMPDIR;
+  process.env.TMPDIR = "/var/folders/test/T/";
+  try {
+    const socketName = typeof process.getuid === "function" ? `ipc-${process.getuid()}.sock` : "ipc.sock";
+    assert.equal(codexDesktopIpcSocketPath(), join("/var/folders/test/T", "codex-ipc", socketName));
+  } finally {
+    if (previousTmpdir === undefined) {
+      delete process.env.TMPDIR;
+    } else {
+      process.env.TMPDIR = previousTmpdir;
+    }
+  }
 });
 
 test("builds Codex Desktop app-server thread-start params", () => {

@@ -41,6 +41,7 @@ This file is updated by the recurring improvement task. Each run should choose o
 | 2026-04-29 | Debug builds do not attempt APNs registration without APNs entitlement. | CLI tests 26/26, simulator build, iPhone Debug build, iPhone install. |
 | 2026-04-29 | Chat Detail empty states use live chat language, not transcript language. | CLI tests 26/26, simulator build and launch, simulator screenshot `test-artifacts/handrail-chat-language-2026-04-29.png`, iPhone Debug build and install. |
 | 2026-04-30 | Task notifications never show raw Codex thread ids. | CLI tests 27/27, iOS simulator build and launch, simulator screenshot `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_f4d9008a-11f2-4ebf-b1da-f3bc7ba535dd.jpg`, notification body fallback test. |
+| 2026-04-30 | Release APNs entitlement uses `production`. | `plutil -lint ios/Handrail/Handrail/Handrail.entitlements`, iOS simulator build and launch (Release) via XcodeBuildMCP. |
 
 ## Run Log
 

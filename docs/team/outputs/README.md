@@ -5,6 +5,7 @@ This directory is the stable output location for recurring Handrail virtual team
 Expected report files:
 
 - `pm.md`
+- `business-analyst.md`
 - `architect.md`
 - `qa-lead.md`
 - `lead-dev.md`

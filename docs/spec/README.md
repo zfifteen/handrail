@@ -11,6 +11,8 @@ Baseline Desktop build:
 
 These documents are not upstream API documentation. They record observed behavior from a specific installed Desktop build and may drift when Codex Desktop updates.
 
+Handrail treats these specs as living contracts. When Handrail code changes a documented protocol surface or persistence assumption, update the corresponding spec in the same change-set (or file a concrete issue describing the drift).
+
 ## Specs
 
 | Document | Purpose | Confidence |

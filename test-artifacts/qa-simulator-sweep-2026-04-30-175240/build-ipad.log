@@ -1,0 +1,43 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj -scheme Handrail -configuration Debug -sdk iphonesimulator -derivedDataPath /private/tmp/handrail-qa-deriveddata-2026-04-30-175240 -destination id=43913CAF-14DD-45B6-9633-0A9790474FC7 build
+
+Build settings from command line:
+    SDKROOT = iphonesimulator26.4
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'Handrail' in project 'Handrail' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 6981f91b99be3a33bbe47f839c64cafb
+Build description path: /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/XCBuildData/6981f91b99be3a33bbe47f839c64cafb.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk /tmp/handrail-qa-deriveddata-2026-04-30-175240/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+
+ProcessInfoPlistFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Info.plist /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/empty-Handrail.plist (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-infoPlistUtility /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/empty-Handrail.plist -producttype com.apple.product-type.application -genpkginfo /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Info.plist
+
+** BUILD SUCCEEDED **
+

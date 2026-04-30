@@ -1,0 +1,577 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj -scheme Handrail -configuration Debug -sdk iphonesimulator -derivedDataPath /private/tmp/handrail-qa-deriveddata-2026-04-30-175240 -destination id=0E58E7BB-44FA-4BEE-9C94-8FED4C334482 build
+
+Build settings from command line:
+    SDKROOT = iphonesimulator26.4
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'Handrail' in project 'Handrail' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 490be7314317b549b6567a95d0c0758d
+Build description path: /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/XCBuildData/490be7314317b549b6567a95d0c0758d.xcbuilddata
+CreateBuildDirectory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj
+    builtin-create-build-directory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk /tmp/handrail-qa-deriveddata-2026-04-30-175240/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+
+CreateBuildDirectory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj
+    builtin-create-build-directory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex
+
+CreateBuildDirectory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj
+    builtin-create-build-directory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj
+    builtin-create-build-directory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj
+    builtin-create-build-directory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator
+
+CreateBuildDirectory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj
+    builtin-create-build-directory /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail-9c9766bd5af72f404c8ad5cab42d6d09-VFS-iphonesimulator/all-product-headers.yaml
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail-9c9766bd5af72f404c8ad5cab42d6d09-VFS-iphonesimulator/all-product-headers.yaml
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/empty-Handrail.plist (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/empty-Handrail.plist
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-generated-files.hmap (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-generated-files.hmap
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-all-target-headers.hmap (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-all-target-headers.hmap
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.hmap (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.hmap
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-project-headers.hmap (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-project-headers.hmap
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-own-target-headers.hmap (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-own-target-headers.hmap
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail_const_extract_protocols.json (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail_const_extract_protocols.json
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-OutputFileMap.json (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-OutputFileMap.json
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.SwiftFileList (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.SwiftFileList
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.SwiftConstValuesFileList (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.DependencyStaticMetadataFileList (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.DependencyMetadataFileList (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.DependencyMetadataFileList
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.LinkFileList (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.LinkFileList
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-all-non-framework-target-headers.hmap (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-DebugDylibPath-normal-arm64.txt (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-DebugDylibInstallName-normal-arm64.txt (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-DebugDylibInstallName-normal-arm64.txt
+
+MkDir /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    /bin/mkdir -p /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app
+
+WriteAuxiliaryFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources/Entitlements-Simulated.plist (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    write-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources/Entitlements-Simulated.plist
+
+ProcessProductPackaging "" /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+    Entitlements:
+    
+    {
+    "application-identifier" = "535MQ7U2FY.com.velocityworks.Handrail";
+}
+    
+    builtin-productPackagingUtility -entitlements -format xml -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent
+
+ProcessProductPackagingDER /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent.der (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    /usr/bin/derq query -f xml -i /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent.der --raw
+
+Ld /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/__preview.dylib normal (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -O0 -L/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -F/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -install_name @rpath/Handrail.debug.dylib -Xlinker -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail_dependency_info.dat -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent.der -Xlinker -no_adhoc_codesign -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/__preview.dylib
+
+ProcessInfoPlistFile /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Info.plist /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/empty-Handrail.plist (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-infoPlistUtility /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/empty-Handrail.plist -producttype com.apple.product-type.application -genpkginfo /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Info.plist
+
+SwiftDriver Handrail normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Handrail -Onone @/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -F /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/handrail-qa-deriveddata-2026-04-30-175240/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache -output-file-map /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex -sdk-module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Session.modulevalidation -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-generated-files.hmap -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-own-target-headers.hmap -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-all-target-headers.hmap -Xcc -iquote -Xcc /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-project-headers.hmap -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/include -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources-normal/arm64 -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources/arm64 -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-Swift.h -working-directory /Users/velocityworks/IdeaProjects/handrail/ios/Handrail -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_AvailabilityInternal-CVDL96FSGO78OGMMX79L4WCU5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/SwiftShims-7TTX9SU826UVK5HI2EC8TWEWI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_stdarg-985YBWYJ2KEIABF3WJA6BIXGB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_stdbool-90KP7QO2AS57HOPYZDHPOQQ20.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/ptrcheck-2KSD28ZCZOX3V3YLD784PF24X.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_float-4LBLD2RXH2L6JAFPH8OZPS353.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/ptrauth-B7M8SOCPB6JZNH95D5YN8I4KQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_SwiftConcurrencyShims-9XLZC8GOQ0MQ6DA08R8FKB29U.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/DeveloperToolsSupport-6D2TS1NLQDPFWIIKA9DY9L0PA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_stddef-8ZTW62UM7L5JPC2FWH1TKZO4N.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_DarwinFoundation1-9AUPZVOMSHGU9DKAJ56QYFBNH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_limits-JYXUHMFWH0EKW8ATIVO5KRLW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_DarwinFoundation2-77WH0OBDUZPOSPIUVYHL3LLI9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_tgmath-74ZH31BQ668VM6MDLL2LXVJSH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_stdint-5Z1AT9VIY5I38UUJRGLNAMLN2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/sys_types-3S3VVEIBBZ96Y35L79V2IACMW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_intrinsics-6EEU3IRMWMN3UBH12DDOQMU8R.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_DarwinFoundation3-4O8GV84CUBQ9Q35A4L0NO63S3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_stdatomic-BA1LDYNWA0M0LIMAOCBPOWPRC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/_Builtin_inttypes-8CO76VL9XH4EDG8RWIHF4LWER.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Darwin-7PDRG6A1OLLC0GCTUFJ5CXOY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/simd-3ZN8U9BOR8CJKWMXTVDSPPL6O.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/ObjectiveC-42WTNRG80Z0ZIWGJLKWVRRWPQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/MachO-A853Y83X7AMS727ORFHYXL7NV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/os_object-8JTON1F2LUTHXSXTP4T2VOCJT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/os_workgroup-BBT2CCHVQ3ZOLKCPTYAFQCGUB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Spatial-DS87HOZW0EMDFN8R6ATF63VUL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Dispatch-3LK0U5ASLMKCPCB7M9IK921FA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/dnssd-2KUOMV5YAFTKXL1YVG29AIU2Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreFoundation-BQ6YATPVRIAS5VSJM9H3ZKYLJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/XPC-6566HNUSJIWUVOCQRTOJ4GK5R.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/os-A0IJA1Q13JG78SUCEK1AOJDS2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreAudioTypes-5UGJOKNZRP91P72LQI1E50JTU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CFNetwork-ZG7KPEVYTD308ELBD7PT2GP9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Security-7BIZ63JMNE4F0VC0SRTTUBOU4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreGraphics-44U08MTPF8BD5K8AOZ1RZILNP.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreAudio-3EBYBOA6TRD77CTI5URXXRXPE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Foundation-7IQ2AH9NXY2YC032MNR8LLKYF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/ImageIO-ACFRTS0OH57QTQW5LIN67AKH4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreText-1AMJRX5KZESIMBQTX3INMXIX5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/UniformTypeIdentifiers-1ZVA550ISCUEH9BO2RGOIIJI0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/UserNotifications-AHLWX257TEXEJTZAKZMHDLP3J.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreTransferable-BPMY8R5HR9Z4WC5C33LDI3S3D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/IOSurface-3K05K3VRJXNK4B781BEGNGDU9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/DataDetection-B8S4X1SVDLG9QAQ5LYUI38G19.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/UIUtilities-1XAFPYQ50PDJBPKVHI7OI9POT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Network-ATIYGB3K8O1M5XOJPYUWC3Y5U.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Symbols-BRXA6WTCRSJ2X6705LVO9ZN1D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Accessibility-2NI6D01UT2XZ1B12NK7MO2FMR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreData-1O4WAAQ2YLDIXMYOE0OJLXFGQ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/OSLog-DJ0XLCIMM5248OHUOZS4YPNDO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/OpenGLES-87KUU6UTFXZHTEWHPAEPXD028.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/FileProvider-3DEB7PQXWU5CAMPFORDH11SMH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreMIDI-20WDXQ8PRNSA4O8RFF71YGZG7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Metal-DYNJPKSIXSGHNZQV0VNIAB6D3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/AVRouting-33FHB52P3SL6IH3P8JH3MEYGZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/AudioToolbox-47FXBRZKR4SE4SZ5BERRB3PDH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreVideo-8Z70TL6MJJK9YUFNL83NCCB8D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreImage-4OS95PSEUUSFUA1V8FJJ0CJO1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/CoreMedia-DNL2I0UGJ38F4KOSE2RVW4R0Y.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/QuartzCore-6CQQXCEGEL4WQLOYEFL0X7A2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/SwiftUICore-C9MRM8RTPMU3Z9ERRR8MDZ72V.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/UIKit-8WECBUQTBU3SFU3KW7IU6DF6H.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/AVFAudio-2R7Z7N7USOS6DAWBE0JBDI3BJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/MediaToolbox-5F8ALQP9SI3ULKIGRPGTMRVEW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/AVFoundation-DQW6BN0GU8AF5NHB8CHYLBYCN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/SwiftUI-QIUTVJV8G4V1RHZQ0RDU3LQ9.pcm
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ Handrail (in target 'Handrail' from project 'Handrail')
+
+EmitSwiftModule normal arm64 (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ IPadChatListQuery.swift,\ IPadSelectedChatWindowScene.swift,\ IPadActivityWorkspaceView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadChatListQuery.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadSelectedChatWindowScene.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadActivityWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadChatListQuery.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadSelectedChatWindowScene.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadActivityWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ IPadChatListWorkspaceView.swift,\ IPadChatDetailWorkspaceView.swift,\ IPadApprovalReviewWorkspaceView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadChatListWorkspaceView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadChatDetailWorkspaceView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadApprovalReviewWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadChatListWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadChatDetailWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadApprovalReviewWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ IPadWorkspaceRootView.swift,\ IPadSidebarView.swift,\ IPadDashboardWorkspaceView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadWorkspaceRootView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadSidebarView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadDashboardWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadWorkspaceRootView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadSidebarView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadDashboardWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ DashboardView.swift,\ AttentionView.swift,\ NotificationCoordinator.swift,\ KeychainStore.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/DashboardView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/AttentionView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Utilities/KeychainStore.swift (in target 'Handrail' from project 'Handrail')
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/DashboardView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/AttentionView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Utilities/KeychainStore.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ NotificationsView.swift,\ SettingsView.swift,\ QRScannerView.swift,\ PreviewData.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/NotificationsView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/SettingsView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/QRScannerView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/PreviewData.swift (in target 'Handrail' from project 'Handrail')
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/NotificationsView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/SettingsView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/QRScannerView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/PreviewData.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ HandrailStore.swift,\ Formatters.swift,\ RootView.swift,\ Components.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Stores/HandrailStore.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Utilities/Formatters.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/RootView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/Components.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Stores/HandrailStore.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Utilities/Formatters.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/RootView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/Components.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ ChatsView.swift,\ ChatDetailView.swift,\ ApprovalRequiredView.swift,\ ActivityView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ChatsView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ChatDetailView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ApprovalRequiredView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ActivityView.swift (in target 'Handrail' from project 'Handrail')
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ChatsView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ChatDetailView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ApprovalRequiredView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ActivityView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ LaunchSplashView.swift,\ ChatTranscriptParser.swift,\ ChatTranscriptView.swift,\ IPadWorkspaceModels.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/LaunchSplashView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ChatTranscriptParser.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ChatTranscriptView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadWorkspaceModels.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/LaunchSplashView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ChatTranscriptParser.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/ChatTranscriptView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadWorkspaceModels.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ HandrailApp.swift,\ HandrailModels.swift,\ HandrailMessages.swift,\ HandrailWebSocketClient.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/HandrailApp.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Models/HandrailModels.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Networking/HandrailMessages.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Networking/HandrailWebSocketClient.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/HandrailApp.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Models/HandrailModels.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Networking/HandrailMessages.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Networking/HandrailWebSocketClient.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 Compiling\ IPadSettingsWorkspaceView.swift,\ IPadNewChatPanel.swift,\ HandrailCommands.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadSettingsWorkspaceView.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadNewChatPanel.swift /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/HandrailCommands.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadSettingsWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/IPadNewChatPanel.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftCompile normal arm64 /Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail/Views/IPad/HandrailCommands.swift (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for Handrail (in target 'Handrail' from project 'Handrail')
+
+SwiftDriver\ Compilation\ Requirements Handrail normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Handrail -Onone @/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -F /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/handrail-qa-deriveddata-2026-04-30-175240/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache -output-file-map /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex -sdk-module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Session.modulevalidation -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-generated-files.hmap -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-own-target-headers.hmap -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-all-target-headers.hmap -Xcc -iquote -Xcc /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-project-headers.hmap -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/include -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources-normal/arm64 -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources/arm64 -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-Swift.h -working-directory /Users/velocityworks/IdeaProjects/handrail/ios/Handrail -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Compiling HandrailApp.swift, HandrailModels.swift, HandrailMessages.swift, HandrailWebSocketClient.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftDriverJobDiscovery normal arm64 Compiling IPadChatListQuery.swift, IPadSelectedChatWindowScene.swift, IPadActivityWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftMergeGeneratedHeaders /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources/Handrail-Swift.h /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-Swift.h (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-swiftHeaderTool -arch arm64 /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-Swift.h -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources/Handrail-Swift.h
+
+Copy /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.swiftmodule/arm64-apple-ios-simulator.swiftmodule /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftmodule (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftmodule /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.swiftmodule/arm64-apple-ios-simulator.swiftmodule
+
+Copy /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.swiftmodule/arm64-apple-ios-simulator.swiftdoc /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftdoc (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftdoc /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.swiftmodule/arm64-apple-ios-simulator.swiftdoc
+
+Copy /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.swiftmodule/arm64-apple-ios-simulator.abi.json /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.abi.json (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.abi.json /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+SwiftDriverJobDiscovery normal arm64 Compiling IPadChatListWorkspaceView.swift, IPadChatDetailWorkspaceView.swift, IPadApprovalReviewWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+
+Copy /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftsourceinfo (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftsourceinfo /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+SwiftDriverJobDiscovery normal arm64 Compiling HandrailStore.swift, Formatters.swift, RootView.swift, Components.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftDriverJobDiscovery normal arm64 Compiling IPadWorkspaceRootView.swift, IPadSidebarView.swift, IPadDashboardWorkspaceView.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftDriverJobDiscovery normal arm64 Compiling LaunchSplashView.swift, ChatTranscriptParser.swift, ChatTranscriptView.swift, IPadWorkspaceModels.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftDriverJobDiscovery normal arm64 Compiling IPadSettingsWorkspaceView.swift, IPadNewChatPanel.swift, HandrailCommands.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftDriverJobDiscovery normal arm64 Compiling DashboardView.swift, AttentionView.swift, NotificationCoordinator.swift, KeychainStore.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftDriverJobDiscovery normal arm64 Compiling NotificationsView.swift, SettingsView.swift, QRScannerView.swift, PreviewData.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ChatsView.swift, ChatDetailView.swift, ApprovalRequiredView.swift, ActivityView.swift (in target 'Handrail' from project 'Handrail')
+
+SwiftDriver\ Compilation Handrail normal arm64 com.apple.xcode.tools.swift.compiler (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name Handrail -Onone @/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -F /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64 -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /tmp/handrail-qa-deriveddata-2026-04-30-175240/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache -output-file-map /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex -sdk-module-cache-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftmodule -validate-clang-modules-once -clang-build-session-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/ModuleCache.noindex/Session.modulevalidation -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail_const_extract_protocols.json -Xcc -iquote -Xcc /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-generated-files.hmap -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-own-target-headers.hmap -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-all-target-headers.hmap -Xcc -iquote -Xcc /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-project-headers.hmap -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/include -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources-normal/arm64 -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources/arm64 -Xcc -I/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-Swift.h -working-directory /Users/velocityworks/IdeaProjects/handrail/ios/Handrail -experimental-emit-module-separately -disable-cmo
+
+Ld /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail.debug.dylib normal (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -O0 -L/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -F/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -filelist /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.LinkFileList -install_name @rpath/Handrail.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.swiftmodule @/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail-linker-args.resp -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -Xlinker -no_adhoc_codesign -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail.debug.dylib
+
+ConstructStubExecutorLinkFileList /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-ExecutorLinkFileList-normal-arm64.txt (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    construct-stub-executor-link-file-list /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'Handrail' from project 'Handrail')
+
+Ld /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail normal (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -O0 -L/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -F/tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator -Xlinker -rpath -Xlinker @executable_path -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail-ExecutorLinkFileList-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.app-Simulated.xcent.der /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail.debug.dylib -Xlinker -no_adhoc_codesign -o /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail
+
+CopySwiftLibs /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail.debug.dylib --scan-folder /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Frameworks --scan-folder /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/PlugIns --scan-folder /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/SystemExtensions --scan-folder /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Extensions --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+
+ExtractAppIntentsMetadata (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name Handrail --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk --xcode-version 17E202 --platform-family iOS --deployment-target 17.0 --bundle-identifier com.velocityworks.Handrail --output /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app --target-triple arm64-apple-ios17.0-simulator --binary-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail --dependency-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail_dependency_info.dat --stringsdata-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.SwiftFileList --metadata-file-list /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.DependencyMetadataFileList --static-metadata-file-list /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.DependencyStaticMetadataFileList --swift-const-vals-list /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Objects-normal/arm64/Handrail.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-04-30 17:52:53.218 appintentsmetadataprocessor[26897:456135] Starting appintentsmetadataprocessor export
+2026-04-30 17:52:53.223 appintentsmetadataprocessor[26897:456135] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+AppIntentsSSUTraining (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Info.plist --temp-dir-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/ssu --bundle-id com.velocityworks.Handrail --product-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app --extracted-metadata-path /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Metadata.appintents --metadata-file-list /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Intermediates.noindex/Handrail.build/Debug-iphonesimulator/Handrail.build/Handrail.DependencyMetadataFileList --source-file /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Info.plist --archive-ssu-assets
+2026-04-30 17:52:53.247 appintentsnltrainingprocessor[26898:456137] Parsing options for appintentsnltrainingprocessor
+2026-04-30 17:52:53.247 appintentsnltrainingprocessor[26898:456137] Starting AppIntents SSU YAML Generation
+2026-04-30 17:52:53.250 appintentsnltrainingprocessor[26898:456137] No AppShortcuts found - Skipping.
+
+CodeSign /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail.debug.dylib (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/Handrail.debug.dylib
+
+CodeSign /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/__preview.dylib (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app/__preview.dylib
+
+CodeSign /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app
+
+RegisterExecutionPolicyException /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-RegisterExecutionPolicyException /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app
+
+Validate /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    builtin-validationUtility /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app (in target 'Handrail' from project 'Handrail')
+    cd /Users/velocityworks/IdeaProjects/handrail/ios/Handrail
+    /usr/bin/touch -c /tmp/handrail-qa-deriveddata-2026-04-30-175240/Build/Products/Debug-iphonesimulator/Handrail.app
+
+** BUILD SUCCEEDED **
+
