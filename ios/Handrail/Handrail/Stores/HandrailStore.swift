@@ -19,7 +19,6 @@ final class HandrailStore {
     var lastStartedChatId: String?
     var notificationChatId: String?
     var showsApprovalFromNotification = false
-    var currentChatId: String?
     var pinnedChatIds: Set<String> = []
     var dismissedAttentionChatIds: Set<String> = []
     var isRefreshingChats = false
@@ -33,6 +32,7 @@ final class HandrailStore {
     private var awaitingStartedChat = false
     private var pendingErrorTarget: PendingErrorTarget?
     private var pushTokenRegistration: PushTokenRegistration?
+    private var viewingChatCounts: [String: Int] = [:]
 
     init(enableNetworking: Bool = true) {
         loadPairing()
@@ -195,17 +195,22 @@ final class HandrailStore {
     }
 
     func enterChat(chatId: String) {
-        currentChatId = chatId
+        viewingChatCounts[chatId, default: 0] += 1
     }
 
     func leaveChat(chatId: String) {
-        if currentChatId == chatId {
-            currentChatId = nil
+        guard let count = viewingChatCounts[chatId] else {
+            return
+        }
+        if count > 1 {
+            viewingChatCounts[chatId] = count - 1
+        } else {
+            viewingChatCounts.removeValue(forKey: chatId)
         }
     }
 
     func isViewingChat(chatId: String) -> Bool {
-        currentChatId == chatId
+        viewingChatCounts[chatId, default: 0] > 0
     }
 
     func approveFromNotification(chatId: String, approvalId: String) {

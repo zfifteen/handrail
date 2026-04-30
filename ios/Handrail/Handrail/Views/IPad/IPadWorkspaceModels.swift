@@ -28,6 +28,17 @@ struct IPadWorkspaceSelection: Hashable {
     var selectedApprovalId: String?
 }
 
+struct IPadSelectedChatWindow: Identifiable, Hashable, Codable {
+    let chatId: String
+
+    var id: String { chatId }
+
+    static func title(for chat: CodexChat?) -> String {
+        guard let chat else { return "Codex chat" }
+        return IPadChatListQuery.displayTitle(for: chat)
+    }
+}
+
 enum ChatListFilter: String, CaseIterable, Identifiable, Hashable {
     case all
     case running
