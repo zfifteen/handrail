@@ -55,4 +55,35 @@ struct HandrailCommandAvailability: Hashable {
     var canContinueSelectedChat = false
     var canApproveSelectedRequest = false
     var canDenySelectedRequest = false
+
+    static func resolve(
+        pairedMachine: PairedMachine?,
+        selectedChat: CodexChat?,
+        selectedApprovalId: String?,
+        latestApproval: ApprovalRequest?
+    ) -> HandrailCommandAvailability {
+        let isOnline = pairedMachine?.isOnline == true
+        let matchingApprovalIsSelected = selectedApprovalId != nil
+            && selectedApprovalId == latestApproval?.approvalId
+
+        return HandrailCommandAvailability(
+            canStartNewChat: isOnline,
+            canRefresh: isOnline,
+            canReconnect: pairedMachine != nil && !isOnline,
+            canStopSelectedChat: isOnline && selectedChat?.canStopFromIPad == true,
+            canContinueSelectedChat: isOnline && selectedChat?.canContinueFromIPad == true,
+            canApproveSelectedRequest: isOnline && matchingApprovalIsSelected,
+            canDenySelectedRequest: isOnline && matchingApprovalIsSelected
+        )
+    }
+}
+
+private extension CodexChat {
+    var canStopFromIPad: Bool {
+        status == .running || status == .waitingForApproval
+    }
+
+    var canContinueFromIPad: Bool {
+        status == .completed || status == .failed || status == .stopped || status == .idle
+    }
 }
