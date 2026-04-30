@@ -127,3 +127,11 @@ struct IPadSettingsWorkspaceView: View {
     .environment(PreviewData.store)
     .preferredColorScheme(.dark)
 }
+
+#Preview("Offline Settings") {
+    NavigationStack {
+        IPadSettingsWorkspaceView()
+    }
+    .environment(PreviewData.offlineStore)
+    .preferredColorScheme(.dark)
+}

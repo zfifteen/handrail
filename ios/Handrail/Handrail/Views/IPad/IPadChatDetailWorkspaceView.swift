@@ -537,8 +537,16 @@ struct IPadChatDetailWorkspaceView: View {
 
 #Preview {
     NavigationStack {
-        IPadChatDetailWorkspaceView(selection: .constant(IPadWorkspaceSelection(selectedSection: .chats, selectedChatId: "chat-running")))
+        IPadChatDetailWorkspaceView(selection: .constant(IPadWorkspaceSelection(selectedSection: .chats, selectedChatId: "preview-chat")))
     }
     .environment(PreviewData.store)
+    .preferredColorScheme(.dark)
+}
+
+#Preview("Empty Chat Detail") {
+    NavigationStack {
+        IPadChatDetailWorkspaceView(selection: .constant(IPadWorkspaceSelection(selectedSection: .chats)))
+    }
+    .environment(PreviewData.emptyStore)
     .preferredColorScheme(.dark)
 }

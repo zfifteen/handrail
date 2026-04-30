@@ -266,3 +266,11 @@ struct IPadChatListWorkspaceView: View {
     .environment(PreviewData.store)
     .preferredColorScheme(.dark)
 }
+
+#Preview("Empty Chat List") {
+    NavigationStack {
+        IPadChatListWorkspaceView(selection: .constant(IPadWorkspaceSelection(selectedSection: .chats)))
+    }
+    .environment(PreviewData.emptyStore)
+    .preferredColorScheme(.dark)
+}

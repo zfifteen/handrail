@@ -36,4 +36,17 @@ enum PreviewData {
         store.connectionText = "Online"
         return store
     }
+
+    static var offlineStore: HandrailStore {
+        let store = self.store
+        store.pairedMachine = PairedMachine(protocolVersion: 1, host: "192.168.1.20", port: 8787, token: "preview", machineName: "MacBook Pro", isOnline: false)
+        store.connectionText = "Offline"
+        return store
+    }
+
+    static var emptyStore: HandrailStore {
+        let store = HandrailStore(enableNetworking: false)
+        store.connectionText = "Offline"
+        return store
+    }
 }

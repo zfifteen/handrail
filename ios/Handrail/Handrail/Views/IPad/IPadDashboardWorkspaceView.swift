@@ -298,3 +298,11 @@ struct IPadDashboardWorkspaceView: View {
     .environment(PreviewData.store)
     .preferredColorScheme(.dark)
 }
+
+#Preview("Offline Dashboard") {
+    NavigationStack {
+        IPadDashboardWorkspaceView()
+    }
+    .environment(PreviewData.offlineStore)
+    .preferredColorScheme(.dark)
+}
