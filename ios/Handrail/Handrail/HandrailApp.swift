@@ -58,8 +58,24 @@ struct HandrailApp: App {
                 store: store,
                 selection: $iPadSelection,
                 showsNewChat: $showsIPadNewChat,
-                focusesChatSearch: $focusesIPadChatSearch
+                focusesChatSearch: $focusesIPadChatSearch,
+                supportsSelectedChatWindows: true
             )
+        }
+
+        WindowGroup("Chat", for: IPadSelectedChatWindow.self) { window in
+            if let window = window.wrappedValue {
+                IPadSelectedChatWindowScene(window: window)
+                    .environment(store)
+                    .preferredColorScheme(.dark)
+                    .onAppear {
+                        HandrailNotificationCoordinator.shared.attach(store: store)
+                    }
+            } else {
+                EmptyState(title: "No chat selected", detail: "Open a chat window from the main Handrail workspace.", systemImage: "text.bubble")
+                    .environment(store)
+                    .preferredColorScheme(.dark)
+            }
         }
     }
 

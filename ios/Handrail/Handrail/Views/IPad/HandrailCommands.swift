@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HandrailCommands: Commands {
+    @Environment(\.openWindow) private var openWindow
     let store: HandrailStore
     @Binding var selection: IPadWorkspaceSelection
     @Binding var showsNewChat: Bool
@@ -74,7 +75,9 @@ struct HandrailCommands: Commands {
         }
 
         CommandMenu("Window") {
-            Button("New Window for Selected Chat") {}
+            Button("New Window for Selected Chat") {
+                openSelectedChatWindow()
+            }
                 .disabled(!availability.canOpenSelectedChatWindow)
         }
     }
@@ -111,6 +114,11 @@ struct HandrailCommands: Commands {
     private func denySelectedRequest() {
         guard let approval = selectedApproval else { return }
         store.deny(approval, reason: "Denied from Handrail.")
+    }
+
+    private func openSelectedChatWindow() {
+        guard let chatId = target.selectedChat?.id else { return }
+        openWindow(value: IPadSelectedChatWindow(chatId: chatId))
     }
 
     private var selectedApproval: ApprovalRequest? {

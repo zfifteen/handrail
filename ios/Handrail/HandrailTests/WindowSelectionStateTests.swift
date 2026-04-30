@@ -9,6 +9,14 @@ final class WindowSelectionStateTests: XCTestCase {
         XCTAssertFalse(IPadSelectedChatWindow.title(for: HandrailTestFixtures.rawIdentifierChat).lowercased().contains("codex:"))
     }
 
+    func testSelectedChatWindowCreatesChatDetailSelection() {
+        let window = IPadSelectedChatWindow(chatId: HandrailTestFixtures.completedChat.id)
+
+        XCTAssertEqual(window.selection.selectedSection, .chats)
+        XCTAssertEqual(window.selection.selectedChatId, HandrailTestFixtures.completedChat.id)
+        XCTAssertNil(window.selection.selectedApprovalId)
+    }
+
     @MainActor
     func testIndependentWindowSelection() {
         let store = HandrailStore(enableNetworking: false)

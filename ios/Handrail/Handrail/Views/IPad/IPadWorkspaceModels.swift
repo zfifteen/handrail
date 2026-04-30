@@ -55,6 +55,10 @@ struct IPadSelectedChatWindow: Identifiable, Hashable, Codable {
 
     var id: String { chatId }
 
+    var selection: IPadWorkspaceSelection {
+        IPadWorkspaceSelection(selectedSection: .chats, selectedChatId: chatId)
+    }
+
     static func title(for chat: CodexChat?) -> String {
         guard let chat else { return "Codex chat" }
         return IPadChatListQuery.displayTitle(for: chat)
