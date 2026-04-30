@@ -15,6 +15,8 @@ const MAX_THINKING_CHARS = 12_000;
 const MAX_THINKING_ENTRY_CHARS = 2_500;
 const ROLLOUT_HEAD_BYTES = 64 * 1024;
 const ROLLOUT_TAIL_BYTES = 2 * 1024 * 1024;
+const STATUS_SCAN_CHUNK_BYTES = 64 * 1024;
+const LINE_FEED = 10;
 const execFileAsync = promisify(execFile);
 
 interface CodexSessionMeta {
@@ -146,12 +148,13 @@ async function readCodexSession(thread: CodexDesktopThread, pinnedThreadIds: Map
   }
 
   const repo = thread.cwd || parsed.payload.cwd || homedir();
+  const status = await readCodexSessionStatus(thread.rollout_path);
   return {
     id: `codex:${parsed.payload.id}`,
     repo,
     title: humanCodexTitle(thread.title, extractTitle(lines.slice(1)), thread.first_user_message, repo),
     projectName: desktopProjectName(repo, projectNames),
-    status: extractStatus(lines.slice(1)),
+    status,
     startedAt: unixSecondsToIso(thread.created_at) || parsed.payload.timestamp,
     updatedAt: unixSecondsToIso(thread.updated_at) || extractUpdatedAt(lines) || parsed.payload.timestamp,
     transcript: extractTranscript(lines.slice(1)),
@@ -244,24 +247,70 @@ function isRawCodexIdentifier(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(candidate);
 }
 
+export async function readCodexSessionStatus(path: string): Promise<ChatRecord["status"]> {
+  const info = await stat(path);
+  const file = await open(path, "r");
+  try {
+    let position = info.size;
+    let suffix = Buffer.alloc(0);
+
+    while (position > 0) {
+      const chunkSize = Math.min(STATUS_SCAN_CHUNK_BYTES, position);
+      position -= chunkSize;
+
+      const buffer = Buffer.alloc(chunkSize);
+      const result = await file.read(buffer, 0, chunkSize, position);
+      const combined = Buffer.concat([buffer.subarray(0, result.bytesRead), suffix]);
+      let lineEnd = combined.length;
+
+      for (let index = combined.length - 1; index >= 0; index -= 1) {
+        if (combined[index] !== LINE_FEED) {
+          continue;
+        }
+
+        const status = extractStatusFromLine(combined.subarray(index + 1, lineEnd).toString("utf8"));
+        if (status) {
+          return status;
+        }
+        lineEnd = index;
+      }
+
+      suffix = combined.subarray(0, lineEnd);
+    }
+
+    return extractStatusFromLine(suffix.toString("utf8")) ?? "idle";
+  } finally {
+    await file.close();
+  }
+}
+
 export function extractStatus(lines: string[]): ChatRecord["status"] {
   for (let index = lines.length - 1; index >= 0; index -= 1) {
-    const parsed = parseLine<CodexSessionLine>(lines[index]);
-    if (parsed.type !== "event_msg") {
-      continue;
-    }
-    switch (parsed.payload?.type) {
-      case "task_complete":
-        return "completed";
-      case "task_failed":
-        return "failed";
-      case "task_interrupted":
-        return "stopped";
-      case "task_started":
-        return "running";
+    const status = extractStatusFromLine(lines[index]);
+    if (status) {
+      return status;
     }
   }
   return "idle";
+}
+
+function extractStatusFromLine(line: string): ChatRecord["status"] | null {
+  const parsed = parseLine<CodexSessionLine>(line);
+  if (parsed.type !== "event_msg") {
+    return null;
+  }
+  switch (parsed.payload?.type) {
+    case "task_complete":
+      return "completed";
+    case "task_failed":
+      return "failed";
+    case "task_interrupted":
+      return "stopped";
+    case "task_started":
+      return "running";
+    default:
+      return null;
+  }
 }
 
 export function extractTranscript(lines: string[]): string[] {

@@ -55,7 +55,7 @@ test("builds Codex Desktop IPC follower requests", () => {
 test("builds Codex Desktop thread deeplinks", () => {
   assert.equal(
     codexDesktopThreadUrl("019dc424-e857-76e0-8229-589ecf107eb4"),
-    "codex://local/019dc424-e857-76e0-8229-589ecf107eb4"
+    "codex://threads/019dc424-e857-76e0-8229-589ecf107eb4"
   );
 });
 

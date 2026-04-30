@@ -68,7 +68,7 @@ export async function startCodexDesktopTurn(input: DesktopTurnInput): Promise<vo
 }
 
 export function codexDesktopThreadUrl(threadId: string): string {
-  return `codex://local/${encodeURIComponent(threadId)}`;
+  return `codex://threads/${encodeURIComponent(threadId)}`;
 }
 
 export async function openCodexDesktopThread(threadId: string): Promise<void> {

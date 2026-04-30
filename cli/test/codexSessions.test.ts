@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { desktopProjectName, extractThinking, formatCodexTranscriptEntry, humanCodexTitle, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
+import { desktopProjectName, extractStatus, extractThinking, formatCodexTranscriptEntry, humanCodexTitle, readCodexSessionStatus, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
 
 test("formats imported Codex transcript entries for rich mobile rendering", () => {
   const entry = formatCodexTranscriptEntry("assistant", [
@@ -175,6 +175,24 @@ test("reads large Codex rollout files from bounded head and tail", async () => {
     assert.equal(lines[0], first);
     assert.equal(lines.at(-1), last);
     assert.ok(lines.join("\n").length < 2_200_000);
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("reads active Codex status when the bounded tail omits task_started", async () => {
+  const tempDir = await mkdtemp(join(tmpdir(), "handrail-rollout-status-"));
+  const path = join(tempDir, "rollout.jsonl");
+  const first = JSON.stringify({ type: "session_meta", payload: { id: "abc", timestamp: "2026-04-28T00:00:00.000Z" } });
+  const started = JSON.stringify({ timestamp: "2026-04-28T00:00:01.000Z", type: "event_msg", payload: { type: "task_started" } });
+  const fillerLine = JSON.stringify({ timestamp: "2026-04-28T00:00:02.000Z", type: "event_msg", payload: { type: "token_count", text: "x".repeat(2048) } });
+  const filler = `${fillerLine}\n`.repeat(1200);
+  await writeFile(path, `${first}\n${started}\n${filler}`, "utf8");
+
+  try {
+    const boundedLines = await readRolloutLines(path);
+    assert.equal(extractStatus(boundedLines.slice(1)), "idle");
+    assert.equal(await readCodexSessionStatus(path), "running");
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }
