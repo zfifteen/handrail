@@ -99,13 +99,7 @@ export async function createHandrailServer(options: {
   const notificationDispatcher = options.notificationDispatcher ?? new NotificationDispatcher(options.state, persistState);
   let lastVisibleChatSignature = "";
   let chats: ChatController;
-  const notifyChatById = async (chatId: string) => {
-    const chat = (await chats.list()).find((item) => item.id === chatId);
-    if (chat) {
-      await notificationDispatcher.notifyChat(chat);
-    }
-  };
-  chats = options.chats ?? new ChatManager(broadcast, undefined, notifyChatById);
+  chats = options.chats ?? new ChatManager(broadcast);
   const observeNotifications = async () => {
     const visibleChats = await chats.list();
     await notificationDispatcher.notifyVisibleChats(

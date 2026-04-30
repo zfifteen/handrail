@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { extractStatus, parseDesktopPinnedThreadIds } from "../src/codexSessions.js";
-import { codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopThreadResumeParams, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame } from "../src/codexDesktopIpc.js";
+import { codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame } from "../src/codexDesktopIpc.js";
 import { discoverProjects } from "../src/newChatOptions.js";
 import { ChatManager } from "../src/chats.js";
 
@@ -25,13 +25,11 @@ test("discovers New Chat projects from Codex Desktop state and config", () => {
 test("builds Codex Desktop IPC follower requests", () => {
   const request = codexDesktopIpcRequest(
     "thread-follower-start-turn",
-    {
-      conversationId: "019dc424-e857-76e0-8229-589ecf107eb4",
-      turnStartParams: {
-        input: [{ type: "text", text: "Continue from phone", text_elements: [] }],
-        cwd: "/Users/me/project"
-      }
-    },
+    codexDesktopFollowerTurnStartParams({
+      threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+      cwd: "/Users/me/project",
+      prompt: "Continue from phone"
+    }),
     "client-1",
     "request-1"
   );
@@ -81,19 +79,6 @@ test("builds Codex Desktop app-server thread-start params", () => {
     dynamicTools: null,
     persistExtendedHistory: false,
     serviceTier: null
-  });
-});
-
-test("builds Codex Desktop app-server thread-resume params", () => {
-  assert.deepEqual(codexDesktopThreadResumeParams({
-    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
-    cwd: "/Users/me/My Project",
-    prompt: "Continue"
-  }), {
-    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
-    cwd: "/Users/me/My Project",
-    persistExtendedHistory: false,
-    excludeTurns: true
   });
 });
 

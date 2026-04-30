@@ -36,6 +36,9 @@ struct ChatDetailView: View {
         .onDisappear {
             store.leaveChat(chatId: chatId)
         }
+        .task(id: chatId) {
+            await refreshVisibleChatUntilCancelled()
+        }
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if canDismissAttention {
@@ -433,6 +436,16 @@ struct ChatDetailView: View {
 
     private func dismissComposerKeyboard() {
         isComposerFocused = false
+    }
+
+    @MainActor
+    private func refreshVisibleChatUntilCancelled() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            if store.pairedMachine?.isOnline == true && store.isViewingChat(chatId: chatId) {
+                store.refreshChats()
+            }
+        }
     }
 
     private func thinkingEntries(round: Int) -> [ThinkingEntry] {

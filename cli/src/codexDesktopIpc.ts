@@ -14,7 +14,6 @@ const DESKTOP_APP_ACTIVATE_SETTLE_MS = 1_000;
 const DESKTOP_ROUTE_SETTLE_MS = 6_000;
 
 const execFileAsync = promisify(execFile);
-const activeDesktopTurns = new Map<string, ActiveDesktopTurn>();
 
 type IpcResponse =
   | { type: "response"; requestId: string; resultType: "success"; method?: string; result?: unknown }
@@ -49,14 +48,13 @@ export interface DesktopConversationInput {
   accessPreset: "full_access" | "on_request" | "read_only";
 }
 
-type DesktopTurnCompleted = (threadId: string) => void | Promise<void>;
-
-export async function startCodexDesktopConversation(input: DesktopConversationInput, onCompleted?: DesktopTurnCompleted): Promise<string> {
+export async function startCodexDesktopConversation(input: DesktopConversationInput): Promise<string> {
   const client = new CodexDesktopAppServerClient(codexDesktopAppServerPath());
   await client.connect();
   try {
     const threadId = await createCodexDesktopThread(client, input);
-    await startManagedCodexDesktopTurn(client, { threadId, cwd: input.cwd, prompt: input.prompt }, onCompleted);
+    client.close();
+    await startCodexDesktopTurn({ threadId, cwd: input.cwd, prompt: input.prompt });
     return threadId;
   } catch (error) {
     client.close();
@@ -64,16 +62,9 @@ export async function startCodexDesktopConversation(input: DesktopConversationIn
   }
 }
 
-export async function startCodexDesktopTurn(input: DesktopTurnInput, onCompleted?: DesktopTurnCompleted): Promise<void> {
-  const client = new CodexDesktopAppServerClient(codexDesktopAppServerPath());
-  await client.connect();
-  try {
-    await resumeCodexDesktopThread(client, input);
-    await startManagedCodexDesktopTurn(client, input, onCompleted);
-  } catch (error) {
-    client.close();
-    throw error;
-  }
+export async function startCodexDesktopTurn(input: DesktopTurnInput): Promise<void> {
+  await openCodexDesktopThread(input.threadId);
+  await startCodexDesktopFollowerTurn(input);
 }
 
 export function codexDesktopThreadUrl(threadId: string): string {
@@ -99,17 +90,6 @@ export async function openCodexDesktopApp(): Promise<void> {
 }
 
 export async function interruptCodexDesktopTurn(threadId: string): Promise<void> {
-  const active = activeDesktopTurns.get(threadId);
-  if (active) {
-    await active.client.request("turn/interrupt", {
-      threadId,
-      ...(active.turnId ? { turnId: active.turnId } : {})
-    });
-    activeDesktopTurns.delete(threadId);
-    active.client.close();
-    return;
-  }
-
   await openCodexDesktopThread(threadId);
   await withCodexDesktopIpc(async (client) => {
     await client.request("thread-follower-interrupt-turn", { conversationId: threadId });
@@ -284,17 +264,19 @@ export function codexDesktopThreadStartParams(input: DesktopConversationInput): 
   };
 }
 
-export function codexDesktopThreadResumeParams(input: DesktopTurnInput): {
-  threadId: string;
-  cwd: string;
-  persistExtendedHistory: false;
-  excludeTurns: true;
+export function codexDesktopFollowerTurnStartParams(input: DesktopTurnInput): {
+  conversationId: string;
+  turnStartParams: {
+    input: Array<{ type: "text"; text: string; text_elements: [] }>;
+    cwd: string;
+  };
 } {
   return {
-    threadId: input.threadId,
-    cwd: input.cwd,
-    persistExtendedHistory: false,
-    excludeTurns: true
+    conversationId: input.threadId,
+    turnStartParams: {
+      input: [{ type: "text", text: input.prompt, text_elements: [] }],
+      cwd: input.cwd
+    }
   };
 }
 
@@ -307,72 +289,10 @@ async function createCodexDesktopThread(client: CodexDesktopAppServerClient, inp
   return threadId;
 }
 
-async function resumeCodexDesktopThread(client: CodexDesktopAppServerClient, input: DesktopTurnInput): Promise<void> {
-  const result = await client.request("thread/resume", codexDesktopThreadResumeParams(input));
-  const threadId = readThreadId(result);
-  if (threadId !== input.threadId) {
-    throw new Error(`Codex Desktop app-server resumed ${threadId ?? "no thread"} instead of ${input.threadId}.`);
-  }
-}
-
-async function startManagedCodexDesktopTurn(client: CodexDesktopAppServerClient, input: DesktopTurnInput, onCompleted?: DesktopTurnCompleted): Promise<void> {
-  const active: ActiveDesktopTurn = { client, turnId: null };
-  const disposeNotificationHandler = client.onNotification((notification) => {
-    const params = notification.params;
-    if (!params || typeof params !== "object" || !("threadId" in params) || params.threadId !== input.threadId) {
-      return;
-    }
-    if (notification.method === "turn/started" && "turn" in params && params.turn && typeof params.turn === "object" && "id" in params.turn && typeof params.turn.id === "string") {
-      active.turnId = params.turn.id;
-      return;
-    }
-    if (notification.method === "turn/completed") {
-      disposeNotificationHandler();
-      activeDesktopTurns.delete(input.threadId);
-      client.close();
-      void onCompleted?.(input.threadId);
-    }
+async function startCodexDesktopFollowerTurn(input: DesktopTurnInput): Promise<void> {
+  await withCodexDesktopIpc(async (client) => {
+    await client.request("thread-follower-start-turn", codexDesktopFollowerTurnStartParams(input));
   });
-
-  activeDesktopTurns.set(input.threadId, active);
-  try {
-    const result = await client.request("turn/start", codexDesktopTurnStartParams(input));
-    active.turnId = readTurnId(result);
-  } catch (error) {
-    disposeNotificationHandler();
-    activeDesktopTurns.delete(input.threadId);
-    throw error;
-  }
-}
-
-function codexDesktopTurnStartParams(input: DesktopTurnInput): {
-  threadId: string;
-  input: Array<{ type: "text"; text: string; text_elements: [] }>;
-  cwd: string;
-  approvalPolicy: null;
-  sandboxPolicy: null;
-  model: null;
-  effort: null;
-  serviceTier: null;
-  summary: "auto";
-  personality: null;
-  outputSchema: null;
-  collaborationMode: null;
-} {
-  return {
-    threadId: input.threadId,
-    input: [{ type: "text", text: input.prompt, text_elements: [] }],
-    cwd: input.cwd,
-    approvalPolicy: null,
-    sandboxPolicy: null,
-    model: null,
-    effort: null,
-    serviceTier: null,
-    summary: "auto",
-    personality: null,
-    outputSchema: null,
-    collaborationMode: null
-  };
 }
 
 function desktopSandbox(accessPreset: DesktopConversationInput["accessPreset"]): "danger-full-access" | "workspace-write" | "read-only" {
@@ -397,30 +317,9 @@ function readThreadId(result: unknown): string | null {
   return thread.id.trim() || null;
 }
 
-function readTurnId(result: unknown): string | null {
-  if (!result || typeof result !== "object" || !("turn" in result)) {
-    return null;
-  }
-  const turn = result.turn;
-  if (!turn || typeof turn !== "object" || !("id" in turn) || typeof turn.id !== "string") {
-    return null;
-  }
-  return turn.id.trim() || null;
-}
-
 type AppServerResponse =
   | { id: string; result?: unknown; error?: null }
   | { id: string; result?: unknown; error: { message?: string; code?: number } };
-
-interface AppServerNotification {
-  method: string;
-  params?: unknown;
-}
-
-interface ActiveDesktopTurn {
-  client: CodexDesktopAppServerClient;
-  turnId: string | null;
-}
 
 interface PendingAppServerResponse {
   resolve(response: AppServerResponse): void;
@@ -432,7 +331,6 @@ class CodexDesktopAppServerClient {
   private child: ChildProcessWithoutNullStreams | null = null;
   private buffer = "";
   private pending = new Map<string, PendingAppServerResponse>();
-  private notificationHandlers = new Set<(notification: AppServerNotification) => void>();
 
   constructor(private readonly executablePath: string) {}
 
@@ -483,17 +381,9 @@ class CodexDesktopAppServerClient {
     return response.result;
   }
 
-  onNotification(handler: (notification: AppServerNotification) => void): () => void {
-    this.notificationHandlers.add(handler);
-    return () => {
-      this.notificationHandlers.delete(handler);
-    };
-  }
-
   close(): void {
     const child = this.child;
     this.child = null;
-    this.notificationHandlers.clear();
     if (child && child.exitCode == null && !child.killed) {
       child.kill();
     }
@@ -523,12 +413,6 @@ class CodexDesktopAppServerClient {
     } catch {
       return;
     }
-    if (isAppServerNotification(message)) {
-      for (const handler of this.notificationHandlers) {
-        handler(message);
-      }
-      return;
-    }
     if (!message || typeof message !== "object" || !("id" in message) || typeof message.id !== "string") {
       return;
     }
@@ -548,12 +432,4 @@ class CodexDesktopAppServerClient {
       this.pending.delete(requestId);
     }
   }
-}
-
-function isAppServerNotification(message: unknown): message is AppServerNotification {
-  return !!message &&
-    typeof message === "object" &&
-    !("id" in message) &&
-    "method" in message &&
-    typeof message.method === "string";
 }

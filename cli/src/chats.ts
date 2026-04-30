@@ -27,8 +27,7 @@ const defaultDeps: ChatManagerDeps = {
 export class ChatManager {
   constructor(
     private readonly broadcast: Broadcast,
-    private readonly deps: ChatManagerDeps = defaultDeps,
-    private readonly notifyChatById?: (chatId: string) => Promise<void>
+    private readonly deps: ChatManagerDeps = defaultDeps
   ) {}
 
   async list(): Promise<ChatRecord[]> {
@@ -49,16 +48,13 @@ export class ChatManager {
       newBranch: options.newBranch,
       workMode: options.workMode
     });
-    const threadId = await this.deps.startCodexDesktopConversation(
-      {
-        cwd: repo,
-        prompt,
-        model: options.model,
-        reasoningEffort: options.reasoningEffort,
-        accessPreset: options.accessPreset
-      },
-      (completedThreadId) => void this.broadcastCompleted(completedThreadId)
-    );
+    const threadId = await this.deps.startCodexDesktopConversation({
+      cwd: repo,
+      prompt,
+      model: options.model,
+      reasoningEffort: options.reasoningEffort,
+      accessPreset: options.accessPreset
+    });
     const now = new Date().toISOString();
     const visibleChat = await this.waitForDesktopVisibleChat(`codex:${threadId}`);
     const chat: ChatRecord = {
@@ -87,14 +83,11 @@ export class ChatManager {
     }
 
     const threadId = desktopThreadId(chatId);
-    await this.deps.startCodexDesktopTurn(
-      {
-        threadId,
-        cwd: desktopChat.repo,
-        prompt: trimmedPrompt
-      },
-      (completedThreadId) => void this.broadcastCompleted(completedThreadId)
-    );
+    await this.deps.startCodexDesktopTurn({
+      threadId,
+      cwd: desktopChat.repo,
+      prompt: trimmedPrompt
+    });
     const now = new Date().toISOString();
     const chat: ChatRecord = {
       ...desktopChat,
@@ -156,28 +149,6 @@ export class ChatManager {
     }
     return chats.map((chat) => chat.id === overlay.id ? { ...chat, ...overlay } : chat);
   }
-
-  private async broadcastCompleted(threadId: string): Promise<void> {
-    const chatId = `codex:${threadId}`;
-    const now = new Date().toISOString();
-    this.broadcast({ type: "chat_event", chatId, event: { kind: "chat_completed", status: "completed", at: now } });
-    this.broadcast({ type: "chat_list", chats: await this.list() });
-    try {
-      await this.notifyChatById?.(chatId);
-    } catch (error) {
-      this.broadcast({ type: "error", message: (error as Error).message });
-    }
-  }
-}
-
-export function chatCompletedEvent(status: ChatRecord["status"]): "chat_completed" | "chat_stopped" | "chat_failed" {
-  if (status === "completed") {
-    return "chat_completed";
-  }
-  if (status === "stopped") {
-    return "chat_stopped";
-  }
-  return "chat_failed";
 }
 
 function desktopThreadId(chatId: string): string {
