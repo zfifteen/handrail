@@ -29,6 +29,7 @@
 		100000000000000000000114 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000014 /* KeychainStore.swift */; };
 		100000000000000000000115 /* LaunchSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000016 /* LaunchSplashView.swift */; };
 		100000000000000000000116 /* ChatTranscriptParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000017 /* ChatTranscriptParser.swift */; };
+		100000000000000000000117 /* ChatTranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000018 /* ChatTranscriptView.swift */; };
 		200000000000000000000101 /* IPadWorkspaceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* IPadWorkspaceModels.swift */; };
 		200000000000000000000102 /* IPadWorkspaceRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* IPadWorkspaceRootView.swift */; };
 		200000000000000000000103 /* IPadSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* IPadSidebarView.swift */; };
@@ -83,6 +84,7 @@
 		100000000000000000000015 /* Handrail.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Handrail/Handrail.entitlements; sourceTree = "<group>"; };
 		100000000000000000000016 /* LaunchSplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/LaunchSplashView.swift; sourceTree = "<group>"; };
 		100000000000000000000017 /* ChatTranscriptParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/ChatTranscriptParser.swift; sourceTree = "<group>"; };
+		100000000000000000000018 /* ChatTranscriptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/ChatTranscriptView.swift; sourceTree = "<group>"; };
 		100000000000000000000201 /* Handrail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Handrail.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		200000000000000000000001 /* IPadWorkspaceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadWorkspaceModels.swift; sourceTree = "<group>"; };
 		200000000000000000000002 /* IPadWorkspaceRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadWorkspaceRootView.swift; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 				100000000000000000000009 /* ChatsView.swift */,
 				10000000000000000000000A /* ChatDetailView.swift */,
 				100000000000000000000017 /* ChatTranscriptParser.swift */,
+				100000000000000000000018 /* ChatTranscriptView.swift */,
 				10000000000000000000000B /* ApprovalRequiredView.swift */,
 				10000000000000000000000C /* ActivityView.swift */,
 				10000000000000000000000D /* NotificationsView.swift */,
@@ -297,6 +300,7 @@
 				100000000000000000000114 /* KeychainStore.swift in Sources */,
 				100000000000000000000115 /* LaunchSplashView.swift in Sources */,
 				100000000000000000000116 /* ChatTranscriptParser.swift in Sources */,
+				100000000000000000000117 /* ChatTranscriptView.swift in Sources */,
 				200000000000000000000101 /* IPadWorkspaceModels.swift in Sources */,
 				200000000000000000000102 /* IPadWorkspaceRootView.swift in Sources */,
 				200000000000000000000103 /* IPadSidebarView.swift in Sources */,
