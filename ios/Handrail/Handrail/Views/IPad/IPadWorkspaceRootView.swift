@@ -22,7 +22,7 @@ struct IPadWorkspaceRootView: View {
     private var placeholderContent: some View {
         switch selection.selectedSection {
         case .dashboard:
-            IPadDashboardWorkspaceView()
+            IPadDashboardWorkspaceView(selection: $selection)
         case .chats:
             IPadChatListWorkspaceView(selection: $selection)
         case .attention:
