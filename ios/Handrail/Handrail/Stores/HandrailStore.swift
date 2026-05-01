@@ -312,7 +312,7 @@ final class HandrailStore {
         showsApprovalFromNotification = latestApproval?.chatId == chatId
     }
 
-    private func handle(_ message: ServerMessage) {
+    func handle(_ message: ServerMessage) {
         switch message {
         case .machineStatus(let machineName, let online, let defaultRepo):
             connectionText = online ? "Online" : "Offline"
@@ -366,12 +366,16 @@ final class HandrailStore {
                 approval,
                 chatTitle: chat(id: approval.chatId)?.title ?? approval.title
             )
+        case .commandResult(let ok, let message):
+            if ok {
+                addActivity("Command result", message)
+            } else {
+                reportPendingError(message)
+            }
         case .error(let message):
             awaitingStartedChat = false
             isRefreshingChats = false
             reportPendingError(message)
-        case .ignored:
-            break
         }
     }
 

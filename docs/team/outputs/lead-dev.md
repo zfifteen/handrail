@@ -2,38 +2,43 @@
 
 ## Strongest Implementation Finding
 
-The iOS sync row was exposing the refresh control with the current sync status as its accessibility label. The visible button said `Refresh`, but VoiceOver and simulator automation saw labels such as `Synced just now`.
+Issue #27 is complete in the current iOS implementation: New Chat and Chat Detail no longer replay a stale global error banner when those surfaces open. New Chat uses `newChatError`, Chat Detail uses `chatErrors[chatId]`, and each surface clears only its scoped transient error on entry while preserving durable Alerts history.
 
 ## Patch Or Issue Work Completed
 
-- Selected GitHub bug issue #9 because it has a concrete iPhone simulator reproduction and a narrow acceptance condition.
-- Updated `SyncStatusRow` so the status icon is hidden from accessibility, the sync status remains static text, and the action button exposes `Refresh` or `Reconnect`.
-- Commented on and closed GitHub issue #9 with simulator accessibility evidence.
-- Preserved unrelated local edits already present in team docs, `DashboardView.swift`, and `scripts/run-codex-automation-now.mjs`.
+- Checked Slack `#handrail-agents` (`C0B0K6B0T6K`); no message was addressed to `Handrail Lead Dev`.
+- No lead-dev handoff file was present.
+- Selected GitHub bug issue #27 because it has concrete iPhone reproduction and acceptance criteria.
+- Verified the existing scoped-error implementation and closed issue #27 with CLI, Swift test, and iPhone simulator evidence.
+- Preserved unrelated pre-existing local edits in `docs/spec/README.md`, `docs/team/outputs/architect.md`, `docs/spec/handrail-websocket-protocol.md`, `ios/Handrail/Handrail/Networking/HandrailMessages.swift`, `ios/Handrail/Handrail/Stores/HandrailStore.swift`, and `ios/Handrail/HandrailTests/TransientErrorStateTests.swift`.
 
 ## Files Changed
 
-- `ios/Handrail/Handrail/Views/Components.swift`
 - `docs/team/outputs/lead-dev.md`
+- `/Users/velocityworks/.codex/automations/handrail-lead-dev/memory.md`
+
+No product source file was changed by this lead-dev run. The selected issue was already satisfied by the current scoped-error code path; the lead-dev action was verification, durable evidence, and issue closure.
 
 ## Remaining Blocker
 
-No blocker remains for issue #9. The simulator still shows the separate open issue #8 symptom: the native tab bar is exposed as a `Tab Bar` group with no child tab buttons.
+No blocker remains for issue #27.
 
-QA handoff refresh is blocked in this sandbox because `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md` is outside the writable roots for this run. The attempted write was rejected before any content changed.
+`CODEX_HOME` was unset in the shell, so `$CODEX_HOME/automations/...` resolved to `/automations/...` and was not writable. The concrete configured path `/Users/velocityworks/.codex/automations/...` was used for memory and QA handoff.
+
+QA handoff refresh is blocked by the current sandbox write roots: `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md` is outside the writable automation root for this run, and the attempted patch was rejected before any content changed.
 
 ## Verification
 
-- Slack inbox checked: no recent message addressed to `Handrail Lead Dev`.
-- `gh auth status -h github.com` confirmed authenticated as `zfifteen`.
+- `gh auth status -h github.com`: authenticated as `zfifteen`.
 - `cd cli && npm test`: 36/36 passed.
-- Direct shell `xcodebuild test -project ios/Handrail/Handrail.xcodeproj -scheme Handrail -destination 'platform=iOS Simulator,name=iPhone 17'` could not enumerate the simulator and exited 70 after CoreSimulatorService errors.
-- XcodeBuildMCP `test_sim` on iPhone 17 / iOS 26.4.1: 33/33 passed.
-- XcodeBuildMCP `build_run_sim` on iPhone 17 / iOS 26.4.1 succeeded.
-- XcodeBuildMCP `snapshot_ui` showed `Synced just now` as static text and the adjacent button with `AXLabel: "Refresh"`.
-- XcodeBuildMCP `tap(label: "Refresh")` succeeded.
-- Dashboard screenshot: `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_112ff3ea-4f93-4ea1-a126-2ad9853a2d2c.jpg`
+- XcodeBuildMCP `test_sim` on iPhone 17 for `HandrailTests/TransientErrorStateTests`: passed.
+- XcodeBuildMCP `build_run_sim` on iPhone 17 succeeded.
+- Simulator New Chat screenshot showed no stale error banner: `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_210ef3c2-b53e-4f39-80e6-23560d6ca46b.jpg`.
+- Simulator Chat Detail screenshot showed no stale historical error banner: `/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/screenshot_optimized_42a538b0-287d-42ce-ae5f-7a2f0a9d1eb1.jpg`.
+- `git diff --check`: passed.
+- GitHub issue #27 comment: https://github.com/zfifteen/handrail/issues/27#issuecomment-4357928604
+- GitHub issue #27 was closed as completed.
 
 ## QA Handoff
 
-Blocked by sandbox write scope. QA can independently confirm issue #9 with the same iPhone 17 simulator path: launch Dashboard, inspect the sync row, and verify the status is static text while the adjacent button has `AXLabel: "Refresh"` and can be tapped by label.
+Blocked by sandbox write scope. QA should independently spot-check issue #27 on iPhone 17: reopen New Chat and Chat Detail and confirm no stale global error banner appears before a fresh failing request.

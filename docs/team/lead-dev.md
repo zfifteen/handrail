@@ -25,7 +25,7 @@ Implementation pressure may be summarized as `Z = A(B/C)`, where `A` is the curr
 ## Inputs To Inspect
 
 - current git status
-- `$CODEX_HOME/automations/handrail-lead-dev/handoff.md` when present
+- `/Users/velocityworks/.codex/automations/handrail-lead-dev/handoff.md` when present and readable
 - recent Slack messages in `#handrail-agents` (`C0B0K6B0T6K`) addressed to `Handrail Lead Dev`
 - `FEATURE_ROADMAP.md`
 - `docs/production_readiness_report.md` when present
@@ -39,7 +39,7 @@ Implementation pressure may be summarized as `Z = A(B/C)`, where `A` is the curr
 Each run chooses exactly one target using this sequence:
 
 1. Act on addressed Slack requests for `Handrail Lead Dev` when their durable artifact or issue is present and not already recorded as handled.
-2. Act on `$CODEX_HOME/automations/handrail-lead-dev/handoff.md` when present. Complete or explicitly block that handoff before selecting unrelated GitHub work.
+2. Act on `/Users/velocityworks/.codex/automations/handrail-lead-dev/handoff.md` when present and readable. Complete or explicitly block that handoff before selecting unrelated GitHub work.
 3. List concrete open bug issues: `gh issue list -R zfifteen/handrail --label bug --state open --limit 100`. Pick the smallest issue with reproduction or acceptance criteria that can be completed end-to-end in one run.
 4. List open feature issues: `gh issue list -R zfifteen/handrail --label enhancement --state open --limit 100`. Pick the smallest issue that can be completed end-to-end in one run.
 5. If multiple candidates are comparable, prefer the lowest issue number.
@@ -65,11 +65,12 @@ When completing a bug issue, leave a final comment with the fix and verification
 
 ## QA Handoff
 
-When validation is needed, write a handoff to the QA lead task:
+When validation is needed, write a handoff to the QA lead task if the handoff path is writable:
 
-- Write a short QA note to `$CODEX_HOME/automations/handrail-qa-lead/handoff.md`.
+- Write a short QA note to `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`.
 - The note must name the one feature/hygiene change, where to validate it (UI path, CLI command, simulator target), and the exact evidence expected (screenshot path, test command, issue link).
 - QA Lead runs independently on its own three-hour schedule.
+- If the QA handoff path is not writable in the current run, do not attempt the write or retry it through a different mechanism. Record the intended handoff content and writability blocker in `docs/team/outputs/lead-dev.md`.
 
 Do not run QA Lead, Architect, Lead Dev, or any other Handrail team role from a Lead Dev run. Do not manually launch another role, call app-server thread creation, edit automation records, or edit automation database rows as a handoff mechanism.
 

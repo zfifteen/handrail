@@ -105,8 +105,8 @@ enum ServerMessage: Decodable {
     case chatStarted(CodexChat)
     case chatEvent(chatId: String, event: ChatEvent)
     case approvalRequired(ApprovalRequest)
+    case commandResult(ok: Bool, message: String)
     case error(String)
-    case ignored
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -123,6 +123,7 @@ enum ServerMessage: Decodable {
         case files
         case diff
         case message
+        case ok
         case defaultRepo
         case options
     }
@@ -161,10 +162,15 @@ enum ServerMessage: Decodable {
                 files: try container.decode([String].self, forKey: .files),
                 diff: try container.decode(String.self, forKey: .diff)
             ))
+        case "command_result":
+            self = .commandResult(
+                ok: try container.decode(Bool.self, forKey: .ok),
+                message: try container.decode(String.self, forKey: .message)
+            )
         case "error":
             self = .error(try container.decode(String.self, forKey: .message))
         default:
-            self = .ignored
+            self = .error("Unsupported server message type: \(type).")
         }
     }
 }

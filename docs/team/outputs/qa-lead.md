@@ -2,52 +2,56 @@
 
 ## Strongest Evidence Finding
 
-The Release APNs source configuration is fixed, but GitHub issue #25 is not closable yet: a real Release archive cannot be signed with the current local provisioning profile because it lacks Push Notifications and the `aps-environment` entitlement.
+Issue #27 remains correctly closed: independent QA validation on iPhone 17 confirmed that New Chat and Chat Detail no longer replay the historical `Codex Desktop did not become ready` banner when opened.
 
 ## Verified Behavior
 
-- Slack inbox checked for `#handrail-agents` (`C0B0K6B0T6K`): no recent message was addressed to `Handrail QA Lead`. The only recent operational message was a no-action coordination verification addressed to `Handrail agents` at `2026-04-30 19:11:51 EDT`, TS `1777590711.698899`.
-- QA handoff checked at `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`: current handoff only confirms the new lead-dev-to-QA handoff mechanism and states no product behavior changed.
+- Slack inbox checked for `#handrail-agents` (`C0B0K6B0T6K`) after the previous QA run timestamp; no message was addressed to `Handrail QA Lead`.
+- QA handoff checked at `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`; no handoff file is currently present.
+- Reviewed the Lead Dev report's QA handoff note for issue #27 and performed the requested iPhone spot-check.
 - `gh auth status -h github.com` is authenticated as `zfifteen` for `zfifteen/handrail`.
-- `plutil -p ios/Handrail/Handrail/Handrail.entitlements` reports `aps-environment => production`.
-- `plutil -lint ios/Handrail/Handrail/Handrail.entitlements` passes.
-- Release build settings with `xcodebuild -project ios/Handrail/Handrail.xcodeproj -scheme Handrail -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath /private/tmp/handrail-qa-buildsettings -showBuildSettings` report:
-  - `CODE_SIGN_ENTITLEMENTS = Handrail/Handrail.entitlements`
-  - `CONFIGURATION = Release`
-  - `PRODUCT_BUNDLE_IDENTIFIER = com.velocityworks.Handrail`
-  - `INFOPLIST_KEY_NSLocalNetworkUsageDescription = Handrail connects to the desktop CLI on your local network.`
+- Opened Dashboard -> New chat on iPhone 17 simulator: no stale readiness error banner appeared before a fresh request.
+- Opened Dashboard -> `Analyze notification plumbing` Chat Detail on iPhone 17 simulator: no stale historical error banner appeared.
 
 ## Missing Evidence Or Regressions
 
-- Issue #25 remains open because its acceptance check requires a signed Release archive entitlement inspection. The attempted archive failed during provisioning: `iOS Team Provisioning Profile: com.velocityworks.Handrail` does not include Push Notifications or the `aps-environment` entitlement.
-- Simulator validation was not required for the current handoff because it touched only automation coordination, not visible iPhone/iPad UI, navigation, decoded screen data, gestures, context menus, sheets, tabs, lists, or empty states.
-- Current open bug list still includes iPhone accessibility/reliability issues #4, #7, #8, #9, #10, #11, #12, #16, #18, #19, #27 and iPad issues #17, #21, #22, #23, #24.
-- Existing unrelated user change preserved: `docs/team/outputs/pm.md` was already modified before this QA report update and was not edited.
+- Issue #27 is verified from QA's side; no reopen condition was found.
+- The full acceptance path for "newly-triggered failing request still appears in Alerts" was not re-exercised in UI during this run because the Lead Dev handoff requested the narrower stale-banner spot-check. The store-level regression tests covering scoped transient errors passed.
+- Existing unrelated local changes remain present in source, specs, and role reports. This QA run preserved them.
 
 ## Code, Test, Or Issue Changes
 
-- Updated GitHub issue #25 body and left a QA verification comment with the exact remaining blocker: a production-capable distribution/TestFlight/App Store provisioning profile is required before `codesign -d --entitlements :- <App.app>` can prove the signed app carries `aps-environment = production`.
+- Added QA verification comment to GitHub issue #27: https://github.com/zfifteen/handrail/issues/27#issuecomment-4358000270
+- Added simulator screenshots:
+  - `test-artifacts/qa-lead-issue27-2026-05-01/01-dashboard-before-new-chat.jpg`
+  - `test-artifacts/qa-lead-issue27-2026-05-01/02-new-chat-no-stale-error.jpg`
+  - `test-artifacts/qa-lead-issue27-2026-05-01/03-chat-detail-no-stale-error.jpg`
 - Updated this report: `docs/team/outputs/qa-lead.md`.
 
 ## Verification
 
-- Read QA/team contracts: `docs/team/qa-lead.md`, `docs/team/README.md`.
-- Read QA memory and handoff:
+- Read QA/team contracts:
+  - `docs/team/qa-lead.md`
+  - `docs/team/README.md`
+- Read automation memory:
   - `/Users/velocityworks/.codex/automations/handrail-qa-lead/memory.md`
-  - `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`
-- Reviewed project QA inputs:
+- Reviewed QA inputs and recent role reports:
   - `TEST_PLAN.md`
   - `UI_PATHS.md`
   - `UI_PATH_ISSUES.md`
-  - `FEATURE_ROADMAP.md`
   - `docs/production_readiness_report.md`
   - `docs/team/outputs/lead-dev.md`
   - `docs/team/outputs/architect.md`
-- Reviewed GitHub bug queue with `gh issue list -R zfifteen/handrail --label bug --limit 100`.
-- Ran Release entitlement/source checks:
-  - `plutil -p ios/Handrail/Handrail/Handrail.entitlements`
-  - `plutil -lint ios/Handrail/Handrail/Handrail.entitlements`
-  - `rg -n "aps-environment|CODE_SIGN_ENTITLEMENTS|INFOPLIST_KEY_NSLocalNetworkUsageDescription|Release" ios/Handrail/Handrail.xcodeproj/project.pbxproj ios/Handrail/Handrail/Handrail.entitlements`
-- Ran archive check:
-  - `xcodebuild archive -project ios/Handrail/Handrail.xcodeproj -scheme Handrail -configuration Release -destination 'generic/platform=iOS' -archivePath /private/tmp/handrail-qa-release.xcarchive -derivedDataPath /private/tmp/handrail-qa-archive-derived`
-  - Result: failed at provisioning because the local team profile lacks Push Notifications and `aps-environment`.
+- Reviewed open issue queue with local `gh`:
+  - `gh issue list -R zfifteen/handrail --state open --limit 100 --json number,title,labels,milestone,updatedAt,url`
+- Reviewed closed issue #27 with local `gh`:
+  - `gh issue view -R zfifteen/handrail 27 --comments --json number,title,state,labels,body,comments,url`
+- Ran CLI tests:
+  - `cd cli && npm test`
+  - Result: 36/36 passed.
+- Ran targeted Swift simulator tests:
+  - XcodeBuildMCP `test_sim` on iPhone 17 / iOS 26.4 with `-only-testing:HandrailTests/TransientErrorStateTests`
+  - Result: passed.
+- Ran iPhone simulator validation:
+  - XcodeBuildMCP `build_run_sim` for project `/Users/velocityworks/IdeaProjects/handrail/ios/Handrail/Handrail.xcodeproj`, scheme `Handrail`, simulator `iPhone 17` (`0E58E7BB-44FA-4BEE-9C94-8FED4C334482`)
+  - Result: build, install, and launch succeeded.
