@@ -20,17 +20,18 @@ Each run should prefer one narrow, deterministic path. Do not add fallback workf
 
 ## Coordination
 
-The PM run starts the sequential implementation chain: PM -> Architect -> Lead Dev -> QA Lead. The Business Analyst runs daily and owns App Store eligibility coordination. Each role should read any relevant prior outputs before choosing work. If two roles identify conflicting next actions, the later role should record the conflict directly rather than resolving it silently.
+The core team now runs as conventional independent Codex Desktop automations:
 
-The implementation chain must use the Handrail run-now helper so every downstream role is requested through Codex Desktop's normal visible automation run-now path. PM runs only Architect. Architect runs only Lead Dev when its downstream rules call for implementation. Lead Dev runs only QA Lead after implementation work and a QA handoff. Architect, Lead Dev, and QA Lead remain paused by default in their automation records.
+| Role | Schedule | Operating shape |
+|---|---:|---|
+| Handrail PM | Every 6 hours | Extensive product run; complete multiple concrete PM actions when they are independent and within PM ownership. |
+| Handrail Architect | Every 6 hours | Extensive architecture run; inspect relevant boundaries and make concrete spec, test, code, or issue progress. |
+| Handrail Lead Dev | Every hour | Complete or explicitly block one complete feature, bug, or hygiene target. |
+| Handrail QA Lead | Every 3 hours | Validate the current QA handoff first, then the highest-value reproducible bug or regression evidence. |
 
-The helper command is:
+The Business Analyst remains on its separate daily App Store eligibility cadence, and the simulator sweep remains a separate broad confidence check.
 
-```sh
-node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs <automation-id>
-```
-
-It sends the Codex Desktop `automation-run-now` IPC request. It does not call app-server thread creation paths, edit automation state, edit database rows, or create a background worker. If the helper fails, record the exact error as a blocker and stop. Do not use a fallback handoff mechanism.
+Roles coordinate through reports, GitHub issues, Slack requests, and handoff files. No role starts another role. A role may write or refresh a handoff for a later scheduled run, but it must not manually launch another role, call app-server thread creation, edit automation records, or edit automation database rows as a handoff mechanism. If two roles identify conflicting next actions, the later role should record the conflict directly rather than resolving it silently.
 
 ## Slack Coordination
 

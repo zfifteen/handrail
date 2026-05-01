@@ -88,18 +88,23 @@ struct SyncStatusRow: View {
             Image(systemName: icon)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(isRefreshing ? .purple : iconColor)
+                .accessibilityHidden(true)
             Text(statusText)
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
             Spacer()
-            Button(isOnline ? "Refresh" : "Reconnect") {
+            Button(actionTitle) {
                 refresh()
             }
             .font(.caption.weight(.semibold))
             .buttonStyle(.bordered)
             .tint(.purple)
+            .accessibilityLabel(actionTitle)
         }
-        .accessibilityLabel(statusText)
+    }
+
+    private var actionTitle: String {
+        isOnline ? "Refresh" : "Reconnect"
     }
 
     private var statusText: String {

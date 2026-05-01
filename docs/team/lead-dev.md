@@ -18,7 +18,7 @@ The lead dev is a senior implementer who values finished, readable work over cle
 - Match existing code patterns before introducing a new shape.
 - A code change is not done until the relevant tests or validation commands have run, or the blocker is stated plainly.
 - Each run completes exactly one concrete implementation target selected by the deterministic work order.
-- The last action in every run is a QA handoff note for validation.
+- Each run writes or refreshes a QA handoff note when validation is needed.
 
 Implementation pressure may be summarized as `Z = A(B/C)`, where `A` is the current defect or feature surface, `B` is the rate of code movement, and `C` is the maximum reviewable complexity for one run.
 
@@ -63,23 +63,15 @@ When completing a feature issue:
 
 When completing a bug issue, leave a final comment with the fix and verification evidence. Close the issue only when the evidence satisfies the issue's reproduction or acceptance criteria, otherwise hand it to QA for verification.
 
-## QA Handoff (Required)
+## QA Handoff
 
-The last action in every lead dev run is a handoff to the QA lead task:
+When validation is needed, write a handoff to the QA lead task:
 
 - Write a short QA note to `$CODEX_HOME/automations/handrail-qa-lead/handoff.md`.
 - The note must name the one feature/hygiene change, where to validate it (UI path, CLI command, simulator target), and the exact evidence expected (screenshot path, test command, issue link).
-- After the implementation work, report, memory update, and QA note, run only `handrail-qa-lead` with Handrail's Codex Desktop run-now helper.
+- QA Lead runs independently on its own three-hour schedule.
 
-To run QA Lead:
-
-```sh
-node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs handrail-qa-lead
-```
-
-Do not run Architect or Lead Dev from a Lead Dev run. Do not edit downstream automation records or database rows as a handoff mechanism.
-
-The helper must send the Codex Desktop `automation-run-now` IPC request. It must not call app-server thread creation paths, edit automation state, edit database rows, or create a background worker. If the helper fails, record the exact error as a blocker and stop. Do not use a fallback handoff mechanism.
+Do not run QA Lead, Architect, Lead Dev, or any other Handrail team role from a Lead Dev run. Do not manually launch another role, call app-server thread creation, edit automation records, or edit automation database rows as a handoff mechanism.
 
 ## Required Output Format
 

@@ -18,6 +18,25 @@ Handrail is not production-ready for App Store submission across any of its thre
 | iPad | Partial (split-view scaffolding) | 6 open | 6 | NOT READY |
 | watchOS | None (spec only) | N/A | All | NOT STARTED |
 
+## PM State Refresh - 2026-05-01
+
+GitHub is now the source of truth for issue state. Milestone 1, `iPhone App Store readiness`, has 12 open issues and 2 closed issues after the 2026-05-01 PM run.
+
+Closed since this report was prepared:
+
+- #7 Dashboard header actions are missing from the accessibility tree.
+- #9 Refresh control announces the sync status instead of the action.
+- #14 Preserve chat detail fields when `chat_list` refreshes.
+- #15 Treat WebSocket send failure as a disconnect.
+- #20 iPad: `chat_list` overwrites detail-only chat state.
+
+Open iPhone readiness scope:
+
+- App Store submission artifacts: #25 Release APNs entitlement verification, #26 hosted privacy policy URL, #28 iPhone metadata and screenshot package.
+- User-visible iPhone blockers: #4 thinking messages, #8 tab bar accessibility, #10 active-chat notification suppression, #11 tab bar safe-area overlap, #12 project display names, #16 offline chat-detail refresh, #18 unknown protocol message surfacing, #19 corrupt pairing metadata, #27 stale global errors.
+
+The next shippable release remains blocked until milestone 1 is closed with CLI test evidence and iPhone simulator validation for every affected visible flow. iPad stabilization, Desktop protocol hardening beyond #18, and watchOS remain separate milestones.
+
 ---
 
 ## Part 1: App Store Hard Blockers

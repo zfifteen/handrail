@@ -71,7 +71,7 @@ Recommended CLI for issue management:
 
 ### Targeted Validation And Simulator Sweeps
 
-Run-now QA threads perform targeted validation from `$CODEX_HOME/automations/handrail-qa-lead/handoff.md` first. The handoff determines the smallest evidence needed for that run.
+The QA Lead automation runs every three hours. Each run performs targeted validation from `$CODEX_HOME/automations/handrail-qa-lead/handoff.md` first. The handoff determines the smallest evidence needed for that run.
 
 Simulator validation is mandatory when the handoff touches visible iPhone or iPad UI, navigation, decoded data feeding a screen, gestures, context menus, sheets, tabs, lists, or empty states. Non-UI docs, CLI, config, and automation-only changes do not require the full iPhone and iPad sweep unless the handoff explicitly asks for it.
 
@@ -81,7 +81,7 @@ A separate daily simulator confidence sweep is responsible for broad release con
 - Walks the documented UI paths (`UI_PATHS.md`) to look for new regressions.
 - Re-verifies any issues that are marked “done” or claimed fixed since the last run.
 
-The daily sweep must leave evidence (commands + device targets + screenshots) in `test-artifacts/`. Run-now QA reports should name whether they performed targeted validation only or invoked broader simulator coverage.
+The daily sweep must leave evidence (commands + device targets + screenshots) in `test-artifacts/`. QA reports should name whether they performed targeted validation only or invoked broader simulator coverage.
 
 ## Required Output Format
 

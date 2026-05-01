@@ -118,6 +118,8 @@ struct DashboardView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 14) {
+                dashboardHeader
+
                 if let machine = store.pairedMachine {
                     machineStatus(machine)
                     SyncStatusRow(
@@ -157,27 +159,7 @@ struct DashboardView: View {
         .refreshable {
             store.refreshChats()
         }
-        .navigationTitle("Dashboard")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    showsStart = true
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                }
-                .disabled(store.pairedMachine?.isOnline != true)
-                .accessibilityLabel("New chat")
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showsScanner = true
-                } label: {
-                    Image(systemName: "qrcode.viewfinder")
-                }
-                .accessibilityLabel("Pair machine")
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: String.self) { id in
             ChatDetailView(chatId: id)
         }
@@ -220,6 +202,34 @@ struct DashboardView: View {
                 showsStart = false
             }
         }
+    }
+
+    private var dashboardHeader: some View {
+        HStack(spacing: 12) {
+            Button {
+                showsStart = true
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title2.weight(.semibold))
+                    .frame(width: 44, height: 44)
+            }
+            .disabled(store.pairedMachine?.isOnline != true)
+            .accessibilityLabel("New Chat")
+
+            Text("Dashboard")
+                .font(.largeTitle.bold())
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button {
+                showsScanner = true
+            } label: {
+                Image(systemName: "qrcode.viewfinder")
+                    .font(.title2.weight(.semibold))
+                    .frame(width: 44, height: 44)
+            }
+            .accessibilityLabel("Scan QR Code")
+        }
+        .foregroundStyle(.primary)
     }
 
     private func machineStatus(_ machine: PairedMachine) -> some View {

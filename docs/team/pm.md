@@ -62,17 +62,11 @@ Releases must:
 
 Before creating a new issue, check whether an open issue already covers the same product gap. Update the existing issue when possible. New issues should include the observable problem, desired user outcome, acceptance evidence, and priority rationale.
 
-## Downstream Run-Now
+## Scheduled Run Behavior
 
-The last action in every PM run is to run only `handrail-architect` with Handrail's Codex Desktop run-now helper:
+The PM automation runs every six hours. Treat each run as an extensive PM work block, not a light status check. Complete multiple concrete PM actions when they are independent, deterministic, and within PM ownership.
 
-```sh
-node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs handrail-architect
-```
-
-Do not run Lead Dev or QA Lead from a PM run. Do not edit downstream automation records or database rows as a handoff mechanism.
-
-The helper must send the Codex Desktop `automation-run-now` IPC request. It must not call app-server thread creation paths, edit automation state, edit database rows, or create a background worker. If the helper fails, record the exact error as a blocker and stop. Do not use a fallback handoff mechanism.
+Do not run Architect, Lead Dev, QA Lead, or any other Handrail team role from a PM run. Do not manually launch another role, call app-server thread creation, edit automation records, or edit automation database rows as a handoff mechanism.
 
 ## Required Output Format
 

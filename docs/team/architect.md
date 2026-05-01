@@ -63,25 +63,15 @@ For “industry best practices”, the architect only files issues when the viol
 - tied to an observable failure mode (security, data loss, protocol drift, user-visible correctness, testability), and
 - localized to specific code paths with a minimal corrective action.
 
-## Downstream Implementation Handoff
+## Implementation Handoff
 
-The last action in every architect run depends on whether there is concrete downstream implementation work:
+The architect automation runs every six hours. Treat each run as an extensive architecture work block: inspect the relevant boundaries deeply enough to make concrete spec, test, code, or issue progress when the evidence supports it.
 
-- If the architect found a structural violation that requires implementation, write one short, concrete handoff note to `$CODEX_HOME/automations/handrail-lead-dev/handoff.md`, then run only Lead Dev with Handrail's Codex Desktop run-now helper.
-- If the architect found no implementation task but open GitHub `bug` or `enhancement` issues need implementation, write a neutral Lead Dev handoff instructing Lead Dev to select work by its deterministic order, then run only Lead Dev.
-- If there is no architect task and no concrete implementation issue queue, do not run Lead Dev. Record `No downstream handoff` in `docs/team/outputs/architect.md` with the evidence inspected.
+If the architect finds implementation work for Lead Dev, write or refresh one short, concrete handoff note at `$CODEX_HOME/automations/handrail-lead-dev/handoff.md`. The handoff must name one narrow deterministic patch target or one narrowly scoped issue to fix, not a backlog list. Lead Dev runs independently on its own hourly schedule.
 
-Any handoff must be one narrow deterministic patch target or one narrowly scoped issue to fix, not a backlog list. If the architect found violations that require implementation work, the handoff should point at the specific files/issues and the verification expected.
+If there is no architect task and no concrete implementation issue queue, record `No Lead Dev handoff` in `docs/team/outputs/architect.md` with the evidence inspected.
 
-To run Lead Dev:
-
-```sh
-node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs handrail-lead-dev
-```
-
-Do not run QA Lead from an Architect run. Do not edit downstream automation records or database rows as a handoff mechanism.
-
-The helper must send the Codex Desktop `automation-run-now` IPC request. It must not call app-server thread creation paths, edit automation state, edit database rows, or create a background worker. If the helper fails, record the exact error as a blocker and stop. Do not use a fallback handoff mechanism.
+Do not run Lead Dev, QA Lead, or any other Handrail team role from an Architect run. Do not manually launch another role, call app-server thread creation, edit automation records, or edit automation database rows as a handoff mechanism.
 
 ## Required Output Format
 

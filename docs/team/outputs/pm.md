@@ -2,37 +2,39 @@
 
 ## Strongest Product Finding
 
-The iPhone readiness path is correctly narrowed around App Store submission, but issue #27 now has only a local candidate implementation, not acceptance evidence. The working tree clears New Chat and per-chat error state on entry and adds focused tests, but #27 should remain open until an iPhone simulator run proves stale errors no longer appear in New Chat or Chat Detail while fresh failures still surface.
+The iPhone App Store readiness milestone is the current product bottleneck: 12 open issues remain, 2 milestone issues are closed, and the milestone now includes the previously untracked App Store metadata/screenshot package. The next shippable scope is bounded to iPhone submission evidence, not iPad, watchOS, or broader Desktop protocol work.
 
 ## Decisions Or Issues Updated
 
 - Slack inbox: checked `#handrail-agents` (`C0B0K6B0T6K`); no recent message was addressed to `Handrail PM`. The only recent operational message was the no-action Slack coordination verification addressed to `Handrail agents` at `2026-04-30 19:11:51 EDT` / TS `1777590711.698899`.
-- Handoff inbox: no PM handoff file was present at `$CODEX_HOME/automations/handrail-pm/handoff.md`.
-- No GitHub issue, milestone, or release was changed this run. The existing GitHub state already captures the current product scope: milestone 1 has 13 open iPhone App Store readiness issues; milestones 2-4 cover iPad stabilization, Desktop protocol hardening, and watchOS companion work.
+- Handoff inbox: no PM handoff file was present at `/Users/velocityworks/.codex/automations/handrail-pm/handoff.md`.
+- GitHub auth: `gh auth status -h github.com` is authenticated as `zfifteen`; all GitHub reads/writes used the local `gh` CLI.
+- Created GitHub issue #28, `App Store blocker: Create iPhone metadata and screenshot package`, and assigned it to milestone 1 with `enhancement` and `iOS` labels.
+- Updated GitHub milestone 1, `iPhone App Store readiness`, to include #28 and to distinguish remaining accessibility blockers (#8 #10 #11 #12) from already-closed #7 and #9.
+- Updated `docs/production_readiness_report.md` with a 2026-05-01 PM state refresh naming closed issues #7, #9, #14, #15, and #20 plus the current open iPhone readiness scope.
 - No release was created or updated; `gh release list --repo zfifteen/handrail --limit 20` returned no releases.
-- Downstream run-now: attempted the required Architect handoff with `node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs handrail-architect`; it failed before creating the visible Architect thread because Codex Desktop reported permission denied reading `/Users/velocityworks/.codex/sessions`.
 
 ## Scope Risks
 
-- The working tree is not clean. It includes prior role/user changes in automation docs, team outputs, iOS store/view files, a new `TransientErrorStateTests.swift`, and `scripts/run-codex-automation-now.mjs`. PM did not revert or fold those changes.
-- Issue #27 appears partially implemented locally, but visible iPhone simulator validation is still missing. Because this touches New Chat and Chat Detail UI state, code review or unit tests alone are not enough to close it.
-- Issue #25 remains open by design: the source entitlement is `production`, but the signed Release archive still needs a distribution/TestFlight/App Store profile before `codesign -d --entitlements :- <App.app>` can prove the shipped entitlement.
-- Issue #26 remains blocked on a hosted privacy policy URL. The local policy text exists at `docs/privacy-policy.md`, but App Store Connect needs a stable URL.
-- iPad and watchOS remain separate scopes and should not displace the iPhone App Store readiness milestone.
-- Architect handoff is blocked until local Codex session-file permissions are repaired. The exact helper error was: `Fatal error: Codex cannot access session files at /Users/velocityworks/.codex/sessions (permission denied)`.
+- Milestone 1 remains open with 12 open issues and 2 closed issues.
+- #25 remains blocked on a production-capable distribution/TestFlight/App Store provisioning profile before a signed Release archive can prove `aps-environment = production`.
+- #26 remains blocked on a hosted privacy policy URL; local policy text at `docs/privacy-policy.md` is not sufficient for App Store Connect.
+- #28 now tracks missing listing metadata and screenshots; it must not include iPad/watchOS claims until those separate milestones are independently ready.
+- #27 still needs visible iPhone simulator validation before closure because it affects New Chat and Chat Detail screen state.
+- Existing unrelated workspace changes remain present in team docs, iOS view files, and the deleted automation script; PM did not revert or fold those changes.
 
 ## Next Product Action
 
-Validate and close or revise #27. The next implementation/QA pass should run the affected iPhone simulator flow: trigger a stale error, open `New chat`, open `Chat Detail`, verify no historical banner appears, then trigger a fresh failure and verify the banner and Alerts entry still appear.
+Keep the next implementation/verification pass inside milestone 1. The most concrete unblocked engineering candidate remains #18: make iOS decode `command_result` and surface unknown server message types. In parallel or afterward, #28 needs a narrow store-assets package containing iPhone listing copy and screenshot inventory without widening the product promise.
 
 ## Verification
 
 - Read role contracts: `docs/team/pm.md` and `docs/team/README.md`.
-- Read PM automation memory and confirmed no existing memory file was present.
+- Checked PM memory path and confirmed no existing memory file was present before this run.
 - Checked Slack channel `C0B0K6B0T6K` for messages addressed to `Handrail PM`.
-- Checked GitHub auth with local `gh`: authenticated as `zfifteen`.
+- Checked local state with `git status --short --branch`; branch is `main...origin/main [ahead 1]` with existing unrelated local modifications.
 - Reviewed project/product state: `README.md`, `FEATURE_ROADMAP.md`, `TEST_PLAN.md`, `UI_PATHS.md`, `UI_PATH_ISSUES.md`, `docs/production_readiness_report.md`, `docs/privacy-policy.md`, and prior team outputs.
-- Reviewed GitHub state with local `gh`: open issues, milestones, issue #18, issue #25, issue #26, issue #27, and releases.
-- Reviewed local repo state with `git status`, `git diff --stat`, and targeted diffs for current iOS and automation changes.
-- Attempted the required final Architect run-now helper; it failed with the Codex session permission blocker above.
-- No build, unit test, or simulator validation was run in this PM pass.
+- Reviewed GitHub state with local `gh`: open issues, closed issues, milestones, releases, and issues #9, #15, #18, and #27.
+- Created #28 with `gh issue create`.
+- Updated milestone 1 through `gh api repos/zfifteen/handrail/milestones/1 -X PATCH`.
+- No build, unit test, or simulator validation was run because this PM pass changed product docs and GitHub tracking only, not app code or visible UI behavior.
