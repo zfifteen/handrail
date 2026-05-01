@@ -2,7 +2,7 @@
 
 ## Overview
 
-Handrail uses a recurring Codex agent task team to keep project work moving without turning every task into a manual conversation. Each agent has a narrow job, a local operating contract, a schedule or trigger, and a required place to leave evidence.
+Handrail uses a recurring Codex agent task team to keep project work moving without turning every task into a manual conversation. Each agent has a narrow job, a local operating contract, a schedule or one visible downstream run-now action, and a required place to leave evidence.
 
 The current team has three entry points:
 
@@ -19,18 +19,18 @@ Handrail PM
       -> Handrail QA Lead
 ```
 
-The PM is the only active three-hour cron job in that chain. Architect, Lead Dev, and QA Lead are paused as cron jobs and are started by trigger scripts after the previous role finishes. This prevents several agents from independently changing the same project at the same time. The daily simulator sweep is a QA confidence sidecar, not part of the PM handoff chain.
+The PM is the only active three-hour cron job in that chain. Architect, Lead Dev, and QA Lead are paused as cron jobs and are run one at a time by the previous role through the Handrail CLI helper that uses Codex Desktop's normal IPC path. This creates normal visible automation threads while preventing several agents from independently changing the same project at the same time. The daily simulator sweep is a QA confidence sidecar, not part of the PM handoff chain.
 
-The invariant is simple: one role advances one kind of work, writes durable evidence, hands off the next concrete request, and then triggers the next role when appropriate.
+The invariant is simple: one role advances one kind of work, writes durable evidence, hands off the next concrete request, and then runs at most one downstream role when appropriate.
 
 ## Current Team
 
 | Role | Schedule | Status | Main responsibility |
 |---|---:|---|---|
 | Handrail PM | Every 3 hours | Active | Product scope, sequencing, milestones, releases, and decision pressure. |
-| Handrail Architect | Triggered by PM | Paused cron | System boundaries, protocol contracts, persistence assumptions, and specs. |
-| Handrail Lead Dev | Triggered by Architect | Paused cron | Narrow implementation patches, reviewability, tests, and QA handoff. |
-| Handrail QA Lead | Triggered by Lead Dev | Paused cron | Behavioral evidence, bug triage, simulator validation, and regression confidence. |
+| Handrail Architect | Run by PM | Paused cron | System boundaries, protocol contracts, persistence assumptions, and specs. |
+| Handrail Lead Dev | Run by Architect | Paused cron | Narrow implementation patches, reviewability, tests, and QA handoff. |
+| Handrail QA Lead | Run by Lead Dev | Paused cron | Behavioral evidence, bug triage, simulator validation, and regression confidence. |
 | Handrail Business Analyst | Daily at 9 AM | Active | App Store eligibility, submission artifacts, and release-readiness coordination. |
 | Handrail QA Daily Simulator Sweep | Daily at 8 AM | Active | Broad iPhone/iPad simulator sweep and reproducible bug discovery. |
 
@@ -46,33 +46,35 @@ All current team roles use:
 
 Each role has a persona document in `docs/team/`. The persona document states what the role owns, what it reads, what it may change, and what evidence it must leave.
 
-The PM automation runs on a timer. At the end of the PM run, it starts the Architect with:
+The PM automation runs on a timer. At the end of the PM run, it runs only Architect with the helper command:
 
-```text
-$CODEX_HOME/automations/handrail-pm/trigger-architect.sh
+```sh
+node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs handrail-architect
 ```
 
-The Architect starts Lead Dev only when downstream implementation work exists. When the Architect finds a structural implementation task, it writes a concrete Lead Dev handoff and starts Lead Dev with:
+The helper sends the Codex Desktop `automation-run-now` IPC request. It does not call app-server thread creation paths, edit automation state, edit database rows, create detached workers, or mark any run successful. If Desktop rejects the IPC request, the role records the exact error as a blocker and stops.
 
-```text
-$CODEX_HOME/automations/handrail-architect/trigger-lead-dev.sh
+The Architect runs Lead Dev only when downstream implementation work exists. When the Architect finds a structural implementation task, it writes a concrete Lead Dev handoff and runs only `handrail-lead-dev` with:
+
+```sh
+node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs handrail-lead-dev
 ```
 
-If the Architect finds no structural implementation task but concrete GitHub `bug` or `enhancement` issues need work, it writes a neutral Lead Dev handoff instructing Lead Dev to select work by its deterministic order, then starts Lead Dev. If neither condition exists, the Architect records `No downstream handoff` and does not trigger Lead Dev.
+If the Architect finds no structural implementation task but concrete GitHub `bug` or `enhancement` issues need work, it writes a neutral Lead Dev handoff instructing Lead Dev to select work by its deterministic order, then runs only Lead Dev. If neither condition exists, the Architect records `No downstream handoff` and runs no downstream role.
 
-The Lead Dev writes a QA handoff, then starts QA Lead with:
+The Lead Dev writes a QA handoff after implementation work, then runs only `handrail-qa-lead` with:
 
-```text
-$CODEX_HOME/automations/handrail-lead-dev/trigger-qa-lead.sh
+```sh
+node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs handrail-qa-lead
 ```
 
-The trigger scripts read the downstream automation's `automation.toml`, extract its prompt, model, and reasoning effort, and then launch `codex exec` in the project workspace. Each triggered run writes its process id and log path back into the upstream automation directory.
+No role may run more than one downstream role from a single run. Downstream automations remain paused in their automation records; the run-now helper creates the visible thread directly.
 
 This gives the team a deterministic rhythm:
 
 1. PM chooses or clarifies useful product movement.
 2. Architect translates product pressure into a boundary or contract decision.
-3. Architect triggers Lead Dev only when there is a concrete downstream implementation task or a concrete implementation issue queue.
+3. Architect runs Lead Dev only when there is a concrete downstream implementation task or a concrete implementation issue queue.
 4. Lead Dev makes one narrow implementation move selected by handoff-first priority.
 5. QA Lead verifies behavior and records evidence.
 6. The cycle repeats on the next PM run.
@@ -109,7 +111,7 @@ Local access includes:
 - Team reports under `docs/team/outputs/`.
 - Codex automation definitions under `$CODEX_HOME/automations/`.
 - Handoff files such as `$CODEX_HOME/automations/handrail-lead-dev/handoff.md`.
-- Trigger scripts that start the next role in the chain.
+- The Handrail run-now helper at `scripts/run-codex-automation-now.mjs`.
 - Local build and test tools available to Codex, including shell commands, `gh`, Node, Xcode tooling, and simulator tooling when installed.
 
 The roles are instructed to preserve unrelated local changes. They may edit code, tests, docs, and GitHub issues only when doing so is the smallest concrete action that advances their role.
@@ -159,7 +161,7 @@ Before one role posts a Slack request to another role, it writes the durable art
 
 ## QA Validation Rhythm
 
-Triggered QA runs perform targeted validation from the QA handoff first. Simulator validation remains mandatory for visible iPhone or iPad UI, navigation, decoded data feeding a screen, gestures, context menus, sheets, tabs, lists, and empty states. Non-UI docs, CLI, config, and automation-only changes do not require the full iPhone and iPad sweep unless the handoff requests it.
+Run-now QA runs perform targeted validation from the QA handoff first. Simulator validation remains mandatory for visible iPhone or iPad UI, navigation, decoded data feeding a screen, gestures, context menus, sheets, tabs, lists, and empty states. Non-UI docs, CLI, config, and automation-only changes do not require the full iPhone and iPad sweep unless the handoff requests it.
 
 The daily simulator sweep is the broad release-confidence mechanism. It runs outside the PM -> Architect -> Lead Dev -> QA chain, saves evidence under `test-artifacts/`, and creates or updates GitHub bug issues only for reproducible findings.
 
@@ -181,7 +183,7 @@ The useful balance is:
 ```text
 durable truth = repo docs + handoff files + GitHub issues
 visible coordination = Slack
-execution rhythm = automation schedules + trigger scripts
+execution rhythm = automation schedules + one visible downstream run-now action
 ```
 
 ## Why This Is Plugin-Shaped
@@ -192,7 +194,7 @@ This configuration can become a generalized Codex plugin because the pattern is 
 - A set of role persona templates.
 - A shared Slack protocol.
 - Automation prompts generated from the role definitions.
-- Trigger scripts that form a deterministic chain with conditional downstream execution.
+- One visible downstream run-now action per upstream role, with conditional downstream execution.
 - A report directory and output contract.
 - Optional GitHub issue and milestone conventions.
 
@@ -203,7 +205,7 @@ The plugin should avoid making the team "smart" in too many ways. The value come
 - Each action leaves evidence.
 - Cross-role requests are addressed explicitly.
 - Slack improves visibility but does not replace durable state.
-- Triggered agents inherit the configured model and reasoning effort from their own automation records.
+- Run-now agents inherit the configured prompt, model, and reasoning effort from their own automation records.
 - QA uses targeted validation for handoffs and a separate daily simulator sweep for broad confidence.
 
 ## Generalized Plugin Implementation Plan
@@ -218,14 +220,14 @@ Extract the Handrail pattern into reusable templates:
 
 - `team/README.md` template for shared rules and Slack coordination.
 - Role persona templates for PM, Architect, Lead Dev, QA Lead, and Business Analyst.
-- Automation prompt template with placeholders for role name, repo path, GitHub target, Slack channel, report path, and handoff path.
-- Trigger script template that reads the downstream automation TOML and passes prompt, model, and reasoning effort to `codex exec`.
+- Automation prompt template with placeholders for role name, repo path, GitHub target, Slack channel, report path, handoff path, and downstream automation id.
+- Downstream run-now instructions that call the project helper with exactly one downstream automation id.
 
 Validation:
 
 - Generate a team into a temporary project directory.
 - Confirm all generated Markdown files use LF line endings.
-- Confirm trigger scripts pass `bash -n`.
+- Confirm generated run-now instructions name exactly one downstream role per upstream role.
 
 ### Phase 2: Configuration Schema
 
@@ -238,7 +240,7 @@ The first version only needs:
 - GitHub repository target.
 - Slack channel id and display name.
 - Roles with exact names, schedules, statuses, report paths, and handoff paths.
-- Chain order for triggered roles, including conditional trigger policy.
+- Chain order for scheduled roles, including conditional downstream policy.
 - Model and reasoning effort defaults.
 
 Do not add multiple scheduling modes, alternate communication backends, or complex dependency graphs in the first version.
@@ -255,7 +257,6 @@ Add a plugin workflow that creates or updates:
 
 - Team docs in the target repo.
 - Automation TOML records in `$CODEX_HOME/automations/`.
-- Trigger scripts in the upstream automation directories.
 - Optional initial handoff files.
 
 The installer should prefer explicit replacement of known generated blocks over broad rewriting. It should state what it changed and stop if existing non-generated content would be overwritten.
@@ -263,7 +264,7 @@ The installer should prefer explicit replacement of known generated blocks over 
 Validation:
 
 - Run installer against a test project.
-- Inspect generated automations with `codex_app.automation_update` or TOML parsing.
+- Inspect generated automations with TOML parsing.
 - Confirm active and paused statuses match the config.
 
 ### Phase 4: Operational Verification
@@ -276,7 +277,7 @@ Checks:
 - Optional test post can be sent after user approval.
 - GitHub target can be reached.
 - The first active automation can see its role doc and report path.
-- Trigger scripts can read downstream prompts, model, and reasoning effort.
+- Downstream run-now actions create exactly one visible Codex Desktop automation thread and leave other downstream roles paused.
 
 For UI or mobile projects, the plugin should not claim validation is complete unless the project-specific QA role performs the required simulator or device checks.
 
@@ -284,12 +285,12 @@ For UI or mobile projects, the plugin should not claim validation is complete un
 
 | Risk | Control |
 |---|---|
-| Agents overwrite each other's work | Keep only the first chain role active; trigger downstream roles sequentially and conditionally. |
+| Agents overwrite each other's work | Keep only the first chain role active; run downstream roles sequentially and conditionally. |
 | Slack becomes the only task record | Require durable artifacts before Slack requests and record handled Slack subject/timestamp. |
 | Role prompts drift from docs | Make role docs the source of truth and keep automation prompts short enough to point back to them. |
-| Triggered roles ignore configured reasoning effort | Trigger scripts must pass `model_reasoning_effort` from downstream TOML. |
+| Downstream roles ignore configured reasoning effort | The helper reads the prompt, model, and reasoning effort from the downstream automation record. |
 | Handoffs are skipped for backlog work | Lead Dev must complete or explicitly block addressed Slack requests and handoff files before selecting GitHub issues. |
-| QA spends every triggered run on broad sweeps | Triggered QA runs validate the handoff; daily simulator sweep owns broad regression discovery. |
+| QA spends every run-now QA thread on broad sweeps | Run-now QA threads validate the handoff; daily simulator sweep owns broad regression discovery. |
 | A generalized plugin becomes too abstract | Start with one deterministic chain and one daily sidecar role. Add new shapes only after a real project needs them. |
 | Human-account work is faked | Account, certificate, App Store Connect, and hosted URL blockers must be stated plainly. |
 

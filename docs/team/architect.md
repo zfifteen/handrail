@@ -67,11 +67,21 @@ For “industry best practices”, the architect only files issues when the viol
 
 The last action in every architect run depends on whether there is concrete downstream implementation work:
 
-- If the architect found a structural violation that requires implementation, write one short, concrete handoff note to `$CODEX_HOME/automations/handrail-lead-dev/handoff.md`, then start Lead Dev with `$CODEX_HOME/automations/handrail-architect/trigger-lead-dev.sh`.
-- If the architect found no implementation task but open GitHub `bug` or `enhancement` issues need implementation, write a neutral Lead Dev handoff instructing Lead Dev to select work by its deterministic order, then start Lead Dev.
-- If there is no architect task and no concrete implementation issue queue, do not trigger Lead Dev. Record `No downstream handoff` in `docs/team/outputs/architect.md` with the evidence inspected.
+- If the architect found a structural violation that requires implementation, write one short, concrete handoff note to `$CODEX_HOME/automations/handrail-lead-dev/handoff.md`, then run only Lead Dev with Handrail's Codex Desktop run-now helper.
+- If the architect found no implementation task but open GitHub `bug` or `enhancement` issues need implementation, write a neutral Lead Dev handoff instructing Lead Dev to select work by its deterministic order, then run only Lead Dev.
+- If there is no architect task and no concrete implementation issue queue, do not run Lead Dev. Record `No downstream handoff` in `docs/team/outputs/architect.md` with the evidence inspected.
 
 Any handoff must be one narrow deterministic patch target or one narrowly scoped issue to fix, not a backlog list. If the architect found violations that require implementation work, the handoff should point at the specific files/issues and the verification expected.
+
+To run Lead Dev:
+
+```sh
+node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs handrail-lead-dev
+```
+
+Do not run QA Lead from an Architect run. Do not edit downstream automation records or database rows as a handoff mechanism.
+
+The helper must send the Codex Desktop `automation-run-now` IPC request. It must not call app-server thread creation paths, edit automation state, edit database rows, or create a background worker. If the helper fails, record the exact error as a blocker and stop. Do not use a fallback handoff mechanism.
 
 ## Required Output Format
 

@@ -2,48 +2,52 @@
 
 ## Strongest Evidence Finding
 
-Simulator smoke validation is now executable: the iOS app builds, installs, launches, and produces screenshots on both iPhone and iPad simulators (iPhone 17 iOS 26.4 and iPad Pro 13-inch (M5) iOS 26.4) using `tools/qa/simulator_sweep.sh` on 2026-04-30.
+The Release APNs source configuration is fixed, but GitHub issue #25 is not closable yet: a real Release archive cannot be signed with the current local provisioning profile because it lacks Push Notifications and the `aps-environment` entitlement.
 
 ## Verified Behavior
 
-- Simulator build/install/launch succeeds for iPhone+iPad, with screenshot evidence:
-  - `test-artifacts/qa-simulator-sweep-2026-04-30-175240/iphone-launch.png`
-  - `test-artifacts/qa-simulator-sweep-2026-04-30-175240/ipad-launch.png`
-- CLI unit + integration-style tests pass (36/36), including:
-  - Codex Desktop IPC frame encoding/decoding helpers.
-  - Desktop thread deep-link formatting.
-  - WebSocket server behavior for pairing, refresh, stop, push-token registration, and polling-triggered broadcasts.
-- UI path documentation exists with screenshot evidence:
-  - `UI_PATHS.md` (documented iPhone UI paths; captured 2026-04-28).
-  - `UI_PATH_ISSUES.md` (documented gaps + screenshots; walkthrough 2026-04-28).
+- Slack inbox checked for `#handrail-agents` (`C0B0K6B0T6K`): no recent message was addressed to `Handrail QA Lead`. The only recent operational message was a no-action coordination verification addressed to `Handrail agents` at `2026-04-30 19:11:51 EDT`, TS `1777590711.698899`.
+- QA handoff checked at `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`: current handoff only confirms the new lead-dev-to-QA handoff mechanism and states no product behavior changed.
+- `gh auth status -h github.com` is authenticated as `zfifteen` for `zfifteen/handrail`.
+- `plutil -p ios/Handrail/Handrail/Handrail.entitlements` reports `aps-environment => production`.
+- `plutil -lint ios/Handrail/Handrail/Handrail.entitlements` passes.
+- Release build settings with `xcodebuild -project ios/Handrail/Handrail.xcodeproj -scheme Handrail -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath /private/tmp/handrail-qa-buildsettings -showBuildSettings` report:
+  - `CODE_SIGN_ENTITLEMENTS = Handrail/Handrail.entitlements`
+  - `CONFIGURATION = Release`
+  - `PRODUCT_BUNDLE_IDENTIFIER = com.velocityworks.Handrail`
+  - `INFOPLIST_KEY_NSLocalNetworkUsageDescription = Handrail connects to the desktop CLI on your local network.`
 
 ## Missing Evidence Or Regressions
 
-- Full UI-path walkthrough in simulator is still missing for this run (Dashboard → Chats → New Chat → Chat Detail → Attention → Activity → Alerts → Settings), and no existing bug issues were re-verified/closed yet.
-- **App Store blockers to track:**
-  - Release APNs entitlement is still `development` (`ios/Handrail/Handrail/Handrail.entitlements`). (GitHub issue #25)
-  - Privacy policy URL + document are absent from the repo. (GitHub issue #26)
-- **Open bug surface (selected):**
-  - iOS accessibility: issues #7, #8, #9, #11.
-  - iOS UX/data: issues #10, #12, #4, #16, #18, #19.
-  - iPad routing/state: issues #17, #21, #22, #23, #24.
+- Issue #25 remains open because its acceptance check requires a signed Release archive entitlement inspection. The attempted archive failed during provisioning: `iOS Team Provisioning Profile: com.velocityworks.Handrail` does not include Push Notifications or the `aps-environment` entitlement.
+- Simulator validation was not required for the current handoff because it touched only automation coordination, not visible iPhone/iPad UI, navigation, decoded screen data, gestures, context menus, sheets, tabs, lists, or empty states.
+- Current open bug list still includes iPhone accessibility/reliability issues #4, #7, #8, #9, #10, #11, #12, #16, #18, #19, #27 and iPad issues #17, #21, #22, #23, #24.
+- Existing unrelated user change preserved: `docs/team/outputs/pm.md` was already modified before this QA report update and was not edited.
 
 ## Code, Test, Or Issue Changes
 
-- Updated `docs/team/qa-lead.md` so the QA lead automation explicitly owns GitHub bug issue triage + verification + closing/reopening with evidence.
-- Added `tools/qa/simulator_sweep.sh` to generate deterministic simulator launch evidence into `test-artifacts/`.
-- Updated `docs/production_readiness_report.md` to move `NSLocalNetworkUsageDescription` from **[BLOCKER]** to **[VERIFY]**, reflecting that it is already set via generated Info.plist build settings in `ios/Handrail/Handrail.xcodeproj/project.pbxproj`.
-- Created GitHub issues:
-  - #25 “App Store blocker: Release APNs entitlement must be production”
-  - #26 “App Store blocker: Add privacy policy URL + document”
+- Updated GitHub issue #25 body and left a QA verification comment with the exact remaining blocker: a production-capable distribution/TestFlight/App Store provisioning profile is required before `codesign -d --entitlements :- <App.app>` can prove the signed app carries `aps-environment = production`.
+- Updated this report: `docs/team/outputs/qa-lead.md`.
 
 ## Verification
 
-- Ran: `cd cli && npm test` (PASS, 36 tests).
-- Ran: `IPHONE_UDID=0E58E7BB-44FA-4BEE-9C94-8FED4C334482 IPAD_UDID=43913CAF-14DD-45B6-9633-0A9790474FC7 tools/qa/simulator_sweep.sh`
-- Reviewed inputs:
+- Read QA/team contracts: `docs/team/qa-lead.md`, `docs/team/README.md`.
+- Read QA memory and handoff:
+  - `/Users/velocityworks/.codex/automations/handrail-qa-lead/memory.md`
+  - `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`
+- Reviewed project QA inputs:
   - `TEST_PLAN.md`
   - `UI_PATHS.md`
   - `UI_PATH_ISSUES.md`
+  - `FEATURE_ROADMAP.md`
   - `docs/production_readiness_report.md`
-  - `gh issue list -R zfifteen/handrail`
+  - `docs/team/outputs/lead-dev.md`
+  - `docs/team/outputs/architect.md`
+- Reviewed GitHub bug queue with `gh issue list -R zfifteen/handrail --label bug --limit 100`.
+- Ran Release entitlement/source checks:
+  - `plutil -p ios/Handrail/Handrail/Handrail.entitlements`
+  - `plutil -lint ios/Handrail/Handrail/Handrail.entitlements`
+  - `rg -n "aps-environment|CODE_SIGN_ENTITLEMENTS|INFOPLIST_KEY_NSLocalNetworkUsageDescription|Release" ios/Handrail/Handrail.xcodeproj/project.pbxproj ios/Handrail/Handrail/Handrail.entitlements`
+- Ran archive check:
+  - `xcodebuild archive -project ios/Handrail/Handrail.xcodeproj -scheme Handrail -configuration Release -destination 'generic/platform=iOS' -archivePath /private/tmp/handrail-qa-release.xcarchive -derivedDataPath /private/tmp/handrail-qa-archive-derived`
+  - Result: failed at provisioning because the local team profile lacks Push Notifications and `aps-environment`.

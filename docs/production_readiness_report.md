@@ -24,11 +24,11 @@ Handrail is not production-ready for App Store submission across any of its thre
 
 These items will cause Apple review rejection or provisioning failure regardless of feature completeness.
 
-### 1.1 APNs Entitlement Set to `development` in Release Target
+### 1.1 Release APNs Entitlement Requires Distribution Signing Verification
 
 **File:** `ios/Handrail/Handrail/Handrail.entitlements`  
-**Finding:** `aps-environment` is hardcoded to `development`. App Store distribution requires the value `production`. Submitting a binary with `development` will cause APNs to silently fail after release and may trigger review rejection during binary validation.  
-**Action:** Change `<string>development</string>` to `<string>production</string>` in `Handrail.entitlements` for the Release configuration. Keep the Debug target's entitlement-stripping behavior (introduced 2026-04-29) intact so personal-team Debug builds remain installable.
+**Finding:** The source entitlement now sets `aps-environment` to `production`, and Release build settings point at `Handrail/Handrail.entitlements`. Final App Store evidence is still missing because the local `iOS Team Provisioning Profile: com.velocityworks.Handrail` cannot sign a Release archive with Push Notifications or `aps-environment`.
+**Action:** Build a Release archive with a distribution/TestFlight/App Store provisioning profile, then inspect the signed app with `codesign -d --entitlements :- <App.app>` and confirm `aps-environment` is `production`. Keep the Debug target's entitlement-stripping behavior (introduced 2026-04-29) intact so personal-team Debug builds remain installable.
 
 ### 1.2 No Paid Apple Developer Program Membership Confirmed
 
@@ -40,10 +40,10 @@ These items will cause Apple review rejection or provisioning failure regardless
 **Finding:** Handrail connects to `ws://` on the local network. iOS 14+ requires `NSLocalNetworkUsageDescription` in the built Info.plist with a human-readable reason. The project currently uses a generated Info.plist (`GENERATE_INFOPLIST_FILE = YES`) and already sets `INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Handrail connects to the desktop CLI on your local network."` in `ios/Handrail/Handrail.xcodeproj/project.pbxproj`.  
 **Action:** Verify the key is present in the Release archive’s Info.plist and that a fresh install prompts for Local Network access before the first WebSocket connection attempt.
 
-### 1.4 No Privacy Policy URL
+### 1.4 Privacy Policy URL Not Hosted
 
-**Finding:** Any app that handles personal data, uses local network, or requests notifications must link a privacy policy on the App Store product page. Handrail stores a pairing token in Keychain and paired-machine metadata in UserDefaults. No privacy policy document or URL is present in the repo.  
-**Action:** Write a minimal privacy policy (local-first, no data leaves device, no account, no telemetry) and host it at a stable URL. Add the URL to the App Store Connect listing before submission.
+**Finding:** Any app that handles personal data, uses local network, or requests notifications must link a privacy policy on the App Store product page. A draft privacy policy now exists at `docs/privacy-policy.md` and covers local-first storage, local-network `ws://` transport, no account, no telemetry, notifications, and Keychain pairing-token storage. App Store submission is still blocked until this text is hosted at a stable URL and the URL is entered in App Store Connect.  
+**Action:** Host the policy at a stable URL and add that URL to the App Store Connect listing before submission.
 
 ### 1.5 No App Store Metadata Package
 
@@ -201,7 +201,7 @@ Additionally, the iPad app has not been launched on a physical iPad device. Phys
 
 Execute in this order:
 
-1. **[BLOCKER]** Fix `Handrail.entitlements`: set `aps-environment` to `production` for Release.
+1. **[VERIFY]** Sign a Release archive with a distribution profile and confirm the signed app entitlement has `aps-environment = production`.
 2. **[VERIFY]** Confirm `NSLocalNetworkUsageDescription` is present in the Release build Info.plist.
 3. **[DATA]** Fix `HandrailStore` chat_list merge to preserve detail-only fields (issues #14, #20).
 4. **[DATA]** Fix WebSocket send failure to mark connection offline (issue #15).
@@ -219,5 +219,5 @@ Execute in this order:
 16. **[watchOS]** Implement watchOS target per issue #5 spec.
 17. **[INFRA]** Add GitHub Actions CI for archive + TestFlight upload.
 18. **[INFRA]** Create `store-assets/` with icon, screenshots, and listing copy.
-19. **[INFRA]** Write and host a privacy policy. Add URL to App Store Connect.
+19. **[INFRA]** Host `docs/privacy-policy.md` at a stable privacy policy URL. Add URL to App Store Connect.
 20. **[INFRA]** Enroll in Apple Developer Program (paid) and assign team in Xcode.

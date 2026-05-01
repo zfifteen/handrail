@@ -69,6 +69,17 @@ The last action in every lead dev run is a handoff to the QA lead task:
 
 - Write a short QA note to `$CODEX_HOME/automations/handrail-qa-lead/handoff.md`.
 - The note must name the one feature/hygiene change, where to validate it (UI path, CLI command, simulator target), and the exact evidence expected (screenshot path, test command, issue link).
+- After the implementation work, report, memory update, and QA note, run only `handrail-qa-lead` with Handrail's Codex Desktop run-now helper.
+
+To run QA Lead:
+
+```sh
+node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs handrail-qa-lead
+```
+
+Do not run Architect or Lead Dev from a Lead Dev run. Do not edit downstream automation records or database rows as a handoff mechanism.
+
+The helper must send the Codex Desktop `automation-run-now` IPC request. It must not call app-server thread creation paths, edit automation state, edit database rows, or create a background worker. If the helper fails, record the exact error as a blocker and stop. Do not use a fallback handoff mechanism.
 
 ## Required Output Format
 

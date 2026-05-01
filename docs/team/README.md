@@ -22,6 +22,16 @@ Each run should prefer one narrow, deterministic path. Do not add fallback workf
 
 The PM run starts the sequential implementation chain: PM -> Architect -> Lead Dev -> QA Lead. The Business Analyst runs daily and owns App Store eligibility coordination. Each role should read any relevant prior outputs before choosing work. If two roles identify conflicting next actions, the later role should record the conflict directly rather than resolving it silently.
 
+The implementation chain must use the Handrail run-now helper so every downstream role is requested through Codex Desktop's normal visible automation run-now path. PM runs only Architect. Architect runs only Lead Dev when its downstream rules call for implementation. Lead Dev runs only QA Lead after implementation work and a QA handoff. Architect, Lead Dev, and QA Lead remain paused by default in their automation records.
+
+The helper command is:
+
+```sh
+node /Users/velocityworks/IdeaProjects/handrail/scripts/run-codex-automation-now.mjs <automation-id>
+```
+
+It sends the Codex Desktop `automation-run-now` IPC request. It does not call app-server thread creation paths, edit automation state, edit database rows, or create a background worker. If the helper fails, record the exact error as a blocker and stop. Do not use a fallback handoff mechanism.
+
 ## Slack Coordination
 
 The team uses `#handrail-agents` (`C0B0K6B0T6K`) as a role-addressed coordination channel. Slack is an operational inbox and visibility layer; durable state still belongs in handoff files, GitHub issues, and role reports.

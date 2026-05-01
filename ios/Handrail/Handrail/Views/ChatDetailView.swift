@@ -28,6 +28,7 @@ struct ChatDetailView: View {
         .navigationTitle(displayTitle(store.chat(id: chatId)?.title ?? "Chat"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
+            store.clearChatError(chatId: chatId)
             store.enterChat(chatId: chatId)
             if store.pairedMachine?.isOnline == true {
                 store.refreshChatDetail(chatId: chatId)

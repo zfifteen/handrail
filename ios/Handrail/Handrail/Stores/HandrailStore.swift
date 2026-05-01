@@ -117,6 +117,14 @@ final class HandrailStore {
         client.send(.getChatDetail(chatId: chatId))
     }
 
+    func clearNewChatError() {
+        newChatError = nil
+    }
+
+    func clearChatError(chatId: String) {
+        chatErrors[chatId] = nil
+    }
+
     func reconnect() {
         guard let pairedMachine else {
             isRefreshingChats = false

@@ -2,52 +2,56 @@
 
 ## Strongest Structural Finding
 
-The architect role must own the written contracts. A protocol or persistence boundary is only stable if the spec/design docs are maintained alongside the code and enforced with deterministic checks (tests or probes). This run makes that responsibility explicit in the architect persona and sets a narrow issue-filing threshold for best-practice violations.
+The CLI and iOS no longer share one observable WebSocket protocol contract. The concrete drift is `command_result`: `cli/src/types.ts`, `cli/src/server.ts`, and `cli/test/server.test.ts` define and exercise it, while iOS `ServerMessage` does not decode it and maps any unknown server message to `.ignored`. `HandrailStore` then drops `.ignored`, so real protocol drift is invisible during development.
 
 ## Invariants Preserved Or At Risk
 
-Preserved (implementation + spec agree):
+Preserved:
 
-- Codex Desktop remains the source of truth for visible chat metadata (Handrail reads Desktop SQLite + rollout).
-- Conversation mutation belongs to the Desktop owner renderer (Handrail opens `codex://threads/<id>` then sends `thread-follower-start-turn`).
-- Raw Codex identifiers should not leak into user-visible labels (chat title fallback logic avoids UUID-like titles; notification labels do the same).
+- Codex Desktop remains the source of truth for visible chat metadata; this run did not change Desktop read or mutation paths.
+- Raw Codex identifiers were not touched or widened into user-facing text.
+- GitHub access through local `gh` is authenticated for `zfifteen/handrail`.
 
-At risk (open issues / incomplete surface):
+At risk:
 
-- “One observable protocol contract” between CLI and iOS: iOS currently maps unknown `ServerMessage.type` values to `.ignored`, hiding protocol drift during development (issue #18).
-- Notification suppression depends on receiver attention but the CLI has no authoritative “currently viewed chat id” signal from iOS yet (issue #10).
-- Approval routing is explicitly not implemented in `cli/src/chats.ts` even though the Desktop IPC surface exists for approval decisions (issue #2).
+- CLI and iOS must agree on one observable protocol contract. Issue #18 now has the narrow acceptance contract for correcting the current drift.
+- Silent unknown-message handling hides future protocol drift in the same surface.
+
+Slack inbox:
+
+- Checked `#handrail-agents` (`C0B0K6B0T6K`). No message was addressed to `Handrail Architect`.
+- Recent no-action coordination message: Subject `Slack coordination layer verification`, TS `1777590711.698899`, addressed to `Handrail agents`.
 
 ## Code Or Issue Changes
 
-Code changes:
+GitHub issue update:
 
-- Updated `cli/src/codexDesktopIpc.ts` to use `/tmp/codex-ipc/ipc-{uid}.sock` (spec-aligned).
-- Added a unit test in `cli/test/codex.test.ts` asserting the observed socket path contract.
+- Added an architect acceptance comment to issue #18: `Surface unknown server message types instead of silently ignoring them`.
+- Required patch target recorded there:
+  - add explicit iOS decoding for `command_result` with `ok` and `message`,
+  - handle successful command results deterministically,
+  - replace `.ignored` unknown-type behavior with a visible protocol error naming the unknown `type`,
+  - add Swift tests for both `command_result` decoding and unknown-type surfacing.
 
-Doc stewardship changes:
+Repo file changes:
 
-- Updated `docs/team/architect.md` to make the architect responsible for creating and maintaining technical specs + design docs, keeping them updated as requirements evolve, and filing GitHub issues for concrete violations.
-- Updated `docs/spec/README.md` to state the “living contract” rule for spec maintenance.
-- Updated `docs/spec/codex-desktop-ipc-protocol.md` to reflect the observed `/tmp/codex-ipc/ipc-{uid}.sock` socket path contract.
-
-Relevant open issues reviewed:
-
-- #18 unknown server message types are silently ignored (protocol drift visibility)
-- #10 active-chat notification suppression
-- #2 first-class approval routing
-- #3 ingest live Codex app-server events (read model enrichment without breaking Desktop parity)
+- Updated this report only: `docs/team/outputs/architect.md`.
 
 ## Required Design Decision
 
-Pick the narrowest contract for “live state” beyond persistence:
+No product decision is required for issue #18. The invariant is already defined: unknown protocol messages must not be silently dropped. The only implementation choice left to Lead Dev is the narrow iOS presentation of successful `command_result` messages, with Activity logging as the smallest visible handling path.
 
-- Option A (minimal): keep SQLite+rollout as the only source of truth; use app-server events only as an ephemeral overlay for *currently-running* threads, and only when the thread is already visible in Desktop’s thread list.
-- Option B (broader): rely on app-server events for transcript/status for all threads and treat persistence reads as fallback.
+Downstream handoff:
 
-The architect recommendation is Option A because it preserves the invariant that Handrail is an observer of Desktop-owned threads rather than a second chat authority.
+- Concrete implementation task found: issue #18.
+- Lead Dev handoff should target `ios/Handrail/Handrail/Networking/HandrailMessages.swift`, `ios/Handrail/Handrail/Stores/HandrailStore.swift`, and the nearest iOS test file.
+- The automation sandbox reports `/Users/velocityworks/.codex/automations/handrail-lead-dev` as not writable from this run. The run will still attempt the required handoff/start step after report and memory updates; if it fails, that is the blocker.
 
 ## Verification
 
-- CLI unit tests passed: `npm test` in `cli/` (includes the new IPC socket path assertion).
-- No iOS simulator validation performed (no iOS UI or runtime behavior changed in this run).
+- Read `docs/team/architect.md` and `docs/team/README.md`.
+- Read architect memory at `/Users/velocityworks/.codex/automations/handrail-architect/memory.md`.
+- Checked Slack channel `C0B0K6B0T6K`.
+- Verified `gh auth status -h github.com` is authenticated as `zfifteen`.
+- Reviewed prior role outputs, open GitHub issue list, issue #18, CLI protocol types/server tests, and iOS message/store handling.
+- No build or simulator validation was run; no code or visible iOS UI was changed in this architect run.

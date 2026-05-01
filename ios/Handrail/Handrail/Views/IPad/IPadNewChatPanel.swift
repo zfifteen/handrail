@@ -37,7 +37,7 @@ struct IPadNewChatPanel: View {
         .navigationTitle("New Chat")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            store.newChatError = nil
+            store.clearNewChatError()
             applyDefaults()
         }
         .onChange(of: store.newChatOptions) { _, _ in

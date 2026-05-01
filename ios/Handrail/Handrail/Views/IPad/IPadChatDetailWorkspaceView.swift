@@ -509,6 +509,7 @@ struct IPadChatDetailWorkspaceView: View {
         guard let chatId = selection.selectedChatId else { return }
         if enteredChatId != chatId {
             leaveEnteredChatIfNeeded()
+            store.clearChatError(chatId: chatId)
             store.enterChat(chatId: chatId)
             enteredChatId = chatId
         }
