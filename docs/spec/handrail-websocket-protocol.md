@@ -102,6 +102,7 @@ Observed:
 - For Handrail-started app-server turns, `cli/src/chats.ts` accepts both commands only when `approvalId` matches a pending structured app-server approval request.
 - Unknown or stale approval ids are rejected with a visible error.
 - `approval_required` is emitted from structured app-server requests handled in `cli/src/codexDesktopIpc.ts`, not from transcript text.
+- When the CLI records a pending approval, it also emits a refreshed `chat_list` with the matching Desktop-visible chat overlaid as `waiting_for_approval`.
 - Codex Desktop IPC exposes owner-routed approval reply methods that require the Desktop/app-server request id for the pending approval, user input, or MCP elicitation.
 
 Inferred:

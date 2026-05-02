@@ -186,6 +186,8 @@ Handrail maps each request into:
 }
 ```
 
+After recording the pending approval, Handrail broadcasts a refreshed `chat_list` where the matching Desktop-visible `codex:` chat is overlaid as `waiting_for_approval`. The approval request does not create a mobile-only chat; the overlay applies only when the chat is already present in the Desktop-derived read model.
+
 When iOS approves or denies the request, Handrail responds to the same app-server child:
 
 ```json

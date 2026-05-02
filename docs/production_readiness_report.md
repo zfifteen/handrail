@@ -64,9 +64,9 @@ Closed in milestone 2:
 Open iPad stabilization scope:
 
 - #6 Product spec: iPad Handrail version. This remains the umbrella product acceptance issue for the iPad surface; it should not be closed by individual bug fixes alone. It is now labeled `blocked` until #24 has real iPad simulator evidence for a live `waiting_for_approval` row and the full iPad walkthrough can be performed without fixture-only state.
-- #24 Waiting approvals look like running chats on Dashboard. Current iPad code path is reported fixed; #29 can now produce a live started chat, but closure still depends on #2 for first-class approval ingestion/routing.
+- #24 Waiting approvals look like running chats on Dashboard. Current iPad code path is reported fixed; #2 now has code/spec/test coverage for first-class approval request IDs and approval-state list broadcasts, but closure still depends on live server evidence from a real approval-producing Desktop/app-server turn.
 
-The strongest current iPad finding is that #21 and #22 are closed with live iPad simulator evidence. A real New Chat start dismissed the popover, switched to Chats, and selected the started chat in detail for #21. A live chat-linked Activity row switched from Activity to Chats and selected the same chat detail for #22. #24 still depends on #2 making approval state first-class enough to validate `waiting_for_approval` behavior. Do not broaden product code with test-only launch state to close the remaining iPad issue; use a real simulator-connected local Handrail feed that naturally contains the needed approval state.
+The strongest current iPad finding is that #21 and #22 are closed with live iPad simulator evidence. A real New Chat start dismissed the popover, switched to Chats, and selected the started chat in detail for #21. A live chat-linked Activity row switched from Activity to Chats and selected the same chat detail for #22. #24 still depends on #2 live evidence: the running local server must expose the rebuilt approval-routing CLI, produce a real `waiting_for_approval` row, and let iOS approve/deny against the app-server request id. Do not broaden product code with test-only launch state to close the remaining iPad issue; use a real simulator-connected local Handrail feed that naturally contains the needed approval state.
 
 ## Lead Dev Scope Refresh - 2026-05-02 06:07Z
 
@@ -86,13 +86,25 @@ The issue remains open and is now labeled `blocked` for live evidence. The local
 
 Milestone 3 now has one open issue: #2. #3 is closed with deterministic CLI test evidence. #2 has code-level approval request-id routing but remains blocked for live evidence until the running server can expose the rebuilt CLI and a real approval request can be captured through iPad simulator validation.
 
+## Architect Approval Broadcast Refresh - 2026-05-02 23:07Z
+
+#2 now also has protocol/test coverage for approval-state list mutation. When the CLI records a structured app-server approval request, it immediately broadcasts `approval_required`, a chat-linked `chat_event`, and a refreshed `chat_list` whose Desktop-visible `codex:` row is overlaid as `waiting_for_approval`. Verification: `cd cli && npm test` passed 44/44.
+
+The remaining blocker is no longer an unspecified protocol shape. It is live acceptance evidence: restart or otherwise replace the running local Handrail server so it exposes the rebuilt CLI, produce a real approval request from a Handrail-started Codex Desktop/app-server turn, verify iOS approve/deny decisions route to the app-server request id, and then capture the dependent iPad #24 dashboard state.
+
+## Lead Dev Live Server Restart Attempt - 2026-05-02 23:51Z
+
+Lead Dev rebuilt the current CLI and reran the approval-routing test suite: `npm test` in `cli/` passed 44/44, including the approval-state `chat_list` broadcast contract. The local LaunchAgent still could not be replaced from this automation context. Before restart, `lsof -nP -iTCP:8788 -sTCP:LISTEN` showed `node` PID `4657`; `launchctl kickstart -k gui/501/com.velocityworks.handrail.server` returned `Operation not permitted`; after restart, the listener remained `node` PID `4657`.
+
+The live acceptance probe was rerun with `node cli/dist/src/index.js chats`. The server responded, but it showed running, idle, and completed chats only; no real `waiting_for_approval` row exists. #2 remains blocked on a permitted LaunchAgent replacement followed by one real approval-producing Handrail-started Codex Desktop/app-server turn and iOS approve/deny evidence.
+
 ## PM Milestone Reconciliation - 2026-05-02 11:08Z
 
 Milestone descriptions were reconciled to match the current GitHub issue state:
 
 - Milestone 1, `iPhone App Store readiness`, is now narrowed to #25 and #28. #25 is blocked on a non-expired APNs-capable distribution/TestFlight/App Store profile; #28 is narrowed to four required iPhone screenshots because #26 closed with a public privacy policy URL.
-- Milestone 2, `iPad MVP stabilization`, is now narrowed to blocked umbrella acceptance issue #6 plus blocked approval-row evidence issue #24. #21 and #22 are closed with live iPad simulator evidence. #24 remains blocked by #2 because the live feed still lacks first-class `waiting_for_approval` state.
-- Milestone 3, `Desktop protocol hardening`, is now narrowed to blocked #2. #29 and #3 are closed, so the remaining Desktop protocol blocker is live first-class approval request evidence.
+- Milestone 2, `iPad MVP stabilization`, is now narrowed to blocked umbrella acceptance issue #6 plus blocked approval-row evidence issue #24. #21 and #22 are closed with live iPad simulator evidence. #24 remains blocked by #2 live evidence, not by a missing iPad style fix.
+- Milestone 3, `Desktop protocol hardening`, is now narrowed to blocked #2. #29 and #3 are closed, and #2 has code/spec/test coverage; the remaining Desktop protocol blocker is live first-class approval request evidence against the running server.
 
 No GitHub release exists yet, and no release should be created until the relevant milestone is closed with recorded CLI and required simulator/device evidence.
 
@@ -295,7 +307,7 @@ Additionally, the iPad app has not been launched on a physical iPad device. Phys
 
 ### 7.3 Approval Routing Needs Live Evidence
 
-**Finding:** The CLI now has first-class app-server approval request-id routing for Handrail-started turns. Live release evidence is still missing because the running LaunchAgent did not restart in the automation sandbox, and #24 still needs a real simulator-connected `waiting_for_approval` row.
+**Finding:** The CLI now has first-class app-server approval request-id routing for Handrail-started turns and broadcasts refreshed `chat_list` state when approval state changes. Live release evidence is still missing because the running LaunchAgent did not restart in the automation sandbox, and #24 still needs a real simulator-connected `waiting_for_approval` row.
 **Action:** Restart the local Handrail server with the rebuilt CLI, produce a real app-server approval request, verify iOS approve/deny sends `accept`/`decline` on the app-server request id, then capture the iPad Dashboard approval-row evidence for #24.
 
 ---
@@ -312,7 +324,7 @@ Execute in this order:
 6. **[APP STORE]** Confirm the `store-assets/metadata.txt` age-rating and export-compliance draft answers in App Store Connect with an Account Holder, Admin, or App Manager.
 7. **[SCREENSHOTS]** Capture the four required v1 iPhone screenshots from a paired 6.9-inch iPhone simulator/device: Dashboard, Chats list, Chat Detail, and New Chat (#28).
 8. **[SCREENSHOTS]** Record simulator/device name, OS version, local CLI/server state, screenshot paths, and visible-flow validation for #28.
-9. **[DESKTOP]** Produce live first-class approval ingestion/routing evidence for `waiting_for_approval` and approve/deny decisions (#2).
+9. **[DESKTOP]** Replace the running local server with the rebuilt CLI and produce live first-class approval ingestion/routing evidence for `waiting_for_approval`, approval-state `chat_list` broadcast, and approve/deny decisions (#2).
 10. **[iPad]** Close #24 only after live simulator evidence for a real `waiting_for_approval` row.
 11. **[iPad]** Run and record a full iPad walkthrough before closing umbrella issue #6 or claiming iPad App Store support.
 12. **[watchOS]** Provide a paired iPhone + Apple Watch hardware path for #5, or explicitly approve a partial simulator/build-only implementation before hardware acceptance.

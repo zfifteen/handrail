@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { extractStatus, parseDesktopPinnedThreadIds } from "../src/codexSessions.js";
-import { codexDesktopAppServerTurnStartParams, codexDesktopApprovalRequestFromServerRequest, codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopLiveEventFromNotification, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame, startCodexDesktopConversationOnAppServer } from "../src/codexDesktopIpc.js";
+import { codexDesktopAppServerTurnStartParams, codexDesktopApprovalRequestFromServerRequest, codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopLiveEventFromNotification, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame, startCodexDesktopConversationOnAppServer, type DesktopApprovalRequest } from "../src/codexDesktopIpc.js";
 import { discoverProjects } from "../src/newChatOptions.js";
 import { ChatManager } from "../src/chats.js";
 
@@ -313,6 +313,66 @@ test("chat manager routes Codex Desktop approval decisions by server request id"
   assert.ok(messages.some((message) => {
     const event = message as { type?: string; event?: { kind?: string } };
     return event.type === "chat_event" && event.event?.kind === "approval_approved";
+  }));
+});
+
+test("chat manager broadcasts chat list when approval state changes", async () => {
+  const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
+  const messages: unknown[] = [];
+  let approvalHandler = (_approval: DesktopApprovalRequest): void => {
+    throw new Error("Approval handler was not installed.");
+  };
+  const desktopChats = [{
+    id: `codex:${threadId}`,
+    repo: "/Users/me/project",
+    title: "Approval broadcast test",
+    projectName: "project",
+    status: "running" as const,
+    startedAt: "2026-04-28T13:00:00.000Z",
+    updatedAt: "2026-04-28T13:00:00.000Z",
+    transcript: []
+  }];
+
+  const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
+    listCodexChats: async () => desktopChats,
+    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    prepareChatWorkspace: async () => "/Users/me/project",
+    startCodexDesktopConversation: async (_input, onApprovalRequest) => {
+      assert.ok(onApprovalRequest);
+      approvalHandler = onApprovalRequest;
+      return threadId;
+    },
+    startCodexDesktopTurn: async () => {},
+    interruptCodexDesktopTurn: async () => {}
+  });
+
+  await manager.startChat({
+    prompt: "Approval broadcast test",
+    projectId: "/Users/me/project",
+    projectPath: "/Users/me/project",
+    workMode: "local",
+    branch: "main",
+    accessPreset: "on_request",
+    model: "gpt-5.5",
+    reasoningEffort: "high"
+  });
+  messages.length = 0;
+
+  approvalHandler({
+    threadId,
+    approvalId: "server-request-1",
+    title: "Command approval required",
+    summary: "npm test",
+    files: [],
+    diff: "",
+    respond: async () => {}
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.ok(messages.some((message) => {
+    const chatList = message as { type?: string; chats?: Array<{ id?: string; status?: string }> };
+    return chatList.type === "chat_list" &&
+      chatList.chats?.some((chat) => chat.id === `codex:${threadId}` && chat.status === "waiting_for_approval");
   }));
 });
 

@@ -2,68 +2,41 @@
 
 ## Strongest Structural Finding
 
-Approval routing has moved from a blocked conceptual boundary to a narrow implemented CLI contract for Handrail-started Codex Desktop turns, but the public README and WebSocket spec still described the older heuristic transcript-detection model.
-
-The current invariant is now sharper: `approvalId` is the structured Codex app-server request id. Handrail does not infer approval actions from transcript text, and stale or unknown ids fail visibly.
+The approval-routing contract now preserves one shared observable state transition: when the CLI records a structured app-server approval request, it emits `approval_required`, `chat_event`, and a refreshed `chat_list` with the Desktop-visible chat overlaid as `waiting_for_approval`. Before this run, the iOS store compensated for the direct approval message, but the WebSocket protocol itself did not broadcast the list mutation at the point where approval state changed.
 
 ## Invariants Preserved Or At Risk
 
-Preserved:
-
-- Codex Desktop remains the source of truth for visible chat metadata.
-- CLI and iOS still share one explicit WebSocket approval contract.
-- Approval actions route only through structured local Codex Desktop/app-server request ids.
-- Raw Codex identifiers were not introduced into user-facing titles or notification text.
-- The CLI build/test path now starts from a clean `dist` tree, so deleted TypeScript tests cannot pass through stale compiled output.
-
-At risk:
-
-- #2 still lacks live approval-producing evidence from a running rebuilt Handrail server and simulator-connected approval workflow.
-- #24 and #28 remain blocked on that live approval evidence; fixture or transcript-derived approval state is not enough.
-
-Slack inbox:
-
-- Checked `#handrail-agents` (`C0B0K6B0T6K`) for messages addressed to `Handrail Architect`.
-- No message was addressed to `Handrail Architect`.
-- Recent no-action coordination message: Subject `Slack coordination layer verification`, TS `1777590711.698899`, addressed to `Handrail agents`.
+- Codex Desktop remains the source of truth for visible chat rows: preserved. The new `chat_list` broadcast is still built from `listCodexChats()` and `applyPendingApprovals()`, so the approval overlay cannot create a mobile-only chat.
+- CLI and iOS share one observable protocol contract: improved. Approval state now has an explicit list-broadcast contract instead of depending on iOS-only local mutation.
+- Raw Codex identifiers must not leak into titles or notification text: no change.
+- Spec documents must describe observed behavior and avoid unsupported Desktop guarantees: updated to describe the Handrail-owned broadcast contract only.
 
 ## Code Or Issue Changes
 
-Repo file changes:
-
-- `README.md`: replaced the regex-pattern approval description with the implemented structured app-server approval request-id contract.
-- `docs/spec/handrail-websocket-protocol.md`: updated the approval routing boundary to match `cli/src/chats.ts` and `cli/src/codexDesktopIpc.ts`.
-- `cli/src/approvals.ts`: removed the unused transcript approval detector.
-- `cli/test/approvals.test.ts`: removed the detector-only test because no production code imports that detector.
-- `cli/package.json`: made `npm run build` remove `dist` before compiling so `npm test` cannot execute stale deleted tests.
-- `docs/team/outputs/architect.md`: updated this report.
-
-GitHub issue changes:
-
-- No GitHub issue was created or updated. Issue #2 already records the remaining live approval evidence blocker, and this run corrected repo contract drift directly.
-
-No Lead Dev handoff. The correction was narrow, implemented, and verified in this architect run.
+- Updated `cli/src/chats.ts` so `handleDesktopApprovalRequest` broadcasts a refreshed `chat_list` after storing a pending approval.
+- Added `chat manager broadcasts chat list when approval state changes` in `cli/test/codex.test.ts`.
+- Updated `docs/spec/handrail-websocket-protocol.md` and `docs/spec/codex-desktop-app-server.md` with the approval-state list-broadcast contract.
+- Slack `#handrail-agents` (`C0B0K6B0T6K`) had no message addressed to `Handrail Architect`; ignored the no-action verification message with Slack Subject `Slack coordination layer verification` and timestamp `1777590711.698899`.
+- Updated GitHub issue #2 with the architect note for this protocol correction.
 
 ## Required Design Decision
 
-No product decision is required. The run preserves the existing local-first Codex Desktop-only contract and narrows approval routing to structured local app-server requests.
+No new product decision is required. #2 remains blocked on live Desktop/app-server approval evidence because the running LaunchAgent server still needs to be replaced before QA can exercise a real approval-producing Handrail-started turn. This run did not close or reclassify that blocker.
 
 ## Product Invariant Check
 
 - Preserved free, local-first, Codex Desktop-only Handrail: yes.
-- Drift risk found: No product-invariant drift found.
+- Drift risk found: No product-invariant drift found. The change is local CLI protocol behavior plus specs/tests; it does not add cloud relay, account state, payment, generic terminal behavior, multi-agent control, non-Codex support, or direct iOS file editing.
 
 ## Verification
 
-- Read architect automation memory.
-- Read `docs/team/architect.md` and `docs/team/README.md`.
-- Checked `$CODEX_HOME/automations/handrail-architect/handoff.md`; no handoff note was present.
-- Read `#handrail-agents` (`C0B0K6B0T6K`) through the Slack connector.
-- Verified `gh auth status -h github.com` is authenticated as `zfifteen`.
-- Read open GitHub issues with `gh issue list --repo zfifteen/handrail --state open --limit 80`.
-- Read issue #2 and #3 with comments using local `gh`.
-- Reviewed `README.md`, `docs/product-invariants.md`, `docs/spec/README.md`, `docs/spec/handrail-websocket-protocol.md`, `docs/spec/codex-desktop-ipc-protocol.md`, `docs/spec/codex-desktop-app-server.md`, `cli/src/chats.ts`, `cli/src/codexDesktopIpc.ts`, `cli/src/types.ts`, `cli/src/approvals.ts`, `cli/test/approvals.test.ts`, `cli/test/codex.test.ts`, `docs/team/outputs/qa-lead.md`, and `docs/team/outputs/lead-dev.md`.
-- Initial `npm test` in `cli/` exposed stale compiled `dist/test/approvals.test.js` after source deletion, so `cli/package.json` now cleans `dist` in `npm run build`.
-- Final `npm test` in `cli/`: passed 43/43.
+- `sed -n '1,240p' docs/team/architect.md`: inspected.
+- `sed -n '1,240p' docs/team/README.md`: inspected.
+- Slack read of `#handrail-agents` (`C0B0K6B0T6K`): no `To: Handrail Architect` request found.
+- `gh auth status`: authenticated as `zfifteen` for local `gh` access.
+- `gh issue list --repo zfifteen/handrail --state open --limit 50`: inspected current open blockers.
+- `gh issue view 2 --repo zfifteen/handrail --comments`: inspected approval-routing state.
+- `gh issue view 24 --repo zfifteen/handrail --comments`: inspected dependent iPad closure blocker.
+- `npm test` in `cli/`: passed 44/44.
 - `git diff --check`: passed.
-- No iOS simulator validation was required because this run did not touch visible iPhone or iPad UI behavior.
+- No iPhone/iPad simulator validation was run because this run did not change visible iOS UI, navigation, decoded iOS screen data, gestures, sheets, tabs, lists, or empty states.

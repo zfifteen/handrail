@@ -69,7 +69,7 @@ export class ChatManager {
         reasoningEffort: options.reasoningEffort,
         accessPreset: options.accessPreset
       },
-      (approval) => this.handleDesktopApprovalRequest(approval),
+      (approval) => void this.handleDesktopApprovalRequest(approval),
       (event) => void this.handleDesktopLiveEvent(event)
     );
     const now = new Date().toISOString();
@@ -179,7 +179,7 @@ export class ChatManager {
     return chats.map((chat) => chat.id === overlay.id ? { ...chat, ...overlay } : chat);
   }
 
-  private handleDesktopApprovalRequest(approval: DesktopApprovalRequest): void {
+  private async handleDesktopApprovalRequest(approval: DesktopApprovalRequest): Promise<void> {
     const request: ApprovalRequest = {
       chatId: `codex:${approval.threadId}`,
       approvalId: approval.approvalId,
@@ -195,6 +195,7 @@ export class ChatManager {
       chatId: request.chatId,
       event: { kind: "approval_required", text: request.summary, status: "waiting_for_approval", at: new Date().toISOString() }
     });
+    this.broadcast({ type: "chat_list", chats: await this.list() });
   }
 
   private async handleDesktopLiveEvent(event: DesktopLiveEvent): Promise<void> {
