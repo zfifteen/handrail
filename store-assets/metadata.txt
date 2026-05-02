@@ -36,6 +36,15 @@ https://github.com/zfifteen/handrail/blob/main/docs/privacy-policy.md
 Review notes:
 Handrail requires Local Network access to connect to the Handrail CLI running on the user's Mac. The connection uses ws:// on the local network and is protected by a per-device pairing token. No Handrail backend account, sync service, payment, telemetry, or cloud relay is used.
 
+App Store Connect compliance answers:
+- Age rating source checked: Apple App Store Connect Help, Age Ratings, 2026-05-02.
+- Age rating draft: answer None/No for app-provided mature themes, violence, sexuality or nudity, medical or wellness content, chance-based activities, unrestricted web access, advertising, user-to-user messaging, broad user-generated content distribution, parental controls, and age assurance.
+- Age category and override: Not Made for Kids; no higher-rating override proposed.
+- Expected age rating: 4+, subject to the App Store Connect questionnaire result. Do not override downward if Apple's questionnaire produces a higher regional or global rating.
+- Export compliance source checked: Apple App Store Connect Help, Export Compliance Documentation for Encryption, 2026-05-02.
+- Export compliance draft: Handrail does not implement proprietary or non-Apple encryption. The app stores the pairing token in the iOS Keychain and connects to the Mac using unencrypted ws:// local-network WebSocket transport.
+- Expected export documentation: no App Store Connect encryption documentation required if Apple accepts the app as using encryption limited to Apple operating system facilities. Account Holder, Admin, or App Manager must confirm this in App Store Connect before submission.
+
 Screenshot inventory:
 - iPhone Dashboard paired state: draft captured at store-assets/screenshots/iphone/iphone-dashboard-paired.png from iPhone 17 simulator; final 6.9-inch App Store capture still needed.
 - iPhone Chats list: draft captured at store-assets/screenshots/iphone/iphone-chats-list.png from iPhone 17 simulator; final 6.9-inch App Store capture still needed.
