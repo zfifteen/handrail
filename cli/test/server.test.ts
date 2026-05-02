@@ -87,10 +87,10 @@ test("WebSocket server pairs, refreshes chats, stops chats, and reports command 
       sendInput() {
         throw new Error("Direct input is disabled.");
       },
-      approve() {
+      async approve() {
         throw new Error("Approvals are disabled.");
       },
-      deny() {
+      async deny() {
         throw new Error("Approvals are disabled.");
       },
       async stop(chatId: string) {
@@ -199,10 +199,10 @@ test("WebSocket server accepts and persists push token registration", async () =
         throw new Error("unused");
       },
       sendInput() {},
-      approve() {
+      async approve() {
         throw new Error("unused");
       },
-      deny() {
+      async deny() {
         throw new Error("unused");
       },
       async stop() {}
@@ -263,10 +263,10 @@ test("WebSocket server broadcasts chat list when thinking appears during polling
       startChat: async () => chat,
       continue: async () => chat,
       sendInput() {},
-      approve() {
+      async approve() {
         throw new Error("unused");
       },
-      deny() {
+      async deny() {
         throw new Error("unused");
       },
       async stop() {}
@@ -325,10 +325,10 @@ test("WebSocket server broadcasts chat list when transcript content changes duri
       startChat: async () => chat,
       continue: async () => chat,
       sendInput() {},
-      approve() {
+      async approve() {
         throw new Error("unused");
       },
-      deny() {
+      async deny() {
         throw new Error("unused");
       },
       async stop() {}

@@ -19,8 +19,8 @@ interface ChatController {
   startChat(options: StartChatOptions): Promise<ChatRecord>;
   continue(chatId: string, prompt: string): Promise<ChatRecord>;
   sendInput(chatId: string, text: string): void;
-  approve(chatId: string, approvalId: string): ApprovalRequest;
-  deny(chatId: string, approvalId: string, reason?: string): ApprovalRequest;
+  approve(chatId: string, approvalId: string): Promise<ApprovalRequest>;
+  deny(chatId: string, approvalId: string, reason?: string): Promise<ApprovalRequest>;
   stop(chatId: string): Promise<void>;
 }
 
@@ -262,11 +262,11 @@ async function handleMessage(
         chats.sendInput(message.chatId, message.text);
         break;
       case "approve":
-        chats.approve(message.chatId, message.approvalId);
+        await chats.approve(message.chatId, message.approvalId);
         broadcast({ type: "chat_list", chats: await chats.list() });
         break;
       case "deny":
-        chats.deny(message.chatId, message.approvalId, message.reason);
+        await chats.deny(message.chatId, message.approvalId, message.reason);
         broadcast({ type: "chat_list", chats: await chats.list() });
         break;
       case "stop_chat":

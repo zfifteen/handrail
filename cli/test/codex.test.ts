@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { extractStatus, parseDesktopPinnedThreadIds } from "../src/codexSessions.js";
-import { codexDesktopAppServerTurnStartParams, codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame, startCodexDesktopConversationOnAppServer } from "../src/codexDesktopIpc.js";
+import { codexDesktopAppServerTurnStartParams, codexDesktopApprovalRequestFromServerRequest, codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame, startCodexDesktopConversationOnAppServer } from "../src/codexDesktopIpc.js";
 import { discoverProjects } from "../src/newChatOptions.js";
 import { ChatManager } from "../src/chats.js";
 
@@ -67,7 +67,11 @@ test("builds Codex Desktop app-server turn-start params", () => {
 
 test("new Desktop conversations keep thread creation and first turn on one app-server connection", async () => {
   const calls: Array<{ method: string; params: unknown }> = [];
+  let approvalHandlerWasSet = false;
   const client = {
+    setApprovalRequestHandler() {
+      approvalHandlerWasSet = true;
+    },
     async request(method: string, params: unknown): Promise<unknown> {
       calls.push({ method, params });
       if (method === "thread/start") {
@@ -86,15 +90,52 @@ test("new Desktop conversations keep thread creation and first turn on one app-s
     model: "gpt-5.5",
     reasoningEffort: "high",
     accessPreset: "on_request"
-  });
+  }, () => {});
 
   assert.equal(threadId, "019dc424-e857-76e0-8229-589ecf107eb4");
+  assert.equal(approvalHandlerWasSet, true);
   assert.deepEqual(calls.map((call) => call.method), ["thread/start", "turn/start"]);
   assert.deepEqual(calls[1].params, {
     threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
     input: [{ type: "text", text: "Start from phone", text_elements: [] }],
     cwd: "/Users/me/project"
   });
+});
+
+test("converts Codex Desktop command approval requests into Handrail approval ids", async () => {
+  let decision: string | null = null;
+  const approval = codexDesktopApprovalRequestFromServerRequest(
+    "server-request-1",
+    "item/commandExecution/requestApproval",
+    {
+      threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+      itemId: "item-1",
+      turnId: "turn-1",
+      command: "npm test",
+      reason: null
+    },
+    async (nextDecision) => {
+      decision = nextDecision;
+    }
+  );
+
+  assert.deepEqual(approval && {
+    threadId: approval.threadId,
+    approvalId: approval.approvalId,
+    title: approval.title,
+    summary: approval.summary,
+    files: approval.files,
+    diff: approval.diff
+  }, {
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    approvalId: "server-request-1",
+    title: "Command approval required",
+    summary: "npm test",
+    files: [],
+    diff: ""
+  });
+  await approval?.respond("accept");
+  assert.equal(decision, "accept");
 });
 
 test("builds Codex Desktop thread deeplinks", () => {
@@ -158,17 +199,85 @@ test("chat manager refuses non-Codex chat ids", async () => {
   );
 });
 
-test("chat manager refuses approval routing until Desktop request ids are available", () => {
+test("chat manager rejects unknown approval ids", async () => {
   const manager = new ChatManager(() => {});
 
-  assert.throws(
+  await assert.rejects(
     () => manager.approve("codex:thread-1", "approval-1"),
-    /Approval routing for Codex chat codex:thread-1 is not enabled yet/
+    /No pending approval approval-1 for Codex chat codex:thread-1/
   );
-  assert.throws(
+  await assert.rejects(
     () => manager.deny("codex:thread-1", "approval-1", "No"),
-    /Approval routing for Codex chat codex:thread-1 is not enabled yet/
+    /No pending approval approval-1 for Codex chat codex:thread-1/
   );
+});
+
+test("chat manager routes Codex Desktop approval decisions by server request id", async () => {
+  const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
+  const messages: unknown[] = [];
+  let desktopChats = [] as Awaited<ReturnType<ChatManager["list"]>>;
+  let approvalDecision: string | null = null;
+
+  const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
+    listCodexChats: async () => desktopChats,
+    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    prepareChatWorkspace: async () => "/Users/me/project",
+    startCodexDesktopConversation: async (_input, onApprovalRequest) => {
+      desktopChats = [{
+        id: `codex:${threadId}`,
+        repo: "/Users/me/project",
+        title: "Approval route test",
+        projectName: "project",
+        status: "running",
+        startedAt: "2026-04-28T13:00:00.000Z",
+        updatedAt: "2026-04-28T13:00:00.000Z",
+        transcript: []
+      }];
+      onApprovalRequest?.({
+        threadId,
+        approvalId: "server-request-1",
+        title: "Command approval required",
+        summary: "npm test",
+        files: [],
+        diff: "",
+        respond: async (decision) => {
+          approvalDecision = decision;
+        }
+      });
+      return threadId;
+    },
+    startCodexDesktopTurn: async () => {},
+    interruptCodexDesktopTurn: async () => {}
+  });
+
+  await manager.startChat({
+    prompt: "Approval route test",
+    projectId: "/Users/me/project",
+    projectPath: "/Users/me/project",
+    workMode: "local",
+    branch: "main",
+    accessPreset: "on_request",
+    model: "gpt-5.5",
+    reasoningEffort: "high"
+  });
+
+  assert.ok(messages.some((message) => {
+    const approval = message as { type?: string; approvalId?: string; chatId?: string };
+    return approval.type === "approval_required" &&
+      approval.approvalId === "server-request-1" &&
+      approval.chatId === `codex:${threadId}`;
+  }));
+  assert.equal((await manager.list())[0]?.status, "waiting_for_approval");
+
+  const approval = await manager.approve(`codex:${threadId}`, "server-request-1");
+
+  assert.equal(approval.summary, "npm test");
+  assert.equal(approvalDecision, "accept");
+  assert.equal((await manager.list())[0]?.status, "running");
+  assert.ok(messages.some((message) => {
+    const event = message as { type?: string; event?: { kind?: string } };
+    return event.type === "chat_event" && event.event?.kind === "approval_approved";
+  }));
 });
 
 test("new chat creation starts a Desktop-owned conversation", async () => {

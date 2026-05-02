@@ -35,6 +35,8 @@ Observed Desktop bundle symbols:
 - `thread/start`
 - `turn/start`
 - `turn/completed`
+- `item/commandExecution/requestApproval`
+- `item/fileChange/requestApproval`
 - `thread/list`
 - `thread/unsubscribe`
 - `thread/backgroundTerminals/clean`
@@ -48,6 +50,7 @@ Observed:
 - Handrail can start a new Desktop thread through the Desktop-bundled app-server with `thread/start`.
 - Handrail starts the first turn for a new Desktop thread over the same app-server connection with `turn/start`.
 - Handrail keeps that app-server child alive until it observes `turn/completed` for the thread.
+- For Handrail-started app-server turns, Handrail can receive `item/commandExecution/requestApproval` and `item/fileChange/requestApproval` requests from the app-server and respond on the same request id.
 - Handrail continues existing Desktop-visible threads through Desktop IPC with `thread-follower-start-turn`.
 - Desktop renderer code uses `thread/list` to fetch recent conversations.
 - Desktop renderer code uses `thread/unsubscribe` when an inactive owner conversation should stop streaming.
@@ -61,9 +64,9 @@ Inferred:
 
 Unknown:
 
-- The full app-server request envelope used by Desktop internally.
 - The complete notification stream emitted by the app-server.
 - Whether there is an app-server method that forces a renderer to reload one conversation from persistence.
+- Whether existing Desktop-owned turns can be attached to a durable app-server approval request stream without starting the turn through Handrail's app-server child.
 
 ## Handrail `thread/start`
 
@@ -130,6 +133,85 @@ Handrail retains the app-server client until it sees:
 ```
 
 Observed local validation is still blocked when the automation sandbox cannot access `~/.codex/sessions`, but the current unit contract requires `thread/start` followed by `turn/start` for new Desktop conversations.
+
+## Handrail Approval Requests
+
+For turns started through `turn/start`, Codex Desktop app-server sends approval requests as newline-delimited JSON objects with `id`, `method`, and `params`. The app-server request `id` is the only response correlation key Handrail can safely expose as a mobile `approvalId`.
+
+Command approval request:
+
+```json
+{
+  "id": "server-request-1",
+  "method": "item/commandExecution/requestApproval",
+  "params": {
+    "threadId": "019dc424-e857-76e0-8229-589ecf107eb4",
+    "turnId": "turn-1",
+    "itemId": "item-1",
+    "approvalId": null,
+    "command": "npm test",
+    "reason": null
+  }
+}
+```
+
+File-change approval request:
+
+```json
+{
+  "id": "server-request-2",
+  "method": "item/fileChange/requestApproval",
+  "params": {
+    "threadId": "019dc424-e857-76e0-8229-589ecf107eb4",
+    "turnId": "turn-1",
+    "itemId": "item-2",
+    "grantRoot": "/Users/me/project",
+    "reason": "Codex requests write access."
+  }
+}
+```
+
+Handrail maps each request into:
+
+```json
+{
+  "type": "approval_required",
+  "chatId": "codex:019dc424-e857-76e0-8229-589ecf107eb4",
+  "approvalId": "server-request-1",
+  "title": "Command approval required",
+  "summary": "npm test",
+  "files": [],
+  "diff": ""
+}
+```
+
+When iOS approves or denies the request, Handrail responds to the same app-server child:
+
+```json
+{
+  "id": "server-request-1",
+  "result": {
+    "decision": "accept"
+  }
+}
+```
+
+Denial uses:
+
+```json
+{
+  "id": "server-request-1",
+  "result": {
+    "decision": "decline"
+  }
+}
+```
+
+The invariant is:
+
+```text
+A Handrail approvalId is the app-server request id, not transcript text, a local UUID, or an inferred item id.
+```
 
 ## Handrail Request IDs
 

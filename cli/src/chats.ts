@@ -2,7 +2,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { prepareChatWorkspace } from "./newChatOptions.js";
 import type { ApprovalRequest, ChatRecord, ServerMessage, StartChatOptions } from "./types.js";
 import { formatCodexTranscriptEntry, listCodexChats, readCodexChatDetail } from "./codexSessions.js";
-import { interruptCodexDesktopTurn, startCodexDesktopConversation, startCodexDesktopTurn } from "./codexDesktopIpc.js";
+import { interruptCodexDesktopTurn, startCodexDesktopConversation, startCodexDesktopTurn, type DesktopApprovalDecision, type DesktopApprovalRequest } from "./codexDesktopIpc.js";
 
 type Broadcast = (message: ServerMessage) => void;
 const DESKTOP_VISIBLE_WAIT_ATTEMPTS = 24;
@@ -27,13 +27,15 @@ const defaultDeps: ChatManagerDeps = {
 };
 
 export class ChatManager {
+  private pendingApprovals = new Map<string, { request: ApprovalRequest; respond(decision: DesktopApprovalDecision): Promise<void> }>();
+
   constructor(
     private readonly broadcast: Broadcast,
     private readonly deps: ChatManagerDeps = defaultDeps
   ) {}
 
   async list(): Promise<ChatRecord[]> {
-    return (await this.deps.listCodexChats()).sort(
+    return this.applyPendingApprovals(await this.deps.listCodexChats()).sort(
       (left, right) => this.sortTime(right) - this.sortTime(left)
     );
   }
@@ -58,13 +60,16 @@ export class ChatManager {
       newBranch: options.newBranch,
       workMode: options.workMode
     });
-    const threadId = await this.deps.startCodexDesktopConversation({
-      cwd: repo,
-      prompt,
-      model: options.model,
-      reasoningEffort: options.reasoningEffort,
-      accessPreset: options.accessPreset
-    });
+    const threadId = await this.deps.startCodexDesktopConversation(
+      {
+        cwd: repo,
+        prompt,
+        model: options.model,
+        reasoningEffort: options.reasoningEffort,
+        accessPreset: options.accessPreset
+      },
+      (approval) => this.handleDesktopApprovalRequest(approval)
+    );
     const now = new Date().toISOString();
     const visibleChat = await this.waitForDesktopVisibleChat(`codex:${threadId}`);
     const chat: ChatRecord = {
@@ -117,12 +122,24 @@ export class ChatManager {
     throw new Error(`Codex chat ${chatId} does not accept direct terminal input from Handrail.`);
   }
 
-  approve(chatId: string, _approvalId: string): ApprovalRequest {
-    throw new Error(`Approval routing for Codex chat ${chatId} is not enabled yet.`);
+  async approve(chatId: string, approvalId: string): Promise<ApprovalRequest> {
+    const pending = this.pendingApproval(chatId, approvalId);
+    await pending.respond("accept");
+    this.pendingApprovals.delete(approvalId);
+    const now = new Date().toISOString();
+    this.broadcast({ type: "chat_event", chatId, event: { kind: "approval_approved", text: pending.request.summary, status: "running", at: now } });
+    this.broadcast({ type: "chat_list", chats: await this.list() });
+    return pending.request;
   }
 
-  deny(chatId: string, _approvalId: string, _reason?: string): ApprovalRequest {
-    throw new Error(`Approval routing for Codex chat ${chatId} is not enabled yet.`);
+  async deny(chatId: string, approvalId: string, _reason?: string): Promise<ApprovalRequest> {
+    const pending = this.pendingApproval(chatId, approvalId);
+    await pending.respond("decline");
+    this.pendingApprovals.delete(approvalId);
+    const now = new Date().toISOString();
+    this.broadcast({ type: "chat_event", chatId, event: { kind: "approval_denied", text: pending.request.summary, status: "running", at: now } });
+    this.broadcast({ type: "chat_list", chats: await this.list() });
+    return pending.request;
   }
 
   async stop(chatId: string): Promise<void> {
@@ -158,6 +175,45 @@ export class ChatManager {
       throw new Error(`Codex Desktop did not expose chat ${overlay.id}. Open Codex Desktop and refresh Handrail.`);
     }
     return chats.map((chat) => chat.id === overlay.id ? { ...chat, ...overlay } : chat);
+  }
+
+  private handleDesktopApprovalRequest(approval: DesktopApprovalRequest): void {
+    const request: ApprovalRequest = {
+      chatId: `codex:${approval.threadId}`,
+      approvalId: approval.approvalId,
+      title: approval.title,
+      summary: approval.summary,
+      files: approval.files,
+      diff: approval.diff
+    };
+    this.pendingApprovals.set(request.approvalId, { request, respond: approval.respond });
+    this.broadcast({ type: "approval_required", ...request });
+    this.broadcast({
+      type: "chat_event",
+      chatId: request.chatId,
+      event: { kind: "approval_required", text: request.summary, status: "waiting_for_approval", at: new Date().toISOString() }
+    });
+  }
+
+  private pendingApproval(chatId: string, approvalId: string): { request: ApprovalRequest; respond(decision: DesktopApprovalDecision): Promise<void> } {
+    const pending = this.pendingApprovals.get(approvalId);
+    if (!pending || pending.request.chatId !== chatId) {
+      throw new Error(`No pending approval ${approvalId} for Codex chat ${chatId}.`);
+    }
+    return pending;
+  }
+
+  private applyPendingApprovals(chats: ChatRecord[]): ChatRecord[] {
+    if (this.pendingApprovals.size === 0) {
+      return chats;
+    }
+    return chats.map((chat) => {
+      const pending = [...this.pendingApprovals.values()].find((item) => item.request.chatId === chat.id);
+      if (!pending) {
+        return chat;
+      }
+      return { ...chat, status: "waiting_for_approval", files: pending.request.files };
+    });
   }
 }
 

@@ -74,6 +74,12 @@ The strongest current iPad finding is that #21 and #22 are closed with live iPad
 
 The iPhone App Store metadata package no longer claims approval-response support for v1. `store-assets/metadata.txt` and `store-assets/screenshot-plan.md` now defer the approval screenshot until #2 has first-class Desktop approval request IDs. This keeps milestone 1 focused on submission evidence instead of silently adding #2 to the iPhone release gate through marketing copy.
 
+## Lead Dev Approval Routing Refresh - 2026-05-02 14:45Z
+
+#2 now has a code-level first-class approval route for Handrail-started app-server turns. The CLI accepts Codex app-server `item/commandExecution/requestApproval` and `item/fileChange/requestApproval` server requests, exposes the app-server request id as Handrail `approvalId`, marks the matching `codex:` chat as `waiting_for_approval` while pending, and sends iOS approve/deny decisions back as app-server `accept`/`decline` responses on the same request id. Verification: `cd cli && npm test` passed 42/42.
+
+The issue remains open and is now labeled `blocked` for live evidence. The local LaunchAgent still needs a permitted restart before the running server can expose the rebuilt `cli/dist`; `launchctl kickstart -k gui/501/com.velocityworks.handrail.server` returned `Operation not permitted` and listener PID `4657` did not change. #24 still needs simulator evidence from a real live `waiting_for_approval` row before closure.
+
 ## PM Milestone Reconciliation - 2026-05-02 11:08Z
 
 Milestone descriptions were reconciled to match the current GitHub issue state:
@@ -256,10 +262,10 @@ Additionally, the iPad app has not been launched on a physical iPad device. Phys
 **Finding:** The WebSocket server uses `ws://` (no TLS). This is acceptable for a local-network-only product but must be explicitly documented in the App Store privacy declaration. Apple may ask about network transport in review for apps that handle tokens.  
 **Action:** Add a sentence to the privacy policy and App Store description: "Handrail communicates only on your local Wi-Fi network using an unencrypted WebSocket connection secured by a per-device pairing token. No data is sent to the internet."
 
-### 7.3 Approval Detection is Pattern-Matched, Not Protocol-Routed
+### 7.3 Approval Routing Needs Live Evidence
 
-**Finding:** The CLI watches Codex output for strings like `approve`, `permission`, `Do you want to proceed`. This is fragile against Codex output format changes. Issue #2 tracks upgrading to first-class approval routing through the Codex Desktop app-server route.  
-**Action:** Issue #2 should be addressed before App Store submission if approval is a marketed feature. If it ships as-is, add an explicit user-facing disclosure in Settings: "Approval detection uses text pattern matching and may miss some requests."
+**Finding:** The CLI now has first-class app-server approval request-id routing for Handrail-started turns. Live release evidence is still missing because the running LaunchAgent did not restart in the automation sandbox, and #24 still needs a real simulator-connected `waiting_for_approval` row.
+**Action:** Restart the local Handrail server with the rebuilt CLI, produce a real app-server approval request, verify iOS approve/deny sends `accept`/`decline` on the app-server request id, then capture the iPad Dashboard approval-row evidence for #24.
 
 ---
 

@@ -49,13 +49,29 @@ export interface DesktopConversationInput {
 
 export interface CodexDesktopAppServerConnection {
   request(method: string, params: unknown, id?: string): Promise<unknown>;
+  setApprovalRequestHandler?(handler: (request: DesktopApprovalRequest) => void): void;
 }
 
-export async function startCodexDesktopConversation(input: DesktopConversationInput): Promise<string> {
+export interface DesktopApprovalRequest {
+  threadId: string;
+  approvalId: string;
+  title: string;
+  summary: string;
+  files: string[];
+  diff: string;
+  respond(decision: DesktopApprovalDecision): Promise<void>;
+}
+
+export type DesktopApprovalDecision = "accept" | "decline";
+
+export async function startCodexDesktopConversation(
+  input: DesktopConversationInput,
+  onApprovalRequest?: (request: DesktopApprovalRequest) => void
+): Promise<string> {
   const client = new CodexDesktopAppServerClient(codexDesktopAppServerPath());
   await client.connect();
   try {
-    const threadId = await startCodexDesktopConversationOnAppServer(client, input);
+    const threadId = await startCodexDesktopConversationOnAppServer(client, input, onApprovalRequest);
     retainCodexDesktopAppServerUntilTurnCompletes(client, threadId);
     return threadId;
   } catch (error) {
@@ -66,8 +82,12 @@ export async function startCodexDesktopConversation(input: DesktopConversationIn
 
 export async function startCodexDesktopConversationOnAppServer(
   client: CodexDesktopAppServerConnection,
-  input: DesktopConversationInput
+  input: DesktopConversationInput,
+  onApprovalRequest?: (request: DesktopApprovalRequest) => void
 ): Promise<string> {
+  if (onApprovalRequest) {
+    client.setApprovalRequestHandler?.(onApprovalRequest);
+  }
   const threadId = await createCodexDesktopThread(client, input);
   await startCodexDesktopAppServerTurn(client, { threadId, cwd: input.cwd, prompt: input.prompt });
   return threadId;
@@ -377,6 +397,7 @@ class CodexDesktopAppServerClient {
   private buffer = "";
   private pending = new Map<string, PendingAppServerResponse>();
   private notificationWaiters: PendingAppServerNotification[] = [];
+  private approvalRequestHandler: ((request: DesktopApprovalRequest) => void) | null = null;
   private nextRequestIndex = 1;
 
   constructor(private readonly executablePath: string) {}
@@ -429,6 +450,10 @@ class CodexDesktopAppServerClient {
     return response.result;
   }
 
+  setApprovalRequestHandler(handler: (request: DesktopApprovalRequest) => void): void {
+    this.approvalRequestHandler = handler;
+  }
+
   waitForNotification(predicate: PendingAppServerNotification["predicate"]): Promise<AppServerNotification> {
     return new Promise((resolve, reject) => {
       this.notificationWaiters.push({ predicate, resolve, reject });
@@ -476,11 +501,34 @@ class CodexDesktopAppServerClient {
     }
     const pending = this.pending.get(message.id);
     if (!pending) {
+      this.readRequest(message);
       return;
     }
     this.pending.delete(message.id);
     clearTimeout(pending.timer);
     pending.resolve(message as AppServerResponse);
+  }
+
+  private readRequest(message: object): void {
+    if (!("id" in message) || typeof message.id !== "string" || !("method" in message) || typeof message.method !== "string") {
+      return;
+    }
+    if (!("params" in message)) {
+      this.sendRequestError(message.id, `Codex Desktop app-server request ${message.method} did not include params.`);
+      return;
+    }
+    const requestId = message.id;
+    const approval = codexDesktopApprovalRequestFromServerRequest(
+      requestId,
+      message.method,
+      message.params,
+      (decision) => this.respondToServerRequest(requestId, { decision })
+    );
+    if (!approval || !this.approvalRequestHandler) {
+      this.sendRequestError(message.id, `Handrail cannot handle Codex Desktop app-server request ${message.method}.`);
+      return;
+    }
+    this.approvalRequestHandler(approval);
   }
 
   private readNotification(message: object): void {
@@ -514,6 +562,77 @@ class CodexDesktopAppServerClient {
   private nextRequestId(method: string): string {
     return `${method}:${this.nextRequestIndex++}`;
   }
+
+  private async respondToServerRequest(requestId: string, result: unknown): Promise<void> {
+    const child = this.child;
+    if (!child?.stdin.writable) {
+      throw new Error("Codex Desktop app-server is not connected.");
+    }
+    child.stdin.write(`${JSON.stringify({ id: requestId, result })}\n`);
+  }
+
+  private sendRequestError(requestId: string, message: string): void {
+    const child = this.child;
+    if (!child?.stdin.writable) {
+      return;
+    }
+    child.stdin.write(`${JSON.stringify({ id: requestId, error: { message } })}\n`);
+  }
+}
+
+export function codexDesktopApprovalRequestFromServerRequest(
+  requestId: string,
+  method: string,
+  params: unknown,
+  respond: (decision: DesktopApprovalDecision) => Promise<void>
+): DesktopApprovalRequest | null {
+  if (!params || typeof params !== "object") {
+    return null;
+  }
+  if (method === "item/commandExecution/requestApproval") {
+    const threadId = readString(params, "threadId");
+    const command = readString(params, "command");
+    const reason = readString(params, "reason");
+    if (!threadId) {
+      return null;
+    }
+    return {
+      threadId,
+      approvalId: requestId,
+      title: "Command approval required",
+      summary: command ?? reason ?? "Codex requests permission to run a command.",
+      files: [],
+      diff: "",
+      respond
+    };
+  }
+  if (method === "item/fileChange/requestApproval") {
+    const threadId = readString(params, "threadId");
+    const grantRoot = readString(params, "grantRoot");
+    const reason = readString(params, "reason");
+    if (!threadId) {
+      return null;
+    }
+    return {
+      threadId,
+      approvalId: requestId,
+      title: "File change approval required",
+      summary: reason ?? (grantRoot ? `Codex requests permission to change files under ${grantRoot}.` : "Codex requests permission to change files."),
+      files: grantRoot ? [grantRoot] : [],
+      diff: "",
+      respond
+    };
+  }
+  return null;
+}
+
+function readString(value: object, key: string): string | null {
+  const fields = value as Record<string, unknown>;
+  if (!(key in fields)) {
+    return null;
+  }
+  const candidate = fields[key];
+  return typeof candidate === "string" && candidate.trim() ? candidate : null;
 }
 
 function retainCodexDesktopAppServerUntilTurnCompletes(client: CodexDesktopAppServerClient, threadId: string): void {
