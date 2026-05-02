@@ -38,10 +38,13 @@ final class HandrailStore {
 
     init(
         enableNetworking: Bool = true,
+        loadStoredPairing: Bool = true,
         taskFactory: @escaping HandrailWebSocketClient.TaskFactory = { URLSession.shared.webSocketTask(with: $0) }
     ) {
         client = HandrailWebSocketClient(taskFactory: taskFactory)
-        loadPairing()
+        if loadStoredPairing {
+            loadPairing()
+        }
         loadPinnedChats()
         loadDismissedAttentionChats()
         client.onMessage = { [weak self] message in

@@ -19,7 +19,7 @@ final class TransientErrorStateTests: XCTestCase {
         XCTAssertTrue(ok)
         XCTAssertEqual(text, "Automation paused.")
 
-        let store = HandrailStore(enableNetworking: false)
+        let store = HandrailStore(enableNetworking: false, loadStoredPairing: false)
         store.handle(message)
 
         XCTAssertEqual(store.activity.first?.title, "Command result")
@@ -40,7 +40,7 @@ final class TransientErrorStateTests: XCTestCase {
         }
         XCTAssertEqual(text, "Unsupported server message type: desktop_repainted.")
 
-        let store = HandrailStore(enableNetworking: false)
+        let store = HandrailStore(enableNetworking: false, loadStoredPairing: false)
         store.handle(message)
 
         XCTAssertEqual(store.lastError, "Unsupported server message type: desktop_repainted.")
@@ -49,7 +49,7 @@ final class TransientErrorStateTests: XCTestCase {
     }
 
     func testOpeningNewChatClearsOnlyNewChatError() {
-        let store = HandrailStore(enableNetworking: false)
+        let store = HandrailStore(enableNetworking: false, loadStoredPairing: false)
         store.newChatError = "Codex Desktop did not become ready."
         store.notifications = [
             HandrailNotification(title: "Handrail error", detail: "Codex Desktop did not become ready.", date: HandrailTestFixtures.baseDate, chatId: nil)
@@ -62,7 +62,7 @@ final class TransientErrorStateTests: XCTestCase {
     }
 
     func testOpeningChatDetailClearsOnlyThatChatError() {
-        let store = HandrailStore(enableNetworking: false)
+        let store = HandrailStore(enableNetworking: false, loadStoredPairing: false)
         store.chatErrors = [
             "selected-chat": "Old selected chat error.",
             "other-chat": "Other chat error."
@@ -76,7 +76,7 @@ final class TransientErrorStateTests: XCTestCase {
 
     func testOfflineChatDetailRefreshReportsChatErrorAndReconnects() {
         let task = StoreTestWebSocketTask()
-        let store = HandrailStore(enableNetworking: false) { _ in task }
+        let store = HandrailStore(enableNetworking: false, loadStoredPairing: false) { _ in task }
         store.pairedMachine = HandrailTestFixtures.pairedOfflineMachine
 
         store.refreshChatDetail(chatId: HandrailTestFixtures.runningChat.id)
@@ -92,7 +92,7 @@ final class TransientErrorStateTests: XCTestCase {
     }
 
     func testViewedChatDoesNotRecordTaskCompletionNotification() {
-        let store = HandrailStore(enableNetworking: false)
+        let store = HandrailStore(enableNetworking: false, loadStoredPairing: false)
         store.chats = [HandrailTestFixtures.runningChat]
 
         store.enterChat(chatId: HandrailTestFixtures.runningChat.id)
@@ -112,7 +112,7 @@ final class TransientErrorStateTests: XCTestCase {
     }
 
     func testViewedChatDoesNotRecordApprovalNotification() {
-        let store = HandrailStore(enableNetworking: false)
+        let store = HandrailStore(enableNetworking: false, loadStoredPairing: false)
         store.chats = [HandrailTestFixtures.waitingForApprovalChat]
 
         store.enterChat(chatId: HandrailTestFixtures.waitingForApprovalChat.id)
