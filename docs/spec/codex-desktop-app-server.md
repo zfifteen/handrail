@@ -131,6 +131,30 @@ Handrail retains the app-server client until it sees:
 
 Observed local validation is still blocked when the automation sandbox cannot access `~/.codex/sessions`, but the current unit contract requires `thread/start` followed by `turn/start` for new Desktop conversations.
 
+## Handrail Request IDs
+
+Observed:
+
+- Handrail sends app-server requests as newline-delimited JSON objects with `id`, `method`, and `params`.
+- Handrail uses the fixed id `__codex_initialize__` for `initialize`.
+- Handrail uses a per-client deterministic counter for later request ids:
+
+```text
+thread/start:1
+turn/start:2
+```
+
+Inferred:
+
+- The app-server treats `id` as a request/response correlation key.
+- Request ids do not need randomness when one Handrail app-server client sends one ordered request stream.
+
+The invariant is:
+
+```text
+App-server request correlation must be auditable from the emitted request stream.
+```
+
 ## Mutation Classes
 
 Appears to mutate persisted or durable thread state:

@@ -31,7 +31,7 @@ Marketing URL:
 Not submitted for v1.
 
 Privacy Policy URL:
-TBD before submission. Source policy text lives in docs/privacy-policy.md.
+https://github.com/zfifteen/handrail/blob/main/docs/privacy-policy.md
 
 Review notes:
 Handrail requires Local Network access to connect to the Handrail CLI running on the user's Mac. The connection uses ws:// on the local network and is protected by a per-device pairing token. No Handrail backend account, sync service, payment, telemetry, or cloud relay is used.

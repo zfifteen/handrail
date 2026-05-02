@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { execFile, spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -113,7 +112,7 @@ export function codexDesktopIpcSocketPath(): string {
   return join(tmpdir(), "codex-ipc", uid == null ? "ipc.sock" : `ipc-${uid}.sock`);
 }
 
-export function codexDesktopIpcRequest(method: string, params: unknown, sourceClientId: string, requestId: string = randomUUID()): IpcRequest {
+export function codexDesktopIpcRequest(method: string, params: unknown, sourceClientId: string, requestId: string): IpcRequest {
   return {
     type: "request",
     requestId,
@@ -152,6 +151,7 @@ class CodexDesktopIpcClient {
   private clientId = INITIALIZING_CLIENT_ID;
   private buffer = Buffer.alloc(0);
   private pending = new Map<string, PendingResponse>();
+  private nextRequestIndex = 1;
 
   constructor(private readonly socketPath: string) {}
 
@@ -181,7 +181,7 @@ class CodexDesktopIpcClient {
       throw new Error("Codex Desktop IPC is not connected.");
     }
 
-    const request = codexDesktopIpcRequest(method, params, this.clientId);
+    const request = codexDesktopIpcRequest(method, params, this.clientId, this.nextRequestId());
     const frame = encodeCodexDesktopIpcFrame(request);
     socket.write(frame);
 
@@ -232,6 +232,10 @@ class CodexDesktopIpcClient {
       pending.reject(new Error(message));
       this.pending.delete(requestId);
     }
+  }
+
+  private nextRequestId(): string {
+    return `handrail-ipc-${this.nextRequestIndex++}`;
   }
 }
 
@@ -373,6 +377,7 @@ class CodexDesktopAppServerClient {
   private buffer = "";
   private pending = new Map<string, PendingAppServerResponse>();
   private notificationWaiters: PendingAppServerNotification[] = [];
+  private nextRequestIndex = 1;
 
   constructor(private readonly executablePath: string) {}
 
@@ -402,19 +407,20 @@ class CodexDesktopAppServerClient {
     }, APP_SERVER_INITIALIZE_ID);
   }
 
-  async request(method: string, params: unknown, id: string = `${method}:${randomUUID()}`): Promise<unknown> {
+  async request(method: string, params: unknown, id?: string): Promise<unknown> {
     const child = this.child;
     if (!child?.stdin.writable) {
       throw new Error("Codex Desktop app-server is not connected.");
     }
+    const requestId = id ?? this.nextRequestId(method);
 
     const response = await new Promise<AppServerResponse>((resolve, reject) => {
       const timer = setTimeout(() => {
-        this.pending.delete(id);
+        this.pending.delete(requestId);
         reject(new Error(`Timed out waiting for Codex Desktop app-server to handle ${method}.`));
       }, APP_SERVER_REQUEST_TIMEOUT_MS);
-      this.pending.set(id, { resolve, reject, timer });
-      child.stdin.write(`${JSON.stringify({ id, method, params })}\n`);
+      this.pending.set(requestId, { resolve, reject, timer });
+      child.stdin.write(`${JSON.stringify({ id: requestId, method, params })}\n`);
     });
 
     if (response.error) {
@@ -503,6 +509,10 @@ class CodexDesktopAppServerClient {
       waiter.reject(error);
     }
     this.notificationWaiters = [];
+  }
+
+  private nextRequestId(method: string): string {
+    return `${method}:${this.nextRequestIndex++}`;
   }
 }
 

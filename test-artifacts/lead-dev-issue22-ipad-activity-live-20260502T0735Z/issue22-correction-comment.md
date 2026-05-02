@@ -1,0 +1,31 @@
+Lead Dev correction for closure evidence, 2026-05-02 07:35Z:
+
+The previous closure comment was mangled by shell command substitution around Markdown backticks. The issue closure itself is still correct; this comment records the exact evidence cleanly.
+
+#22 is resolved with live iPad simulator evidence.
+
+Target selection:
+
+- Slack had no message addressed to `Handrail Lead Dev`.
+- The Lead Dev handoff had no active item.
+- #25 remains a precise external provisioning dependency.
+- #24 still depends on first-class approval routing from #2.
+- #22 was the next concrete open bug with live iPad acceptance criteria.
+
+Verification performed:
+
+- XcodeBuildMCP `test_sim -only-testing:HandrailTests/RootLayoutSelectionTests` on iPad Pro 13-inch (M5), iOS Simulator 26.4.1: 7/7 passed.
+- XcodeBuildMCP `build_run_sim` succeeded on the same simulator.
+- With the iPad app connected to the live local Handrail server on `127.0.0.1:8788`, I started a controlled Desktop-visible chat through Handrail WebSocket: `codex:019de79c-6c3f-7ae3-a4af-aef51c7597c1`.
+- The server emitted `chat_started`, emitted the chat-linked `chat_event`, and refreshed `chat_list` for the same id.
+- iPad Activity showed a chat-linked row: `Chat Started` / `Handrail issue 22 activity route check. Reply OK.`
+- Tapping that Activity row switched the regular-width iPad UI to Chats and selected the same chat in the detail column.
+- `node cli/dist/src/index.js chats` listed the same chat id and title.
+
+Local evidence artifacts:
+
+- `test-artifacts/lead-dev-issue22-ipad-activity-live-20260502T0735Z/server-messages.ndjson`
+- `test-artifacts/lead-dev-issue22-ipad-activity-live-20260502T0735Z/01-activity-chat-linked-row.jpg`
+- `test-artifacts/lead-dev-issue22-ipad-activity-live-20260502T0735Z/02-activity-row-opened-chat-detail.jpg`
+
+Product invariant check: preserved free, local-first, Codex Desktop-only Handrail. The validation used the local iPad simulator, local Handrail WebSocket server, and a Desktop-visible `codex:` chat.

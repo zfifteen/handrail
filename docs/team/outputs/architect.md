@@ -2,20 +2,23 @@
 
 ## Strongest Structural Finding
 
-The app-server spec had drifted from the current #29 implementation contract. New chat creation now uses the Codex Desktop app-server for both `thread/start` and the first `turn/start` on one retained app-server connection; Desktop IPC `thread-follower-start-turn` remains the route for continuing an existing Desktop-visible thread.
+Desktop IPC and app-server request correlation had one remaining nondeterministic edge. `docs/spec/codex-desktop-ipc-protocol.md` already required deterministic IPC `requestId` values, but `cli/src/codexDesktopIpc.ts` still generated random UUID-backed IPC and app-server ids when callers did not supply an id.
+
+The fix makes request ids auditable from the emitted request stream: IPC requests use a per-client `handrail-ipc-N` counter, app-server `initialize` keeps the fixed `__codex_initialize__` id, and later app-server requests use a per-client `<method>:N` counter.
 
 ## Invariants Preserved Or At Risk
 
 Preserved:
 
-- Handrail remains a local-first observer/controller for Codex Desktop, not a separate chat authority.
-- A phone-created chat must not become mobile-visible until the Desktop-derived read model exposes the new `codex:` id.
-- Existing Desktop-visible chat continuation still goes through the Desktop owner route.
+- CLI and iOS protocol contracts were not widened.
+- Codex Desktop remains the source of truth for visible chat metadata.
+- Handrail still uses Desktop IPC for owner-routed visible-thread mutations and the Desktop app-server for new-thread app-server operations.
+- Request correlation now follows one narrow deterministic path instead of relying on randomness.
 - Raw Codex identifiers were not introduced into user-facing titles or notification text.
 
 At risk:
 
-- #29 remains acceptance-blocked because the live listener on `127.0.0.1:8788` is still running pre-patch code, while a patched ephemeral server reaches Codex app-server session access and then fails at the automation sandbox boundary.
+- #2 and #3 remain structurally linked: approval routing is still blocked until live Desktop/app-server events provide real pending request ids and kinds.
 
 Slack inbox:
 
@@ -27,22 +30,19 @@ Slack inbox:
 
 Repo file changes:
 
-- `docs/spec/codex-desktop-app-server.md`: aligned the living app-server contract with the current implementation and #29 evidence:
-  - documented app-server `turn/start`;
-  - documented app-server `turn/completed` retention;
-  - separated new-chat app-server startup from existing-thread Desktop IPC continuation;
-  - recorded the no-orphan `chat_started` / `chat_event` / `chat_list` broadcast invariant.
+- `cli/src/codexDesktopIpc.ts`: removed random UUID request id generation; IPC and app-server clients now use deterministic per-client counters for requests that do not have an explicit id.
+- `docs/spec/codex-desktop-app-server.md`: documented Handrail app-server request id behavior and the request-correlation invariant.
 - `docs/team/outputs/architect.md`: updated this report.
 
 GitHub issue changes:
 
-- No GitHub issue was created or updated. Issue #29 already records the live acceptance blocker and the needed out-of-sandbox server restart.
+- No GitHub issue was created or updated. Existing issues #2 and #3 already record the approval/live-event boundary; this run produced a smaller direct code/spec correction.
 
-No Lead Dev handoff. The implementation contract already has focused CLI tests; the missing action is operational validation of the restarted live server, not a new patch target.
+No Lead Dev handoff. The deterministic request id correction was narrow enough for this architect run and passed CLI verification.
 
 ## Required Design Decision
 
-No product decision is required. The existing product contract is sufficient: app-server thread creation remains local Codex Desktop integration, and mobile visibility is gated by the Desktop-derived chat list.
+No product decision is required. Deterministic local request correlation preserves the existing local-first Codex Desktop-only contract.
 
 ## Product Invariant Check
 
@@ -57,8 +57,8 @@ No product decision is required. The existing product contract is sufficient: ap
 - Read `#handrail-agents` (`C0B0K6B0T6K`) through the Slack connector.
 - Verified `gh auth status -h github.com` is authenticated as `zfifteen`.
 - Read open GitHub issues with `gh issue list --repo zfifteen/handrail --state open --limit 40`.
-- Read issue #29 with comments using local `gh issue view 29 --repo zfifteen/handrail --comments`.
-- Reviewed `README.md`, `docs/product-invariants.md`, `docs/spec/README.md`, `docs/spec/handrail-websocket-protocol.md`, `docs/spec/codex-desktop-ipc-protocol.md`, `docs/spec/codex-desktop-app-server.md`, `docs/spec/codex-desktop-persistence.md`, `cli/src/codexDesktopIpc.ts`, and `cli/test/codex.test.ts`.
+- Read issue #2 comments and issue #3 state using local `gh`.
+- Reviewed `README.md`, `docs/product-invariants.md`, `docs/spec/handrail-websocket-protocol.md`, `docs/spec/codex-desktop-ipc-protocol.md`, `docs/spec/codex-desktop-app-server.md`, `cli/src/codexDesktopIpc.ts`, `cli/src/chats.ts`, `cli/src/server.ts`, `cli/src/types.ts`, and `cli/test/codex.test.ts`.
 - `npm test` in `cli/`: passed 40/40.
 - `git diff --check`: passed.
-- No iOS simulator validation was required because this run changed a spec/report only and did not touch visible iPhone or iPad UI behavior.
+- No iOS simulator validation was required because this run did not touch visible iPhone or iPad UI behavior.

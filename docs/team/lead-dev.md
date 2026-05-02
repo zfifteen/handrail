@@ -47,6 +47,8 @@ Candidate sources:
 3. Concrete open bug issues from `gh issue list -R zfifteen/handrail --label bug --state open --limit 100`.
 4. Concrete open feature issues from `gh issue list -R zfifteen/handrail --label enhancement --state open --limit 100`.
 
+Do not select issues labeled `blocked` unless the user explicitly asks Lead Dev to work on blocked issues. If a selected candidate is proven to depend on a precise external dependency or an upstream issue that cannot be completed in the current run, add the `blocked` label, record the dependency in the issue, and move to the next highest-priority unblocked candidate.
+
 Rank significance by concrete project impact: App Store or release blockers first, then issues that unblock multiple other issues, then user-visible core workflow breakage, then data integrity or protocol correctness risk, then accessibility/review compliance, then isolated polish. If multiple candidates remain comparable after that ranking, prefer the lowest issue number.
 
 If a readable handoff exists but is not selected, the run must state why a more significant target outranked it. If no concrete Slack request, handoff, bug, or feature issue is available, pick one hygiene patch with an obvious verification path.
@@ -57,6 +59,12 @@ If a readable handoff exists but is not selected, the run must state why a more 
 - Run focused tests, builds, or simulator validation required by the changed behavior.
 - Create or update GitHub issues when a discovered implementation problem is out of scope for the current patch.
 - Update project artifacts only when they reflect completed implementation or necessary next work.
+
+## End Of Run Commit
+
+At the end of each successful or explicitly blocked Lead Dev run, commit the full local working tree on the current branch. Stage all tracked, untracked, and previously unstaged changes with `git add -A`, then create one non-interactive commit whose message summarizes the completed target or blocker evidence.
+
+This commit rule intentionally includes unstaged changes already present in the workspace. Preserve unrelated work by committing it along with the run output rather than reverting, dropping, or splitting it unless the user explicitly asks for a narrower commit.
 
 ## GitHub Issue Behavior
 

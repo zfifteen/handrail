@@ -2,61 +2,55 @@
 
 ## Strongest Implementation Finding
 
-#29 is resolved. The source patch was already present; the live blocker was the stale LaunchAgent process on `127.0.0.1:8788`. Restarting `com.velocityworks.handrail.server` moved the listener from PID `16041` to PID `70040`, after which a real `start_chat` emitted `chat_started`, emitted a chat-linked `chat_event`, refreshed `chat_list`, and appeared in `node cli/dist/src/index.js chats` as the same Desktop-visible `codex:` chat.
+#26 is complete. Handrail now has a reachable public privacy policy URL in the App Store metadata package, and the hosted raw policy content matches the repo source text.
 
 ## Patch Or Issue Work Completed
 
-- Rebuilt and tested the CLI from the current branch.
-- Restarted the actual live Handrail LaunchAgent with `launchctl kickstart -k gui/$(id -u)/com.velocityworks.handrail.server`.
-- Verified the listener changed from `node` PID `16041` to `node` PID `70040`.
-- Sent a controlled real `start_chat` through the live Handrail WebSocket server on `127.0.0.1:8788`.
-- Observed `chat_started` for `codex:019de74b-9e6e-71e1-a6e1-14028304e776`.
-- Observed a chat-linked `chat_event` with `event.kind = chat_started` for the same id.
-- Observed a `chat_list` update containing the same id.
-- Confirmed `node cli/dist/src/index.js chats` lists the same chat and prompt token.
-- Closed GitHub issue #29 with the acceptance evidence.
-- Attempted to stop the acceptance probe chat with the normal CLI stop command; the command returned only the known APNs configuration noise, and the chat still reported `running` after a settle check.
-- Wrote the QA handoff for #21/#22 now that #29 is closed.
+- Created the GitHub `blocked` label because the repo did not have one.
+- Applied `blocked` to #25 because Release APNs archive closure depends on a non-expired APNs-capable Apple distribution/TestFlight/App Store provisioning profile.
+- Applied `blocked` to #24 because closure depends on #2 producing first-class Codex Desktop/app-server approval request IDs and a real live `waiting_for_approval` row.
+- Updated `docs/team/lead-dev.md` so Lead Dev skips `blocked` issues unless explicitly asked by the user. The rule also says to label newly discovered precise external/upstream blockers and move to the next highest-priority unblocked candidate.
+- Selected #26 as the next highest-priority unblocked target because it is an App Store readiness blocker and unblocks part of #28.
+- Updated `store-assets/metadata.txt` with the public privacy policy URL: `https://github.com/zfifteen/handrail/blob/main/docs/privacy-policy.md`.
+- Updated `docs/production_readiness_report.md` to record #26 as closed and narrow #28's remaining blocker to required iPhone screenshots.
+- Closed GitHub issue #26 with verification evidence.
+- Commented on #28 that the privacy URL gap is resolved and screenshots remain.
 
 ## Files Changed
 
+- `docs/team/lead-dev.md`
 - `docs/team/outputs/lead-dev.md`
 - `docs/production_readiness_report.md`
-- `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`
-- `test-artifacts/issue29-resolve-20260502T060625Z/`
+- `store-assets/metadata.txt`
 
-Pre-existing local changes elsewhere were preserved.
+Pre-existing local changes and test artifacts were preserved.
 
 ## Remaining Blocker
 
-#29 has no remaining blocker.
+#26 has no remaining blocker.
 
-Follow-on work:
+Known skipped blockers:
 
-- #21 still needs iPad simulator validation that a live successful New Chat dismisses the sheet and selects the started chat.
-- #22 still needs iPad simulator validation that a live chat-linked Activity row opens chat detail.
-- #24 still depends on #2 for first-class approval state before validating the approval-row dashboard treatment.
-- The acceptance probe chat `codex:019de74b-9e6e-71e1-a6e1-14028304e776` still reports `running` after a normal `handrail stop` attempt. This did not affect #29 acceptance because `chat_started`, chat-linked `chat_event`, `chat_list`, and Desktop visibility all passed.
+- #25 is labeled `blocked`: needs a non-expired APNs-capable Apple distribution/TestFlight/App Store provisioning profile for `com.velocityworks.Handrail`.
+- #24 is labeled `blocked`: needs #2 approval-routing evidence before the live iPad `waiting_for_approval` row can be validated.
+
+Next unblocked release-readiness work: #28 screenshot capture for Dashboard, Chats list, Chat Detail, and New Chat under `store-assets/screenshots/iphone/`.
 
 ## Product Invariant Check
 
 - Preserved free, local-first, Codex Desktop-only Handrail: yes.
-- Drift risk found: No product-invariant drift found. The accepted path keeps Codex Desktop as the source of truth and broadcasts only Desktop-visible `codex:` chats.
+- Drift risk found: No product-invariant drift found. The metadata and privacy policy continue to describe local-network transport, no account, no telemetry, no Handrail cloud, and Codex Desktop as the local authority.
 
 ## Verification
 
-- `npm test` in `cli/`: passed, 40/40.
+- `gh issue view 25 -R zfifteen/handrail --json number,title,labels,url`: confirmed #25 has `blocked`.
+- `gh issue view 24 -R zfifteen/handrail --json number,title,labels,url`: confirmed #24 has `blocked`.
+- `curl -I -L --max-time 20 https://github.com/zfifteen/handrail/blob/main/docs/privacy-policy.md`: returned HTTP 200.
+- `curl -fsSL --max-time 20 https://raw.githubusercontent.com/zfifteen/handrail/main/docs/privacy-policy.md | diff -u docs/privacy-policy.md -`: returned no diff.
 - `git diff --check`: passed.
-- `launchctl kickstart -k gui/$(id -u)/com.velocityworks.handrail.server`: succeeded.
-- `lsof -nP -iTCP:8788 -sTCP:LISTEN`: after restart, `node` PID `70040` listens on port `8788`.
-- Live probe artifact: `test-artifacts/issue29-resolve-20260502T060625Z/summary.json`.
-- Probe token: `HANDRAIL_ISSUE29_RESOLVE_20260502T060625Z`.
-- Started chat id: `codex:019de74b-9e6e-71e1-a6e1-14028304e776`.
-- GitHub issue #29 closed with evidence.
-- `node cli/dist/src/index.js stop codex:019de74b-9e6e-71e1-a6e1-14028304e776`: returned `Missing HANDRAIL_APNS_TEAM_ID.` noise and did not clear the running status within the settle window.
+- GitHub issue #26 closed with evidence.
+- No iPhone or iPad simulator validation was required because this run changed metadata/docs and GitHub labels only, not visible in-app UI behavior.
 
 ## QA Handoff
 
-Wrote `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`.
-
-QA should next use the now-working live `start_chat` path to validate #21 and #22 on iPad simulator. Required evidence: simulator target, screenshot path, the same live started chat id or a fresh controlled started chat id, confirmation that the New Chat sheet dismisses, and confirmation that a chat-linked Activity row opens the selected chat detail.
+No QA handoff is needed for #26. The remaining #28 work requires future iPhone screenshot capture from verified simulator/device flows.
