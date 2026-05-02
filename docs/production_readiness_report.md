@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Handrail is not production-ready for App Store submission across any of its three target platforms. The iPhone app is now blocked by submission evidence rather than known open iPhone UI/reliability bugs: milestone 1 has 2 open artifact/provisioning issues and 12 closed readiness issues. The iPad app has a working split-view surface, but the remaining visible iPad validation is blocked upstream by first-class approval-routing evidence. The watchOS app has zero implementation - only a product spec (issue #5). The report below assigns each gap a priority tier and states the concrete action required.
+Handrail is not production-ready for App Store submission across any of its three target platforms. The iPhone app is now blocked by submission evidence rather than known open iPhone UI/reliability bugs: milestone 1 has 2 open artifact/provisioning issues and 12 closed readiness issues. The iPad app has a working split-view surface, but the remaining visible iPad validation is blocked upstream by first-class approval-routing evidence. The watchOS app has zero implementation, and issue #5 is now labeled `blocked` because its acceptance plan requires paired iPhone + Apple Watch hardware evidence. The report below assigns each gap a priority tier and states the concrete action required.
 
 **Overall Readiness by Platform:**
 
@@ -16,7 +16,7 @@ Handrail is not production-ready for App Store submission across any of its thre
 |---|---|---|---|---|
 | iOS (iPhone) | Feature-complete MVP | 0 known open iPhone UI/reliability bugs in milestone 1 | 2 evidence blockers | NOT READY |
 | iPad | Partial split-view workspace | 1 validation-gated bug + 1 open product spec | 2 milestone blockers plus upstream Desktop approval blocker #2 | NOT READY |
-| watchOS | None (spec only) | N/A | All | NOT STARTED |
+| watchOS | None (spec only) | N/A | All; blocked on paired Apple Watch acceptance path | BLOCKED |
 
 ## App Store Readiness State Refresh - 2026-05-02 11:08Z
 
@@ -95,6 +95,19 @@ Milestone descriptions were reconciled to match the current GitHub issue state:
 - Milestone 3, `Desktop protocol hardening`, is now narrowed to blocked #2. #29 and #3 are closed, so the remaining Desktop protocol blocker is live first-class approval request evidence.
 
 No GitHub release exists yet, and no release should be created until the relevant milestone is closed with recorded CLI and required simulator/device evidence.
+
+## watchOS Companion State Refresh - 2026-05-02 17:46Z
+
+Milestone 4, `watchOS companion`, has one open issue: #5. It is now labeled `blocked` because the acceptance criteria require WatchConnectivity delivery on paired iPhone + Apple Watch hardware, while the current local environment has no usable watch acceptance path.
+
+Current evidence:
+
+- `xcodebuild -list -project ios/Handrail/Handrail.xcodeproj` lists only `Handrail` and `HandrailTests`; no watchOS target exists.
+- `find ios/Handrail -maxdepth 3 -iname '*watch*' -o -iname '*Widget*'` found no watch or widget source files.
+- `xcrun xctrace list devices` listed only the Mac and reported CoreSimulator access errors.
+- `xcrun devicectl list devices` timed out waiting for CoreDeviceService to initialize.
+
+The next watchOS action requires either a usable paired iPhone + Apple Watch hardware path, or an explicit product decision to accept a partial simulator/build-only watchOS implementation before hardware acceptance. Do not close #5 from simulator layout evidence alone.
 
 ---
 
@@ -239,7 +252,7 @@ Additionally, the iPad app has not been launched on a physical iPad device. Phys
 ## Part 6: watchOS — Not Started
 
 **Issue:** #5  
-**Finding:** No watchOS code exists. The `ios/Handrail/Handrail.xcodeproj` has no watchOS target. Issue #5 is a complete product specification with acceptance criteria and a verification plan, but implementation has not begun.
+**Finding:** No watchOS code exists. The `ios/Handrail/Handrail.xcodeproj` has no watchOS target. Issue #5 is a complete product specification with acceptance criteria and a verification plan, but implementation is now blocked on paired iPhone + Apple Watch hardware evidence or an explicit decision to accept a partial pre-hardware implementation.
 
 **Pre-implementation checklist for Codex:**
 1. Add a watchOS App target to `Handrail.xcodeproj` with a companion WatchKit extension (or a modern SwiftUI watchOS app target for watchOS 7+).
@@ -279,25 +292,16 @@ Additionally, the iPad app has not been launched on a physical iPad device. Phys
 
 Execute in this order:
 
-1. **[VERIFY]** Sign a Release archive with a distribution profile and confirm the signed app entitlement has `aps-environment = production`.
-2. **[VERIFY]** Confirm `NSLocalNetworkUsageDescription` is present in the Release build Info.plist.
-3. **[DATA]** Fix `HandrailStore` chat_list merge to preserve detail-only fields (issues #14, #20).
-4. **[DATA]** Fix WebSocket send failure to mark connection offline (issue #15).
-5. **[DATA]** Fix `refreshChatDetail` offline no-op (issue #16).
-6. **[DATA]** Fix corrupt pairing metadata handling (issue #19).
-7. **[A11Y]** Fix custom tab bar accessibility (issue #8).
-8. **[A11Y]** Fix Dashboard header button accessibility (issue #7).
-9. **[A11Y]** Fix refresh button accessibility label (issue #9).
-10. **[A11Y]** Fix tab bar safe-area inset on content (issue #11).
-11. **[FEATURE]** Fix thinking messages not displayed (issue #4).
-12. **[FEATURE]** Suppress notifications for active foreground chat (issue #10).
-13. **[FEATURE]** Clear stale global errors on sheet/detail open.
-14. **[DESKTOP]** Closed 2026-05-02: Desktop `start_chat` handoff emits `chat_started` and chat-linked activity (#29).
-15. **[DESKTOP]** Produce live first-class approval ingestion/routing evidence for `waiting_for_approval` (#2).
-16. **[iPad]** Close #24 only after live simulator evidence for a real `waiting_for_approval` row.
-17. **[iPad]** Keep project-grouped slug fix evidence attached to closed issue #12.
-18. **[watchOS]** Implement watchOS target per issue #5 spec.
-19. **[INFRA]** Add GitHub Actions CI for archive + TestFlight upload.
-20. **[INFRA]** Capture the four required v1 iPhone screenshots under `store-assets/screenshots/iphone/`.
-21. **[INFRA]** Add `https://github.com/zfifteen/handrail/blob/main/docs/privacy-policy.md` to App Store Connect as the privacy policy URL.
-22. **[INFRA]** Enroll in Apple Developer Program (paid) and assign team in Xcode.
+1. **[SIGNING]** Enroll or configure a paid Apple Developer Program team for `com.velocityworks.Handrail`.
+2. **[SIGNING]** Install/select a non-expired distribution/TestFlight/App Store provisioning profile with Push Notifications and `aps-environment`.
+3. **[VERIFY]** Sign a Release archive and confirm the signed app entitlement has `aps-environment = production` (#25).
+4. **[VERIFY]** Confirm `NSLocalNetworkUsageDescription` is present in the signed Release build Info.plist.
+5. **[APP STORE]** Enter `https://github.com/zfifteen/handrail/blob/main/docs/privacy-policy.md` in App Store Connect.
+6. **[APP STORE]** Confirm the `store-assets/metadata.txt` age-rating and export-compliance draft answers in App Store Connect with an Account Holder, Admin, or App Manager.
+7. **[SCREENSHOTS]** Capture the four required v1 iPhone screenshots from a paired 6.9-inch iPhone simulator/device: Dashboard, Chats list, Chat Detail, and New Chat (#28).
+8. **[SCREENSHOTS]** Record simulator/device name, OS version, local CLI/server state, screenshot paths, and visible-flow validation for #28.
+9. **[DESKTOP]** Produce live first-class approval ingestion/routing evidence for `waiting_for_approval` and approve/deny decisions (#2).
+10. **[iPad]** Close #24 only after live simulator evidence for a real `waiting_for_approval` row.
+11. **[iPad]** Run and record a full iPad walkthrough before closing umbrella issue #6 or claiming iPad App Store support.
+12. **[watchOS]** Provide a paired iPhone + Apple Watch hardware path for #5, or explicitly approve a partial simulator/build-only implementation before hardware acceptance.
+13. **[INFRA]** Add a distribution pipeline only after signing inputs exist; until then, document the manual Release archive command and evidence path.

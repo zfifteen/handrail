@@ -82,19 +82,13 @@ The token is stored in `~/.handrail/state.json` on the Mac and in Keychain on iO
 
 ## Approval Behavior
 
-The CLI watches Codex output for simple approval-like text such as `approve`, `permission`, `Do you want to proceed`, or `y/n`. When detected, it emits an `approval_required` event and runs:
+For Handrail-started Codex Desktop turns, the CLI listens for structured Codex app-server approval requests. It exposes the app-server request id to iOS as `approvalId`, emits `approval_required`, and sends approve or deny decisions back to the same local app-server request.
 
-```sh
-git -C <repo> diff --stat
-git -C <repo> diff
-git -C <repo> diff --name-only
-```
-
-The iOS app shows the summary, changed files, and diff. Approval routing must go through the Codex chat route exposed by the Mac.
+The iOS app shows the approval summary and available file context. Approval routing must use the real Codex Desktop/app-server request id; Handrail does not infer approvals from transcript text.
 
 ## Limitations
 
-- Approval detection is intentionally small pattern matching.
+- Live approval-response release evidence is still required before App Store copy or screenshots claim approval workflows.
 - The WebSocket server is plain local-network `ws://`.
 - The iOS app stores the pairing token in Keychain and paired-machine metadata in UserDefaults.
 - Handrail does not maintain an independent chat store.

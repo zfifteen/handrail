@@ -99,18 +99,21 @@ Protocol drift must become visible during development instead of being silently 
 Observed:
 
 - iOS can send `approve` and `deny` with `chatId` and `approvalId`.
-- `cli/src/chats.ts` currently rejects both commands with a visible error.
+- For Handrail-started app-server turns, `cli/src/chats.ts` accepts both commands only when `approvalId` matches a pending structured app-server approval request.
+- Unknown or stale approval ids are rejected with a visible error.
+- `approval_required` is emitted from structured app-server requests handled in `cli/src/codexDesktopIpc.ts`, not from transcript text.
 - Codex Desktop IPC exposes owner-routed approval reply methods that require the Desktop/app-server request id for the pending approval, user input, or MCP elicitation.
 
 Inferred:
 
 - A Handrail `approvalId` must not be invented from transcript text.
-- First-class approval routing requires live Desktop/app-server request events that identify the pending request id and approval kind before iOS approval buttons can mutate Desktop state.
+- First-class approval routing requires Desktop/app-server request events that identify the pending request id and approval kind before iOS approval buttons can mutate Desktop state.
 - Pattern-detected transcript or status text may support notification copy, but it is not enough evidence to send an approval decision.
 
 Unknown:
 
-- The complete app-server notification envelope for pending approval, input, and MCP elicitation requests.
+- Whether existing Desktop-owned turns can expose a durable approval request stream without Handrail starting the turn through its retained app-server child.
+- The complete app-server envelope for user-input and MCP elicitation requests.
 
 The invariant is:
 

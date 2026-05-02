@@ -2,23 +2,24 @@
 
 ## Strongest Structural Finding
 
-Desktop IPC and app-server request correlation had one remaining nondeterministic edge. `docs/spec/codex-desktop-ipc-protocol.md` already required deterministic IPC `requestId` values, but `cli/src/codexDesktopIpc.ts` still generated random UUID-backed IPC and app-server ids when callers did not supply an id.
+Approval routing has moved from a blocked conceptual boundary to a narrow implemented CLI contract for Handrail-started Codex Desktop turns, but the public README and WebSocket spec still described the older heuristic transcript-detection model.
 
-The fix makes request ids auditable from the emitted request stream: IPC requests use a per-client `handrail-ipc-N` counter, app-server `initialize` keeps the fixed `__codex_initialize__` id, and later app-server requests use a per-client `<method>:N` counter.
+The current invariant is now sharper: `approvalId` is the structured Codex app-server request id. Handrail does not infer approval actions from transcript text, and stale or unknown ids fail visibly.
 
 ## Invariants Preserved Or At Risk
 
 Preserved:
 
-- CLI and iOS protocol contracts were not widened.
 - Codex Desktop remains the source of truth for visible chat metadata.
-- Handrail still uses Desktop IPC for owner-routed visible-thread mutations and the Desktop app-server for new-thread app-server operations.
-- Request correlation now follows one narrow deterministic path instead of relying on randomness.
+- CLI and iOS still share one explicit WebSocket approval contract.
+- Approval actions route only through structured local Codex Desktop/app-server request ids.
 - Raw Codex identifiers were not introduced into user-facing titles or notification text.
+- The CLI build/test path now starts from a clean `dist` tree, so deleted TypeScript tests cannot pass through stale compiled output.
 
 At risk:
 
-- #2 and #3 remain structurally linked: approval routing is still blocked until live Desktop/app-server events provide real pending request ids and kinds.
+- #2 still lacks live approval-producing evidence from a running rebuilt Handrail server and simulator-connected approval workflow.
+- #24 and #28 remain blocked on that live approval evidence; fixture or transcript-derived approval state is not enough.
 
 Slack inbox:
 
@@ -30,19 +31,22 @@ Slack inbox:
 
 Repo file changes:
 
-- `cli/src/codexDesktopIpc.ts`: removed random UUID request id generation; IPC and app-server clients now use deterministic per-client counters for requests that do not have an explicit id.
-- `docs/spec/codex-desktop-app-server.md`: documented Handrail app-server request id behavior and the request-correlation invariant.
+- `README.md`: replaced the regex-pattern approval description with the implemented structured app-server approval request-id contract.
+- `docs/spec/handrail-websocket-protocol.md`: updated the approval routing boundary to match `cli/src/chats.ts` and `cli/src/codexDesktopIpc.ts`.
+- `cli/src/approvals.ts`: removed the unused transcript approval detector.
+- `cli/test/approvals.test.ts`: removed the detector-only test because no production code imports that detector.
+- `cli/package.json`: made `npm run build` remove `dist` before compiling so `npm test` cannot execute stale deleted tests.
 - `docs/team/outputs/architect.md`: updated this report.
 
 GitHub issue changes:
 
-- No GitHub issue was created or updated. Existing issues #2 and #3 already record the approval/live-event boundary; this run produced a smaller direct code/spec correction.
+- No GitHub issue was created or updated. Issue #2 already records the remaining live approval evidence blocker, and this run corrected repo contract drift directly.
 
-No Lead Dev handoff. The deterministic request id correction was narrow enough for this architect run and passed CLI verification.
+No Lead Dev handoff. The correction was narrow, implemented, and verified in this architect run.
 
 ## Required Design Decision
 
-No product decision is required. Deterministic local request correlation preserves the existing local-first Codex Desktop-only contract.
+No product decision is required. The run preserves the existing local-first Codex Desktop-only contract and narrows approval routing to structured local app-server requests.
 
 ## Product Invariant Check
 
@@ -56,9 +60,10 @@ No product decision is required. Deterministic local request correlation preserv
 - Checked `$CODEX_HOME/automations/handrail-architect/handoff.md`; no handoff note was present.
 - Read `#handrail-agents` (`C0B0K6B0T6K`) through the Slack connector.
 - Verified `gh auth status -h github.com` is authenticated as `zfifteen`.
-- Read open GitHub issues with `gh issue list --repo zfifteen/handrail --state open --limit 40`.
-- Read issue #2 comments and issue #3 state using local `gh`.
-- Reviewed `README.md`, `docs/product-invariants.md`, `docs/spec/handrail-websocket-protocol.md`, `docs/spec/codex-desktop-ipc-protocol.md`, `docs/spec/codex-desktop-app-server.md`, `cli/src/codexDesktopIpc.ts`, `cli/src/chats.ts`, `cli/src/server.ts`, `cli/src/types.ts`, and `cli/test/codex.test.ts`.
-- `npm test` in `cli/`: passed 40/40.
+- Read open GitHub issues with `gh issue list --repo zfifteen/handrail --state open --limit 80`.
+- Read issue #2 and #3 with comments using local `gh`.
+- Reviewed `README.md`, `docs/product-invariants.md`, `docs/spec/README.md`, `docs/spec/handrail-websocket-protocol.md`, `docs/spec/codex-desktop-ipc-protocol.md`, `docs/spec/codex-desktop-app-server.md`, `cli/src/chats.ts`, `cli/src/codexDesktopIpc.ts`, `cli/src/types.ts`, `cli/src/approvals.ts`, `cli/test/approvals.test.ts`, `cli/test/codex.test.ts`, `docs/team/outputs/qa-lead.md`, and `docs/team/outputs/lead-dev.md`.
+- Initial `npm test` in `cli/` exposed stale compiled `dist/test/approvals.test.js` after source deletion, so `cli/package.json` now cleans `dist` in `npm run build`.
+- Final `npm test` in `cli/`: passed 43/43.
 - `git diff --check`: passed.
 - No iOS simulator validation was required because this run did not touch visible iPhone or iPad UI behavior.

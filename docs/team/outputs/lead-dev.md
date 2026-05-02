@@ -2,18 +2,19 @@
 
 ## Strongest Implementation Finding
 
-The open iPad umbrella issue #6 was selectable only because it lacked the `blocked` label. Its own acceptance boundary requires #24 live iPad approval-row evidence first, and #24 is blocked upstream by #2 live approval evidence. The run corrected that durable issue state and reconciled the readiness report so future Lead Dev runs skip #6 until the upstream approval evidence exists.
+The first unblocked enhancement, #5, cannot be completed by this unattended Lead Dev run without fabricating acceptance evidence. Its contract is a full watchOS companion and the verification plan requires WatchConnectivity delivery on paired iPhone + Apple Watch hardware. The local project has no watchOS target, and the current device layer exposes no usable Apple Watch acceptance path.
 
 ## Patch Or Issue Work Completed
 
 - Slack had no request addressed to `Handrail Lead Dev`; the only relevant channel message remains the no-action verification at TS `1777590711.698899`.
 - The readable lead-dev handoff has no active item.
-- Confirmed `gh auth status` is authenticated for `zfifteen`.
-- Skipped open issues already labeled `blocked`: #25, #24, #28, #13, and #2.
-- Selected #6 as the next open unblocked enhancement, then proved it is an umbrella acceptance issue blocked by #24 and #2 rather than a one-run implementation target.
-- Added `blocked` to #6 and recorded the exact dependency in GitHub: https://github.com/zfifteen/handrail/issues/6#issuecomment-4364271166
-- Updated milestone 3's GitHub description so Desktop protocol hardening now names #29 and #3 as closed and #2 as the single blocked open issue.
-- Updated the production readiness report with the current #6/#24/#2 dependency and #3 closure state.
+- Confirmed `gh auth status -h github.com` is authenticated for `zfifteen`.
+- Skipped open issues already labeled `blocked`: #25, #24, #28, #13, #6, and #2.
+- Selected #5 as the first unblocked enhancement.
+- Proved #5 is a full watchOS acceptance target blocked by missing paired iPhone + Apple Watch hardware evidence, not a one-run implementation target.
+- Added `blocked` to #5 and recorded the exact dependency in GitHub: https://github.com/zfifteen/handrail/issues/5#issuecomment-4364379432
+- Updated milestone 4's GitHub description to name the paired-watch acceptance dependency.
+- Updated the production readiness report so watchOS state matches GitHub issue state.
 
 ## Files Changed
 
@@ -22,19 +23,27 @@ The open iPad umbrella issue #6 was selectable only because it lacked the `block
 
 ## Remaining Blocker
 
-#6 remains blocked until #24 has real iPad simulator evidence for a live `waiting_for_approval` row. #24 remains blocked by #2 live first-class approval evidence. The next unblocked candidate is #5, but it is a broad watchOS product spec requiring target creation and paired Apple Watch hardware for final acceptance, not a one-run Lead Dev implementation target.
+#5 needs either a usable paired iPhone + Apple Watch hardware path for WatchConnectivity acceptance, or an explicit product decision to accept a partial simulator/build-only watchOS implementation before hardware acceptance. Current local evidence: the Xcode project lists only `Handrail` and `HandrailTests`, no watch/widget source files exist, `xcrun xctrace list devices` listed only the Mac, and `xcrun devicectl list devices` timed out waiting for CoreDeviceService.
 
 ## Product Invariant Check
 
 - Preserved free, local-first, Codex Desktop-only Handrail: yes.
-- Drift risk found: No product-invariant drift found. This run changed issue/readiness state only and did not introduce cloud, account, payment, generic terminal, multi-agent, non-Codex, or direct iOS file-editing behavior.
+- Drift risk found: No product-invariant drift found. This run changed durable issue/readiness state only and did not introduce cloud, account, payment, generic terminal, multi-agent, non-Codex, or direct iOS file-editing behavior.
 
 ## Verification
 
-- `gh auth status`: authenticated as `zfifteen`.
 - Slack `#handrail-agents` (`C0B0K6B0T6K`): no message addressed to `Handrail Lead Dev`; no-action verification remains at TS `1777590711.698899`.
-- `gh issue list -R zfifteen/handrail --state open --limit 100 --json number,title,labels,milestone,url`: confirmed #6 now carries `blocked`.
-- `gh api repos/zfifteen/handrail/milestones/3`: confirmed milestone 3 now has one open issue and a description naming #2 as the remaining blocked scope.
+- `gh auth status -h github.com`: authenticated as `zfifteen`.
+- `gh issue list -R zfifteen/handrail --state open --label bug --limit 100 --json number,title,labels,url,updatedAt`: all open bugs are blocked.
+- `gh issue list -R zfifteen/handrail --state open --label enhancement --limit 100 --json number,title,labels,url,updatedAt`: #5 was the first unblocked enhancement before this run.
+- `gh issue edit 5 -R zfifteen/handrail --add-label blocked`: applied the blocker label.
+- `gh issue comment 5 -R zfifteen/handrail`: recorded the blocker evidence.
+- `gh api repos/zfifteen/handrail/milestones/4 --method PATCH`: updated the milestone description with the watch hardware dependency.
+- `xcodebuild -list -project ios/Handrail/Handrail.xcodeproj`: lists only `Handrail` and `HandrailTests`.
+- `find ios/Handrail -maxdepth 3 -iname '*watch*' -o -iname '*Widget*'`: found no watch/widget source files.
+- `xcrun xctrace list devices`: listed only the Mac and reported CoreSimulator access errors.
+- `xcrun devicectl list devices`: timed out waiting for CoreDeviceService.
+- `cd cli && npm test`: passed 43/43.
 - `git diff --check`: passed.
 
 ## QA Handoff
