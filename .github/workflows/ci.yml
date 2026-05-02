@@ -10,6 +10,21 @@ permissions:
   contents: read
 
 jobs:
+  repo-hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check tracked text uses LF line endings
+        run: |
+          if LC_ALL=C git grep -I -n $'\r' -- .; then
+            echo "CRLF line endings found in tracked text files."
+            exit 1
+          fi
+
   cli-tests:
     name: CLI tests
     runs-on: ubuntu-latest

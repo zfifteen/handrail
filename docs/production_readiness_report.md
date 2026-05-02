@@ -117,6 +117,10 @@ The repo now has a narrow GitHub Actions smoke workflow at `.github/workflows/ci
 
 The repository now has `.gitattributes` with LF normalization for text files plus explicit binary handling for common image, PDF, and video artifacts. This turns the local agent line-ending contract into a Git-level review guard for generated Markdown, JSONL, CSV, Swift, TypeScript, shell, and plain-text outputs without changing product behavior or CI scope.
 
+## Lead Dev CI Line-Ending Guard Refresh - 2026-05-02 22:50Z
+
+CI now has a root-level repository hygiene job that rejects tracked text files containing carriage returns with `LC_ALL=C git grep -I -n $'\r' -- .`. This makes the LF-only generated artifact contract executable in pull requests and pushes without touching product behavior, signing, simulator validation, or App Store evidence scope.
+
 ---
 
 ## Part 1: App Store Hard Blockers
@@ -151,7 +155,7 @@ These items will cause Apple review rejection or provisioning failure regardless
 
 ### 1.6 CI Exists; Distribution Pipeline Still Blocked
 
-**Finding:** `.github/workflows/ci.yml` now runs CLI tests and an unsigned iOS Simulator `build-for-testing` on pushes and pull requests. This catches ordinary TypeScript, protocol-test, Swift app build, and Swift test-target build regressions before review. It does not archive, export, sign, or upload an App Store build.
+**Finding:** `.github/workflows/ci.yml` now runs a root repository hygiene job for LF-only tracked text, CLI tests, and an unsigned iOS Simulator `build-for-testing` on pushes and pull requests. This catches line-ending drift, ordinary TypeScript, protocol-test, Swift app build, and Swift test-target build regressions before review. It does not archive, export, sign, or upload an App Store build.
 **Action:** After the #25 signing inputs exist, extend release automation to build a signed Release archive, export with a distribution/TestFlight/App Store provisioning profile, inspect the signed entitlements, and upload through App Store Connect tooling.
 
 ---

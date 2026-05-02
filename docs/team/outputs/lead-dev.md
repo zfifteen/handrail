@@ -2,7 +2,7 @@
 
 ## Strongest Implementation Finding
 
-All current open GitHub bug and enhancement issues remain labeled `blocked`, so this Lead Dev run selected repository hygiene. The repo now has a Git-level LF normalization contract for text artifacts, matching the local agent rule that generated CSV, JSONL, Markdown, and plain-text outputs must use LF line endings.
+All current open GitHub bug and enhancement issues remain labeled `blocked`, so this Lead Dev run selected repository hygiene again. CI now enforces the repo's LF-only tracked-text contract instead of leaving it as documentation and `.gitattributes` policy alone.
 
 ## Patch Or Issue Work Completed
 
@@ -11,14 +11,12 @@ All current open GitHub bug and enhancement issues remain labeled `blocked`, so 
 - Confirmed `gh auth status -h github.com` is authenticated for `zfifteen`.
 - Confirmed all open bugs are blocked: #25 and #24.
 - Confirmed all open enhancements are blocked: #28, #13, #6, #5, and #2.
-- Reviewed `.github/workflows/ci.yml`, `cli/package.json`, `cli/tsconfig.json`, `.gitignore`, `TEST_PLAN.md`, the active readiness report, and the existing CLI/iOS test inventory.
-- Added `.gitattributes` with `* text=auto eol=lf`.
-- Marked common image, PDF, and video artifact extensions as binary so screenshot and media evidence are not line-ending normalized.
-- Updated `docs/production_readiness_report.md` with the repository hygiene evidence.
+- Added a root-level CI `repo-hygiene` job that runs `LC_ALL=C git grep -I -n $'\r' -- .` and fails when any tracked text file contains carriage returns.
+- Updated `docs/production_readiness_report.md` with the executable CI line-ending guard evidence.
 
 ## Files Changed
 
-- `.gitattributes`
+- `.github/workflows/ci.yml`
 - `docs/production_readiness_report.md`
 - `docs/team/outputs/lead-dev.md`
 
@@ -29,7 +27,7 @@ Signed Release distribution automation remains blocked until #25 has a non-expir
 ## Product Invariant Check
 
 - Preserved free, local-first, Codex Desktop-only Handrail: yes.
-- Drift risk found: No product-invariant drift found. This run changed repository attributes and documentation only; it did not introduce cloud relay, account state, payment, generic terminal behavior, multi-agent control, non-Codex support, or direct iOS file editing.
+- Drift risk found: No product-invariant drift found. This run changed CI repository hygiene and documentation only; it did not introduce cloud relay, account state, payment, generic terminal behavior, multi-agent control, non-Codex support, or direct iOS file editing.
 
 ## Verification
 
@@ -37,11 +35,10 @@ Signed Release distribution automation remains blocked until #25 has a non-expir
 - `gh auth status -h github.com`: authenticated as `zfifteen`.
 - `gh issue list -R zfifteen/handrail --label bug --state open --limit 100 --json number,title,labels,url,updatedAt`: #25 and #24 are blocked.
 - `gh issue list -R zfifteen/handrail --label enhancement --state open --limit 100 --json number,title,labels,url,updatedAt`: #28, #13, #6, #5, and #2 are blocked.
-- `git check-attr text eol -- .gitattributes docs/team/outputs/lead-dev.md cli/package.json store-assets/metadata.txt`: all four paths report `text: auto` and `eol: lf`.
-- `git check-attr binary -- test-artifacts/handrail-keychain-pairing-2026-04-27.png test-artifacts/handrail-archived-continue-control-2026-04-26.png`: both PNG paths report `binary: set`.
-- `LC_ALL=C rg -n $'\r' .gitattributes docs/production_readiness_report.md docs/team/outputs/lead-dev.md`: no carriage returns found.
+- `if LC_ALL=C git grep -I -n $'\r' -- .; then echo 'CR characters found'; exit 1; else echo 'No CR characters found in tracked text'; fi`: passed.
+- Ruby YAML parse of `.github/workflows/ci.yml`: passed.
 - `git diff --check`: passed.
 
 ## QA Handoff
 
-No QA handoff is needed for this run because the target changed repository hygiene and documentation only. No visible iPhone or iPad UI behavior changed.
+No QA handoff is needed for this run because the target changed CI hygiene and documentation only. No visible iPhone or iPad UI behavior changed.
