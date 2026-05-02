@@ -113,6 +113,10 @@ The next watchOS action requires either a usable paired iPhone + Apple Watch har
 
 The repo now has a narrow GitHub Actions smoke workflow at `.github/workflows/ci.yml`. It runs `npm ci` plus `npm test` for the CLI and builds the `Handrail` app plus test bundle for iOS Simulator with signing disabled. This adds a review gate for normal code movement without pretending to solve the signed Release archive or App Store upload path. The workflow now uses read-only repository permissions and bounded job timeouts so smoke CI has a tighter execution contract. Distribution automation remains blocked until the Apple signing inputs in #25 exist.
 
+## Lead Dev Repository Hygiene Refresh - 2026-05-02 21:25Z
+
+The repository now has `.gitattributes` with LF normalization for text files plus explicit binary handling for common image, PDF, and video artifacts. This turns the local agent line-ending contract into a Git-level review guard for generated Markdown, JSONL, CSV, Swift, TypeScript, shell, and plain-text outputs without changing product behavior or CI scope.
+
 ---
 
 ## Part 1: App Store Hard Blockers
