@@ -2,7 +2,7 @@
 
 ## Strongest Implementation Finding
 
-All current open GitHub bug and enhancement issues remain labeled `blocked`, so this Lead Dev run selected CI hygiene. The smoke workflow now has explicit read-only repository permissions and bounded job timeouts, tightening the review gate without claiming signed Release distribution coverage.
+All current open GitHub bug and enhancement issues remain labeled `blocked`, so this Lead Dev run selected CI hygiene. The smoke workflow now builds the Handrail iOS app and test bundle with `build-for-testing`, which catches Swift test-target compile regressions before review without claiming signed Release distribution coverage.
 
 ## Patch Or Issue Work Completed
 
@@ -11,8 +11,9 @@ All current open GitHub bug and enhancement issues remain labeled `blocked`, so 
 - Confirmed `gh auth status -h github.com` is authenticated for `zfifteen`.
 - Confirmed all open bugs are blocked: #25 and #24.
 - Confirmed all open enhancements are blocked: #28, #13, #6, #5, and #2.
-- Updated `.github/workflows/ci.yml` with top-level `contents: read` permissions plus 10-minute CLI and 20-minute iOS simulator build job timeouts.
-- Updated `docs/production_readiness_report.md` so the CI hygiene state records the stricter smoke workflow contract.
+- Reviewed `.github/workflows/ci.yml`, `cli/package.json`, `cli/tsconfig.json`, the active readiness report, and the existing CLI/iOS test inventory.
+- Updated `.github/workflows/ci.yml` so the iOS smoke job runs `xcodebuild build-for-testing` for the `Handrail` scheme on a generic iOS Simulator destination.
+- Updated `docs/production_readiness_report.md` so CI readiness records app plus test-bundle build coverage, not only app build coverage.
 
 ## Files Changed
 
@@ -36,7 +37,8 @@ Signed Release distribution automation remains blocked until #25 has a non-expir
 - `gh issue list -R zfifteen/handrail --state open --label bug --limit 100 --json number,title,labels,milestone,updatedAt,url`: #25 and #24 are blocked.
 - `gh issue list -R zfifteen/handrail --state open --label enhancement --limit 100 --json number,title,labels,milestone,updatedAt,url`: #28, #13, #6, #5, and #2 are blocked.
 - `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/ci.yml"); puts "ok"'`: passed.
-- `cd cli && npm test`: passed.
+- `cd cli && npm test`: passed 43/43.
+- XcodeBuildMCP `test_sim -only-testing:HandrailTests`: passed 48/48 on iPhone 17, iOS Simulator 26.4.1.
 - `git diff --check`: passed.
 
 ## QA Handoff

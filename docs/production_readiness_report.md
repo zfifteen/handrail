@@ -111,7 +111,7 @@ The next watchOS action requires either a usable paired iPhone + Apple Watch har
 
 ## Lead Dev CI Hygiene Refresh - 2026-05-02 18:20Z
 
-The repo now has a narrow GitHub Actions smoke workflow at `.github/workflows/ci.yml`. It runs `npm ci` plus `npm test` for the CLI and builds the `Handrail` scheme for iOS Simulator with signing disabled. This adds a review gate for normal code movement without pretending to solve the signed Release archive or App Store upload path. The workflow now uses read-only repository permissions and bounded job timeouts so smoke CI has a tighter execution contract. Distribution automation remains blocked until the Apple signing inputs in #25 exist.
+The repo now has a narrow GitHub Actions smoke workflow at `.github/workflows/ci.yml`. It runs `npm ci` plus `npm test` for the CLI and builds the `Handrail` app plus test bundle for iOS Simulator with signing disabled. This adds a review gate for normal code movement without pretending to solve the signed Release archive or App Store upload path. The workflow now uses read-only repository permissions and bounded job timeouts so smoke CI has a tighter execution contract. Distribution automation remains blocked until the Apple signing inputs in #25 exist.
 
 ---
 
@@ -147,7 +147,7 @@ These items will cause Apple review rejection or provisioning failure regardless
 
 ### 1.6 CI Exists; Distribution Pipeline Still Blocked
 
-**Finding:** `.github/workflows/ci.yml` now runs CLI tests and an unsigned iOS Simulator build on pushes and pull requests. This catches ordinary TypeScript, protocol-test, and Swift build regressions before review. It does not archive, export, sign, or upload an App Store build.
+**Finding:** `.github/workflows/ci.yml` now runs CLI tests and an unsigned iOS Simulator `build-for-testing` on pushes and pull requests. This catches ordinary TypeScript, protocol-test, Swift app build, and Swift test-target build regressions before review. It does not archive, export, sign, or upload an App Store build.
 **Action:** After the #25 signing inputs exist, extend release automation to build a signed Release archive, export with a distribution/TestFlight/App Store provisioning profile, inspect the signed entitlements, and upload through App Store Connect tooling.
 
 ---
