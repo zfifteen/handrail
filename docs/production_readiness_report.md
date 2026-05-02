@@ -111,7 +111,7 @@ The next watchOS action requires either a usable paired iPhone + Apple Watch har
 
 ## Lead Dev CI Hygiene Refresh - 2026-05-02 18:20Z
 
-The repo now has a narrow GitHub Actions smoke workflow at `.github/workflows/ci.yml`. It runs `npm ci` plus `npm test` for the CLI and builds the `Handrail` scheme for iOS Simulator with signing disabled. This adds a review gate for normal code movement without pretending to solve the signed Release archive or App Store upload path. Distribution automation remains blocked until the Apple signing inputs in #25 exist.
+The repo now has a narrow GitHub Actions smoke workflow at `.github/workflows/ci.yml`. It runs `npm ci` plus `npm test` for the CLI and builds the `Handrail` scheme for iOS Simulator with signing disabled. This adds a review gate for normal code movement without pretending to solve the signed Release archive or App Store upload path. The workflow now uses read-only repository permissions and bounded job timeouts so smoke CI has a tighter execution contract. Distribution automation remains blocked until the Apple signing inputs in #25 exist.
 
 ---
 
