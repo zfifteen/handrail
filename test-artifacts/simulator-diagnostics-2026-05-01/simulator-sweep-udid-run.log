@@ -1,0 +1,42 @@
+QA simulator sweep:
+- iPhone: iPhone 17 (0E58E7BB-44FA-4BEE-9C94-8FED4C334482) (Booted) 
+- iPad:   iPad Pro 13-inch (M5) (43913CAF-14DD-45B6-9633-0A9790474FC7) (Shutdown) 
+- out:    /Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-simulator-sweep-2026-05-01-183710
+Monitoring boot status for iPhone 17 (0E58E7BB-44FA-4BEE-9C94-8FED4C334482).
+Device already booted, nothing to do.
+
+Monitoring boot status for iPad Pro 13-inch (M5) (43913CAF-14DD-45B6-9633-0A9790474FC7).
+Booting device...
+[2026-05-01 22:37:11 +0000] Status=0, isTerminal=NO, Elapsed=00:00.
+	Booting
+
+[2026-05-01 22:37:13 +0000] Status=1, isTerminal=NO, Elapsed=00:01.
+	Waiting on BackBoard
+
+[2026-05-01 22:37:18 +0000] Status=4, isTerminal=NO, Elapsed=00:06.
+	Waiting on System App
+
+[2026-05-01 22:37:18 +0000] Status=4, isTerminal=NO, Elapsed=00:06.
+	Waiting on System App
+
+[2026-05-01 22:37:19 +0000] Status=4, isTerminal=NO, Elapsed=00:07.
+	Waiting on System App
+
+[2026-05-01 22:37:20 +0000] Status=4, isTerminal=NO, Elapsed=00:08.
+	Waiting on System App
+
+[2026-05-01 22:37:21 +0000] Status=4, isTerminal=NO, Elapsed=00:09.
+	Waiting on System App
+
+[2026-05-01 22:37:21 +0000] Status=4294967295, isTerminal=YES, Elapsed=00:10.
+	Finished
+
+Detected file type from extension: PNG
+Note: No display specified. Defaulting to display: C73D8A37-881F-4F66-9184-89017FBCED68 (screenID: 1, name: LCD)
+Wrote screenshot to: /Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-simulator-sweep-2026-05-01-183710/iphone-launch.png
+Detected file type from extension: PNG
+Note: No display specified. Defaulting to display: A3D3A6AE-E4DD-4137-918F-20FB06A73045 (screenID: 1, name: LCD)
+Wrote screenshot to: /Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-simulator-sweep-2026-05-01-183710/ipad-launch.png
+ok: captured:
+- /Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-simulator-sweep-2026-05-01-183710/iphone-launch.png
+- /Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-simulator-sweep-2026-05-01-183710/ipad-launch.png

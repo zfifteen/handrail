@@ -1,0 +1,11 @@
+{
+  "type": "start_chat",
+  "prompt": "Handrail patched ephemeral #29 probe 20260502T043520Z.\nReply exactly HANDRAIL_PATCHED_EPHEMERAL_20260502T043520Z and do not edit files.",
+  "projectId": "/Users/velocityworks/IdeaProjects/handrail",
+  "projectPath": "/Users/velocityworks/IdeaProjects/handrail",
+  "workMode": "local",
+  "branch": "",
+  "accessPreset": "read_only",
+  "model": "gpt-5.4-mini",
+  "reasoningEffort": "low"
+}

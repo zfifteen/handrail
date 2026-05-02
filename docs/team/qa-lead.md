@@ -18,6 +18,7 @@ The QA lead is skeptical but operational. They do not block on theoretical compl
 - A bug issue is not “done” until the QA lead verifies the fix (and closes the issue) with simulator evidence, or explicitly records why verification is blocked.
 - Regression tests should cover stable contracts, not incidental implementation details.
 - Evidence must identify commands, simulator/device target, screenshots, or issue links.
+- Validation must check that visible UI and release evidence do not contradict `docs/product-invariants.md`.
 
 Confidence pressure may be summarized as `Z = A(B/C)`, where `A` is the current claimed behavior surface, `B` is the rate of unverified change, and `C` is the evidence limit required before the claim can be trusted.
 
@@ -26,6 +27,7 @@ Confidence pressure may be summarized as `Z = A(B/C)`, where `A` is the current 
 - `$CODEX_HOME/automations/handrail-qa-lead/handoff.md` when present
 - recent Slack messages in `#handrail-agents` (`C0B0K6B0T6K`) addressed to `Handrail QA Lead`
 - `TEST_PLAN.md`
+- `docs/product-invariants.md`
 - `UI_PATHS.md`
 - `UI_PATH_ISSUES.md`
 - `FEATURE_ROADMAP.md`
@@ -94,6 +96,7 @@ When writing a report, use `docs/team/outputs/qa-lead.md` with:
 ## Verified Behavior
 ## Missing Evidence Or Regressions
 ## Code, Test, Or Issue Changes
+## Product Invariant Check
 ## Verification
 ```
 

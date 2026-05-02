@@ -1,0 +1,11 @@
+{
+  "createdAt": "2026-05-01T22:58:06.645Z",
+  "statePath": "/Users/velocityworks/.handrail/state.json",
+  "server": "ws://127.0.0.1:8788",
+  "machineName": "MacBookPro.lan",
+  "defaultRepo": "/Users/velocityworks/IdeaProjects/handrail",
+  "reproRoot": "/private/tmp/handrail-live-data-repro",
+  "observeAfterStartMs": 20000,
+  "observeAfterApprovalMs": 120000,
+  "waitForStartMs": 120000
+}

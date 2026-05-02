@@ -8,34 +8,71 @@
 
 ## Executive Summary
 
-Handrail is not production-ready for App Store submission across any of its three target platforms. The iOS iPhone app is the most advanced (CLI tests 27/27, core flows verified on device), but carries open accessibility bugs that Apple reviewers are likely to flag and data-flow bugs that corrupt the UI under normal use. The iPad app has six confirmed routing and state-management bugs with no verified device run. The watchOS app has zero implementation — only a product spec (issue #5). The report below assigns each gap a priority tier and states the concrete action required.
+Handrail is not production-ready for App Store submission across any of its three target platforms. The iPhone app is now blocked by submission evidence rather than known open iPhone UI/reliability bugs: milestone 1 has 3 open artifact/provisioning issues and 11 closed readiness issues. The iPad app has a working split-view surface, but the remaining visible iPad validation is now blocked upstream by live Desktop protocol failures: new chat start does not reliably emit `chat_started`, and approval state is not yet first-class. The watchOS app has zero implementation - only a product spec (issue #5). The report below assigns each gap a priority tier and states the concrete action required.
 
 **Overall Readiness by Platform:**
 
 | Platform | Implementation | Known Open Bugs | App Store Blockers | Status |
 |---|---|---|---|---|
-| iOS (iPhone) | Feature-complete MVP | 11 open | 5 | NOT READY |
-| iPad | Partial (split-view scaffolding) | 6 open | 6 | NOT READY |
+| iOS (iPhone) | Feature-complete MVP | 0 known open iPhone UI/reliability bugs in milestone 1 | 3 evidence blockers | NOT READY |
+| iPad | Partial split-view workspace | 3 validation-gated bugs + 1 open product spec | 4 milestone blockers plus upstream Desktop approval blocker #2 | NOT READY |
 | watchOS | None (spec only) | N/A | All | NOT STARTED |
 
-## PM State Refresh - 2026-05-01
+## App Store Readiness State Refresh - 2026-05-01 16:30Z
 
-GitHub is now the source of truth for issue state. Milestone 1, `iPhone App Store readiness`, has 12 open issues and 2 closed issues after the 2026-05-01 PM run.
+GitHub is now the source of truth for issue state. Milestone 1, `iPhone App Store readiness`, has 3 open issues and 11 closed issues after the 2026-05-01 Lead Dev run.
 
-Closed since this report was prepared:
+Closed in milestone 1 since this report was prepared:
 
+- #4 Show Codex Desktop thinking messages in iOS.
 - #7 Dashboard header actions are missing from the accessibility tree.
+- #8 Custom tab bar items are not individually accessible.
 - #9 Refresh control announces the sync status instead of the action.
+- #10 Notification is shown for the chat currently open in iOS.
+- #11 Custom tab bar overlays lower content on Dashboard and Chats.
+- #12 Project-grouped Chats shows raw slug identifiers instead of project names.
+- #16 Reconnect or report when chat detail refresh is requested offline.
+- #18 Surface unknown server message types instead of silently ignoring them.
+- #19 Report corrupt stored pairing metadata.
+- #27 Clear stale global errors when opening New Chat or Chat Detail.
+
+Closed related reliability issues outside the active milestone:
+
 - #14 Preserve chat detail fields when `chat_list` refreshes.
 - #15 Treat WebSocket send failure as a disconnect.
 - #20 iPad: `chat_list` overwrites detail-only chat state.
 
 Open iPhone readiness scope:
 
-- App Store submission artifacts: #25 Release APNs entitlement verification, #26 hosted privacy policy URL, #28 iPhone metadata and screenshot package.
-- User-visible iPhone blockers: #4 thinking messages, #8 tab bar accessibility, #10 active-chat notification suppression, #11 tab bar safe-area overlap, #12 project display names, #16 offline chat-detail refresh, #18 unknown protocol message surfacing, #19 corrupt pairing metadata, #27 stale global errors.
+- #25 Release APNs entitlement verification. Source entitlements are correct, but the signed Release archive cannot be produced locally because no production-capable provisioning profile is installed for `com.velocityworks.Handrail` with Push Notifications and `aps-environment`.
+- #26 Hosted privacy policy URL. The policy source exists at `docs/privacy-policy.md`; App Store readiness still needs a stable hosted URL.
+- #28 iPhone metadata and screenshot package. Listing copy exists at `store-assets/metadata.txt`, the support URL points at the public GitHub issue tracker, and the marketing URL is deliberately omitted for v1. The screenshot plan exists at `store-assets/screenshot-plan.md`; the hosted privacy URL and four required v1 iPhone screenshots are still missing. Approval-response copy and the approval screenshot are deferred until #2 has first-class approval-routing evidence.
 
 The next shippable release remains blocked until milestone 1 is closed with CLI test evidence and iPhone simulator validation for every affected visible flow. iPad stabilization, Desktop protocol hardening beyond #18, and watchOS remain separate milestones.
+
+## iPad Stabilization State Refresh - 2026-05-01 23:05Z
+
+Milestone 2, `iPad MVP stabilization`, has 4 open issues and 2 closed issues after the 2026-05-01 QA Lead, Lead Dev, and live-data root-cause runs. The open iPad issues are no longer blocked by simulator infrastructure alone; the live data needed for closure is blocked by Desktop protocol issues in milestone 3.
+
+Closed in milestone 2:
+
+- #17 Navigate from iPad activity rows to selected chat detail.
+- #23 iPad chat routing leaves stale approval selection alive.
+
+Open iPad stabilization scope:
+
+- #6 Product spec: iPad Handrail version. This remains the umbrella product acceptance issue for the iPad surface; it should not be closed by individual bug fixes alone.
+- #21 New Chat sheet never closes on success. Current iPad code path is reported fixed, and #29 now provides the live `start_chat` success path needed for simulator closure evidence.
+- #22 Activity rows set a hidden chat selection. Current iPad code path is reported fixed, and #29 now provides live chat-linked Activity events needed for simulator closure evidence.
+- #24 Waiting approvals look like running chats on Dashboard. Current iPad code path is reported fixed; #29 can now produce a live started chat, but closure still depends on #2 for first-class approval ingestion/routing.
+
+The strongest current iPad finding is that #21 and #22 are ready for live iPad simulator validation, because #29 now makes a real `start_chat` emit `chat_started` and chat-linked activity. #24 still depends on #2 making approval state first-class enough to validate `waiting_for_approval` behavior. Do not broaden product code with test-only launch state to close the iPad issues; use a real simulator-connected local Handrail feed that naturally contains the needed `start_chat`, chat-linked Activity, and approval states.
+
+## Lead Dev Scope Refresh - 2026-05-02 06:07Z
+
+#29 is closed. The live Handrail listener on `127.0.0.1:8788` was restarted from stale PID `16041` to PID `70040` using LaunchAgent `com.velocityworks.handrail.server`. A real `start_chat` through the live server emitted `chat_started`, emitted a chat-linked `chat_event`, refreshed `chat_list`, and appeared in `node cli/dist/src/index.js chats` as Desktop-visible chat `codex:019de74b-9e6e-71e1-a6e1-14028304e776`. Evidence is in `test-artifacts/issue29-resolve-20260502T060625Z/`.
+
+The iPhone App Store metadata package no longer claims approval-response support for v1. `store-assets/metadata.txt` and `store-assets/screenshot-plan.md` now defer the approval screenshot until #2 has first-class Desktop approval request IDs. This keeps milestone 1 focused on submission evidence instead of silently adding #2 to the iPhone release gate through marketing copy.
 
 ---
 
@@ -64,10 +101,10 @@ These items will cause Apple review rejection or provisioning failure regardless
 **Finding:** Any app that handles personal data, uses local network, or requests notifications must link a privacy policy on the App Store product page. A draft privacy policy now exists at `docs/privacy-policy.md` and covers local-first storage, local-network `ws://` transport, no account, no telemetry, notifications, and Keychain pairing-token storage. App Store submission is still blocked until this text is hosted at a stable URL and the URL is entered in App Store Connect.  
 **Action:** Host the policy at a stable URL and add that URL to the App Store Connect listing before submission.
 
-### 1.5 No App Store Metadata Package
+### 1.5 App Store Metadata Package Is Partial
 
-**Finding:** App Store submission requires: app name, subtitle, description, keywords, support URL, marketing URL, screenshots (at minimum iPhone 6.9-inch and iPad 12.9-inch if iPad is universal), and an app icon at 1024x1024. None of these assets exist in the repo.  
-**Action:** Create a `store-assets/` directory in the repo. Add the icon, screenshots for each target device size, and a `metadata.txt` with the listing copy. Use Xcode Organizer or Fastlane Deliver to manage the upload workflow.
+**Finding:** `store-assets/metadata.txt` now contains iPhone-only listing copy, review notes, keyword/category proposal, explicit scope exclusions, a public support URL, and the v1 marketing URL omission decision. The copy no longer markets approval responses while #2 is open. `store-assets/screenshot-plan.md` now lists four required v1 iPhone screenshots and defers the approval screenshot until first-class approval routing is verified. The package is still not complete because the hosted privacy URL and required iPhone screenshots are missing.
+**Action:** Capture the four required v1 iPhone screenshots from verified simulator/device flows, place them under `store-assets/screenshots/iphone/`, and replace the privacy policy URL placeholder in `store-assets/metadata.txt`. Do not capture or submit an approval screenshot until #2 produces real approval-routing evidence.
 
 ### 1.6 No Automated Build / Distribution Pipeline
 
@@ -166,10 +203,10 @@ All six issues must be resolved before an iPad target can be submitted. The iPad
 
 | Issue | File | Action |
 |---|---|---|
-| #21 New Chat sheet never closes on success | `RootView.swift:37-40` | Set `showsIPadNewChat = false` in the `lastStartedChatId` observation handler. |
-| #23 Chat routing leaves stale `selectedApprovalId` | `RootView.swift:93-96` | Clear `selectedApprovalId` in every code path that sets `selectedChatId`. |
-| #24 Approval-blocked chats show green play icon | `IPadDashboardWorkspaceView.swift:268-270` | Add a `waitingForApproval` icon/color branch before the default `activeRow` rendering. |
-| #22 / #17 Activity rows set hidden chat selection | `IPadActivityWorkspaceView.swift:18-22` | After setting `selectedChatId`, also set `selectedSection = .chats` so the split-view detail column mounts the chat detail. |
+| #21 New Chat sheet never closes on success | `RootView.swift:37-40` | Code path reported fixed and #29 is closed. Close after a live successful iPad `start_chat` transition dismisses the sheet and selects the started chat in simulator. |
+| #23 Chat routing leaves stale `selectedApprovalId` | `RootView.swift:93-96` | Closed 2026-05-01. Started-chat and notification-chat routes now use `IPadWorkspaceSelection.selectChat(id:)`, which clears stale approval selection. |
+| #24 Approval-blocked chats show green play icon | `IPadDashboardWorkspaceView.swift:268-270` | Code path reported fixed. Close only after #2 produces a live `waiting_for_approval` chat and the row renders as warning-style approval state in simulator. |
+| #22 / #17 Activity rows set hidden chat selection | `IPadActivityWorkspaceView.swift:18-22` | #17 is closed, #22 code path is reported fixed, and #29 now emits live chat-linked Activity events. Close #22 after a live row opens the chat detail in simulator. |
 | #20 chat_list overwrites iPad detail state | `HandrailStore.swift:324-333` | Resolved by the fix in item 2.1 above. |
 | #12 Project-grouped Chats shows raw slug identifiers | `Views/Chats` | Map `chat.projectId` through the same display-name resolver used by Chat Detail headers. |
 
@@ -233,10 +270,12 @@ Execute in this order:
 11. **[FEATURE]** Fix thinking messages not displayed (issue #4).
 12. **[FEATURE]** Suppress notifications for active foreground chat (issue #10).
 13. **[FEATURE]** Clear stale global errors on sheet/detail open.
-14. **[iPad]** Fix all six iPad routing/state bugs (issues #17, #20, #21, #22, #23, #24).
-15. **[iPad]** Fix project-grouped slugs (issue #12).
-16. **[watchOS]** Implement watchOS target per issue #5 spec.
-17. **[INFRA]** Add GitHub Actions CI for archive + TestFlight upload.
-18. **[INFRA]** Create `store-assets/` with icon, screenshots, and listing copy.
-19. **[INFRA]** Host `docs/privacy-policy.md` at a stable privacy policy URL. Add URL to App Store Connect.
-20. **[INFRA]** Enroll in Apple Developer Program (paid) and assign team in Xcode.
+14. **[DESKTOP]** Closed 2026-05-02: Desktop `start_chat` handoff emits `chat_started` and chat-linked activity (#29).
+15. **[DESKTOP]** Add first-class approval ingestion/routing for live `waiting_for_approval` evidence (#2).
+16. **[iPad]** Close the remaining iPad routing/state bugs only after live simulator evidence for #21, #22, and #24.
+17. **[iPad]** Keep project-grouped slug fix evidence attached to closed issue #12.
+18. **[watchOS]** Implement watchOS target per issue #5 spec.
+19. **[INFRA]** Add GitHub Actions CI for archive + TestFlight upload.
+20. **[INFRA]** Create `store-assets/` with icon, screenshots, and listing copy.
+21. **[INFRA]** Host `docs/privacy-policy.md` at a stable privacy policy URL. Add URL to App Store Connect.
+22. **[INFRA]** Enroll in Apple Developer Program (paid) and assign team in Xcode.

@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-05-01T23:38:43.324Z",
+  "outDir": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-lead-issue29-start-chat-20260501T233843Z",
+  "statePath": "/Users/velocityworks/.handrail/state.json",
+  "source": "throwaway local createHandrailServer from cli/dist after npm test build",
+  "startChat": {
+    "sentAt": "2026-05-01T23:38:43.634Z",
+    "resultType": "error",
+    "error": "error creating thread: Fatal error: Codex cannot access session files at /Users/velocityworks/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /Users/velocityworks/.codex (underlying error: Operation not permitted (os error 1))"
+  },
+  "cliListing": {
+    "path": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-lead-issue29-start-chat-20260501T233843Z/cli-chats.txt",
+    "containsStartedChat": false
+  },
+  "directListing": {
+    "path": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-lead-issue29-start-chat-20260501T233843Z/direct-codex-chats.json",
+    "containsStartedChat": false
+  },
+  "serverPort": 62927,
+  "conclusion": "fail: start_chat did not satisfy issue #29 acceptance evidence"
+}

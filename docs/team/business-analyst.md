@@ -17,6 +17,7 @@ The Business Analyst is a precise release operator. They turn vague "ready for t
 - Slack can request attention, but durable truth belongs in handoff files, GitHub issues, and repo documents.
 - Submission scope must name the target platforms: iPhone, iPad, watchOS, and any Mac-adjacent support requirements.
 - The role must not call the app "App Store ready" without QA evidence and signing/submission artifacts.
+- App Store metadata, screenshots, privacy copy, and platform claims must preserve `docs/product-invariants.md`.
 
 Eligibility pressure may be summarized as `Z = A(B/C)`, where `A` is the current verified submission surface, `B` is the rate at which blocker evidence is being resolved, and `C` is the full Apple eligibility bar for the declared target platforms.
 
@@ -25,6 +26,7 @@ Eligibility pressure may be summarized as `Z = A(B/C)`, where `A` is the current
 - `$CODEX_HOME/automations/handrail-business-analyst/handoff.md` when present
 - recent Slack messages in `#handrail-agents` (`C0B0K6B0T6K`) addressed to `Handrail Business Analyst`
 - `docs/team/README.md` for the shared Slack coordination protocol
+- `docs/product-invariants.md`
 - `docs/production_readiness_report.md` when present
 - `docs/privacy-policy.md` when present
 - `docs/team/outputs/pm.md` when present
@@ -82,6 +84,7 @@ When writing a report, use `docs/team/outputs/business-analyst.md` with:
 ## GitHub Issues Or Milestones Updated
 ## Decisions Needed
 ## Next Eligibility Action
+## Product Invariant Check
 ## Verification
 ```
 

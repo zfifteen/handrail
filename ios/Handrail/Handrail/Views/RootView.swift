@@ -91,8 +91,8 @@ struct RootView: View {
             phoneRouteToken += 1
             phoneRoute = PhoneRootRoute(kind: .startedChat, chatId: chatId, token: phoneRouteToken)
         case .iPadRegular:
-            iPadSelection.selectedSection = .chats
-            iPadSelection.selectedChatId = chatId
+            iPadSelection.selectChat(id: chatId)
+            showsIPadNewChat = false
         }
     }
 
@@ -105,8 +105,7 @@ struct RootView: View {
             phoneRouteToken += 1
             phoneRoute = PhoneRootRoute(kind: .notificationChat, chatId: chatId, token: phoneRouteToken)
         case .iPadRegular:
-            iPadSelection.selectedSection = .chats
-            iPadSelection.selectedChatId = chatId
+            iPadSelection.selectChat(id: chatId)
         }
     }
 }
@@ -188,6 +187,9 @@ struct PhoneRootView: View {
             .tag(HandrailTab.settings)
         }
         .tint(.purple)
+        .overlay(alignment: .bottom) {
+            PhoneTabAccessibilityBar(selectedTab: $selectedTab)
+        }
         .onChange(of: route) { _, route in
             guard let route else { return }
             handle(route)
@@ -211,13 +213,85 @@ struct PhoneRootView: View {
     }
 }
 
-private enum HandrailTab {
+enum HandrailTab {
     case dashboard
     case chats
     case attention
     case activity
     case alerts
     case settings
+}
+
+enum PhoneTabBarMetrics {
+    static let accessibilityHeight: CGFloat = 83
+    static let contentBottomInset: CGFloat = 96
+}
+
+enum PhoneTabAccessibilityItem: String, CaseIterable, Identifiable, Equatable {
+    case dashboard = "Dashboard"
+    case chats = "Chats"
+    case attention = "Attention"
+    case activity = "Activity"
+    case more = "More"
+
+    var id: String { rawValue }
+
+    var targetTab: HandrailTab {
+        switch self {
+        case .dashboard: .dashboard
+        case .chats: .chats
+        case .attention: .attention
+        case .activity: .activity
+        case .more: .alerts
+        }
+    }
+
+    func isSelected(_ selectedTab: HandrailTab) -> Bool {
+        switch self {
+        case .dashboard:
+            selectedTab == .dashboard
+        case .chats:
+            selectedTab == .chats
+        case .attention:
+            selectedTab == .attention
+        case .activity:
+            selectedTab == .activity
+        case .more:
+            selectedTab == .alerts || selectedTab == .settings
+        }
+    }
+}
+
+private struct PhoneTabAccessibilityBar: View {
+    @Binding var selectedTab: HandrailTab
+
+    var body: some View {
+        GeometryReader { proxy in
+            HStack(spacing: 0) {
+                ForEach(PhoneTabAccessibilityItem.allCases) { item in
+                    Button {
+                        selectedTab = item.targetTab
+                    } label: {
+                        Color.clear
+                            .frame(
+                                maxWidth: .infinity,
+                                minHeight: PhoneTabBarMetrics.accessibilityHeight,
+                                maxHeight: PhoneTabBarMetrics.accessibilityHeight
+                            )
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(item.rawValue)
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilityAddTraits(item.isSelected(selectedTab) ? .isSelected : [])
+                }
+            }
+            .frame(height: PhoneTabBarMetrics.accessibilityHeight)
+            .offset(y: proxy.safeAreaInsets.bottom)
+            .accessibilityElement(children: .contain)
+        }
+        .frame(height: PhoneTabBarMetrics.accessibilityHeight)
+    }
 }
 
 #Preview {

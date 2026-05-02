@@ -1,0 +1,14 @@
+{
+  "artifact": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/lead-dev-issue29-patched-ephemeral-20260502T043520Z",
+  "port": 49715,
+  "terminalError": "error creating thread: Fatal error: Codex cannot access session files at /Users/velocityworks/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /Users/velocityworks/.codex (underlying error: Operation not permitted (os error 1))",
+  "startedChatId": null,
+  "sawChatStarted": false,
+  "messages": [
+    "machine_status",
+    "new_chat_options",
+    "chat_list",
+    "automation_list",
+    "error"
+  ]
+}

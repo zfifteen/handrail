@@ -1,0 +1,9 @@
+{
+  "command": "node",
+  "args": [
+    "cli/dist/src/index.js",
+    "chats"
+  ],
+  "cwd": "/Users/velocityworks/IdeaProjects/handrail",
+  "startedAt": "2026-05-01T22:58:06.946Z"
+}

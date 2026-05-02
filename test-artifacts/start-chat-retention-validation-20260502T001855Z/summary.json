@@ -1,0 +1,38 @@
+{
+  "artifactDir": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/start-chat-retention-validation-20260502T001855Z",
+  "port": 63535,
+  "marker": "HANDRAIL_RETENTION_OK_20260502T001855Z",
+  "started": {
+    "id": "codex:019de60d-7902-7d62-a9f0-914c354f30e5",
+    "repo": "/private/tmp/handrail-live-data-repro",
+    "title": "Reply exactly HANDRAIL_RETENTION_OK_20260502T001855Z",
+    "projectName": "handrail-live-data-repro",
+    "status": "running",
+    "startedAt": "2026-05-02T00:18:56.644Z",
+    "updatedAt": "2026-05-02T00:18:56.644Z",
+    "transcript": [
+      "User:\nReply exactly HANDRAIL_RETENTION_OK_20260502T001855Z  \n\n"
+    ],
+    "acceptsInput": false
+  },
+  "observations": [
+    {
+      "at": "2026-05-02T00:18:57.151Z",
+      "attempt": 1,
+      "cliChatsIncludesStartedId": false,
+      "cliChatsIncludesMarker": false
+    },
+    {
+      "at": "2026-05-02T00:19:00.589Z",
+      "attempt": 2,
+      "cliChatsIncludesStartedId": false,
+      "cliChatsIncludesMarker": false
+    },
+    {
+      "at": "2026-05-02T00:19:04.027Z",
+      "attempt": 3,
+      "cliChatsIncludesStartedId": true,
+      "cliChatsIncludesMarker": true
+    }
+  ]
+}

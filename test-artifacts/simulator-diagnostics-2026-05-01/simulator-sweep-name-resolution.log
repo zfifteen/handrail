@@ -1,0 +1,7 @@
+awk: syntax error at source line 3
+ context is
+	          match($0, >>>  /\\(([0-9A-F-]+)\\)/, <<< 
+awk: illegal statement at source line 3
+awk: illegal statement at source line 3
+error: simulator device not found: 'iPhone 17'
+hint: list devices with: xcrun simctl list devices available

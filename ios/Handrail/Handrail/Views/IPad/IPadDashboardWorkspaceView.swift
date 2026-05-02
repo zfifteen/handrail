@@ -181,7 +181,7 @@ struct IPadDashboardWorkspaceView: View {
 
     private func activeRow(_ chat: CodexChat) -> some View {
         HStack(spacing: 10) {
-            chatRowButton(chat, icon: "play.fill", color: .green)
+            chatRowButton(chat, icon: activeIcon(for: chat), color: activeColor(for: chat))
 
             if HandrailCommandAvailability.resolve(
                 pairedMachine: store.pairedMachine,
@@ -302,6 +302,14 @@ struct IPadDashboardWorkspaceView: View {
 
     private func attentionColor(for chat: CodexChat) -> Color {
         chat.status == .failed ? .red : .orange
+    }
+
+    private func activeIcon(for chat: CodexChat) -> String {
+        chat.status == .waitingForApproval ? "exclamationmark.triangle.fill" : "play.fill"
+    }
+
+    private func activeColor(for chat: CodexChat) -> Color {
+        chat.status == .waitingForApproval ? .purple : .green
     }
 
     private func outcomeIcon(for chat: CodexChat) -> String {

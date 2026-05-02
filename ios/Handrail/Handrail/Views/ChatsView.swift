@@ -14,56 +14,64 @@ struct ChatsView: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 12) {
-                if let machine = store.pairedMachine {
-                    machineCard(machine)
-                    SyncStatusRow(
-                        isRefreshing: store.isRefreshingChats,
-                        lastRefreshAt: store.lastChatRefreshAt,
-                        isOnline: machine.isOnline,
-                        refresh: store.refreshChats
-                    )
-                    Button {
-                        showsStart = true
-                    } label: {
-                        Label("New chat", systemImage: "square.and.pencil")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.purple)
-
-                    if !activeChats.isEmpty {
-                        chatSection(title: "Active chats", chats: activeChats, emptyTitle: "")
-                    }
-                    chatSection(title: "Pinned", chats: pinnedChats, emptyTitle: "No pinned chats")
-                    allChatsSection
-                } else {
-                    Card {
-                        EmptyState(
-                            title: "No machine paired",
-                            detail: "Run handrail pair on your Mac, then scan the QR code here.",
-                            systemImage: "qrcode.viewfinder"
+        GeometryReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 12) {
+                    if let machine = store.pairedMachine {
+                        machineCard(machine)
+                        SyncStatusRow(
+                            isRefreshing: store.isRefreshingChats,
+                            lastRefreshAt: store.lastChatRefreshAt,
+                            isOnline: machine.isOnline,
+                            refresh: store.refreshChats
                         )
                         Button {
-                            showsScanner = true
+                            showsStart = true
                         } label: {
-                            Label("Scan Pairing QR", systemImage: "camera.viewfinder")
+                            Label("New chat", systemImage: "square.and.pencil")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(.purple)
+
+                        if !activeChats.isEmpty {
+                            chatSection(title: "Active chats", chats: activeChats, emptyTitle: "")
+                        }
+                        chatSection(title: "Pinned", chats: pinnedChats, emptyTitle: "No pinned chats")
+                        allChatsSection
+                    } else {
+                        Card {
+                            EmptyState(
+                                title: "No machine paired",
+                                detail: "Run handrail pair on your Mac, then scan the QR code here.",
+                                systemImage: "qrcode.viewfinder"
+                            )
+                            Button {
+                                showsScanner = true
+                            } label: {
+                                Label("Scan Pairing QR", systemImage: "camera.viewfinder")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.purple)
+                        }
                     }
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .safeAreaPadding(.bottom, PhoneTabBarMetrics.contentBottomInset)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .safeAreaPadding(.bottom, 96)
+            .refreshable {
+                store.refreshChats()
+            }
+            .frame(
+                width: proxy.size.width,
+                height: max(0, proxy.size.height - PhoneTabBarMetrics.contentBottomInset),
+                alignment: .top
+            )
+            .clipped()
         }
         .background(Color.black.ignoresSafeArea())
-        .refreshable {
-            store.refreshChats()
-        }
         .navigationTitle("Handrail")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -271,7 +279,7 @@ struct ChatsView: View {
     }
 
     private func projectName(for chat: CodexChat) -> String {
-        chat.projectName ?? URL(fileURLWithPath: chat.repo).lastPathComponent
+        IPadChatListQuery.projectName(for: chat)
     }
 
     private func sortDate(for chat: CodexChat) -> Date {

@@ -1,0 +1,5 @@
+error: simulator device name is ambiguous: 'iPhone 17'
+matches:
+  D9D85019-C5E6-401E-B369-F4C79D9029B8
+  0E58E7BB-44FA-4BEE-9C94-8FED4C334482
+hint: set IPHONE_UDID / IPAD_UDID explicitly for a deterministic target

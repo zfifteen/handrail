@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-05-01T23:45:37.120Z",
+  "outDir": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-manual-issue29-start-chat-20260501T234537Z",
+  "statePath": "/Users/velocityworks/.handrail/state.json",
+  "source": "manual follow-up throwaway createHandrailServer from rebuilt cli/dist",
+  "startChat": {
+    "sentAt": "2026-05-01T23:45:37.429Z",
+    "resultType": "error",
+    "error": "Codex Desktop did not expose chat codex:019de5ee-fbf7-72f3-9a69-6ac1cef476a8. Open Codex Desktop and refresh Handrail."
+  },
+  "cliListing": {
+    "path": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-manual-issue29-start-chat-20260501T234537Z/cli-chats.txt",
+    "containsStartedChat": false
+  },
+  "directListing": {
+    "path": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/qa-manual-issue29-start-chat-20260501T234537Z/direct-codex-chats.json",
+    "containsStartedChat": false
+  },
+  "serverPort": 63084,
+  "conclusion": "fail: start_chat did not satisfy issue #29 acceptance evidence"
+}

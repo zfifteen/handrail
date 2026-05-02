@@ -68,11 +68,26 @@ enum IPadChatListQuery {
     }
 
     static func projectName(for chat: CodexChat) -> String {
+        let rawName: String
         if let projectName = chat.projectName?.trimmingCharacters(in: .whitespacesAndNewlines), !projectName.isEmpty {
-            return projectName
+            rawName = projectName
+        } else {
+            let lastPathComponent = URL(fileURLWithPath: chat.repo).lastPathComponent
+            rawName = lastPathComponent.isEmpty ? "Unknown Project" : lastPathComponent
         }
-        let lastPathComponent = URL(fileURLWithPath: chat.repo).lastPathComponent
-        return lastPathComponent.isEmpty ? "Unknown Project" : lastPathComponent
+        return displayProjectName(rawName)
+    }
+
+    private static func displayProjectName(_ value: String) -> String {
+        let parts = value.split { character in
+            character == "-" || character == "_"
+        }
+        guard parts.count > 1 else {
+            return value
+        }
+        return parts.map { part in
+            part.prefix(1).uppercased() + part.dropFirst()
+        }.joined(separator: " ")
     }
 
     private static func row(for chat: CodexChat, sort: ChatListSort) -> IPadChatListRow {

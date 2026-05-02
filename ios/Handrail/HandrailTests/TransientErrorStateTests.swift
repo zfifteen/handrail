@@ -73,4 +73,67 @@ final class TransientErrorStateTests: XCTestCase {
         XCTAssertNil(store.chatErrors["selected-chat"])
         XCTAssertEqual(store.chatErrors["other-chat"], "Other chat error.")
     }
+
+    func testOfflineChatDetailRefreshReportsChatErrorAndReconnects() {
+        let task = StoreTestWebSocketTask()
+        let store = HandrailStore(enableNetworking: false) { _ in task }
+        store.pairedMachine = HandrailTestFixtures.pairedOfflineMachine
+
+        store.refreshChatDetail(chatId: HandrailTestFixtures.runningChat.id)
+
+        XCTAssertEqual(
+            store.chatErrors[HandrailTestFixtures.runningChat.id],
+            "Mac is offline. Reconnect before refreshing this chat."
+        )
+        XCTAssertEqual(store.notifications.first?.chatId, HandrailTestFixtures.runningChat.id)
+        XCTAssertEqual(store.connectionText, "Reconnecting")
+        XCTAssertTrue(store.isRefreshingChats)
+        XCTAssertEqual(task.sentMessages.count, 1)
+    }
+
+    func testViewedChatDoesNotRecordTaskCompletionNotification() {
+        let store = HandrailStore(enableNetworking: false)
+        store.chats = [HandrailTestFixtures.runningChat]
+
+        store.enterChat(chatId: HandrailTestFixtures.runningChat.id)
+        store.handle(.chatEvent(
+            chatId: HandrailTestFixtures.runningChat.id,
+            event: ChatEvent(
+                kind: "chat_completed",
+                text: "Finished visible task.",
+                status: .completed,
+                at: HandrailTestFixtures.baseDate
+            )
+        ))
+
+        XCTAssertTrue(store.isViewingChat(chatId: HandrailTestFixtures.runningChat.id))
+        XCTAssertTrue(store.notifications.isEmpty)
+        XCTAssertEqual(store.chat(id: HandrailTestFixtures.runningChat.id)?.status, .completed)
+    }
+
+    func testViewedChatDoesNotRecordApprovalNotification() {
+        let store = HandrailStore(enableNetworking: false)
+        store.chats = [HandrailTestFixtures.waitingForApprovalChat]
+
+        store.enterChat(chatId: HandrailTestFixtures.waitingForApprovalChat.id)
+        store.handle(.approvalRequired(HandrailTestFixtures.approval))
+
+        XCTAssertTrue(store.isViewingChat(chatId: HandrailTestFixtures.waitingForApprovalChat.id))
+        XCTAssertTrue(store.notifications.isEmpty)
+        XCTAssertEqual(store.latestApproval?.approvalId, HandrailTestFixtures.approval.approvalId)
+    }
+}
+
+private final class StoreTestWebSocketTask: HandrailWebSocketTask {
+    var sentMessages: [URLSessionWebSocketTask.Message] = []
+
+    func resume() {}
+
+    func cancel(with closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {}
+
+    func send(_ message: URLSessionWebSocketTask.Message, completionHandler: @escaping @Sendable (Error?) -> Void) {
+        sentMessages.append(message)
+    }
+
+    func receive(completionHandler: @escaping @Sendable (Result<URLSessionWebSocketTask.Message, Error>) -> Void) {}
 }

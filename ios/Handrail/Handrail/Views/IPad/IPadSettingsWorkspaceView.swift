@@ -8,6 +8,7 @@ struct IPadSettingsWorkspaceView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 machineSection
+                pairingRepairSection
                 pairingSection
                 aboutSection
             }
@@ -20,6 +21,29 @@ struct IPadSettingsWorkspaceView: View {
             QRScannerView { payload in
                 store.pair(with: payload)
                 showsScanner = false
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var pairingRepairSection: some View {
+        if let pairingError = store.pairingError {
+            Card {
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Pairing needs reset", systemImage: "exclamationmark.triangle")
+                        .font(.headline)
+                    Text(pairingError)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button(role: .destructive) {
+                        store.resetPairing()
+                    } label: {
+                        Label("Reset Pairing", systemImage: "trash")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                }
             }
         }
     }

@@ -1,0 +1,11 @@
+{
+  "type": "start_chat",
+  "prompt": "Reply exactly HANDRAIL_LEAD_DEV_START_CHAT_OK_20260502T002815Z",
+  "projectId": "tmp-handrail-live-data-repro",
+  "projectPath": "/private/tmp/handrail-live-data-repro",
+  "workMode": "local",
+  "branch": "main",
+  "accessPreset": "read_only",
+  "model": "gpt-5.4-mini",
+  "reasoningEffort": "low"
+}

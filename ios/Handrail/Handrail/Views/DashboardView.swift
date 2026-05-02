@@ -116,49 +116,57 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 14) {
-                dashboardHeader
+        GeometryReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 14) {
+                    dashboardHeader
 
-                if let machine = store.pairedMachine {
-                    machineStatus(machine)
-                    SyncStatusRow(
-                        isRefreshing: store.isRefreshingChats,
-                        lastRefreshAt: store.lastChatRefreshAt,
-                        isOnline: machine.isOnline,
-                        refresh: store.refreshChats
-                    )
-                    shortcutSection
-                    pinnedChatsSection
-                    sectionDivider
-                    allChatsSection
-                    sectionDivider
-                } else {
-                    Card {
-                        EmptyState(
-                            title: "No machine paired",
-                            detail: "Run handrail pair on your Mac, then scan the QR code here.",
-                            systemImage: "qrcode.viewfinder"
+                    if let machine = store.pairedMachine {
+                        machineStatus(machine)
+                        SyncStatusRow(
+                            isRefreshing: store.isRefreshingChats,
+                            lastRefreshAt: store.lastChatRefreshAt,
+                            isOnline: machine.isOnline,
+                            refresh: store.refreshChats
                         )
-                        Button {
-                            showsScanner = true
-                        } label: {
-                            Label("Scan Pairing QR", systemImage: "camera.viewfinder")
-                                .frame(maxWidth: .infinity)
+                        shortcutSection
+                        pinnedChatsSection
+                        sectionDivider
+                        allChatsSection
+                        sectionDivider
+                    } else {
+                        Card {
+                            EmptyState(
+                                title: "No machine paired",
+                                detail: "Run handrail pair on your Mac, then scan the QR code here.",
+                                systemImage: "qrcode.viewfinder"
+                            )
+                            Button {
+                                showsScanner = true
+                            } label: {
+                                Label("Scan Pairing QR", systemImage: "camera.viewfinder")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.purple)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.purple)
                     }
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .safeAreaPadding(.bottom, PhoneTabBarMetrics.contentBottomInset)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .safeAreaPadding(.bottom, 96)
+            .refreshable {
+                store.refreshChats()
+            }
+            .frame(
+                width: proxy.size.width,
+                height: max(0, proxy.size.height - PhoneTabBarMetrics.contentBottomInset),
+                alignment: .top
+            )
+            .clipped()
         }
         .background(Color.black.ignoresSafeArea())
-        .refreshable {
-            store.refreshChats()
-        }
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: String.self) { id in
             ChatDetailView(chatId: id)

@@ -1,0 +1,11 @@
+{
+  "command": "sqlite3",
+  "args": [
+    "-readonly",
+    "-json",
+    "/Users/velocityworks/.codex/logs_2.sqlite",
+    "SELECT id, thread_id, target, ts, ts_nanos, CASE WHEN feedback_log_body LIKE '%\"type\":\"response.failed\"%' THEN 'failed' WHEN feedback_log_body LIKE '%\"type\":\"response.completed\"%' THEN 'completed' WHEN feedback_log_body LIKE '%\"type\":\"response.in_progress\"%' THEN 'running' WHEN feedback_log_body LIKE '%\"type\":\"response.created\"%' THEN 'running' END AS inferred_status FROM logs WHERE target = 'codex_api::endpoint::responses_websocket' AND (feedback_log_body LIKE '%\"type\":\"response.failed\"%' OR feedback_log_body LIKE '%\"type\":\"response.completed\"%' OR feedback_log_body LIKE '%\"type\":\"response.in_progress\"%' OR feedback_log_body LIKE '%\"type\":\"response.created\"%') ORDER BY ts DESC, ts_nanos DESC, id DESC LIMIT 100"
+  ],
+  "cwd": "/Users/velocityworks/IdeaProjects/handrail",
+  "startedAt": "2026-05-01T23:00:25.499Z"
+}

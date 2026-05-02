@@ -24,6 +24,7 @@ Handrail treats these specs as living contracts. When Handrail code changes a do
 | [Codex Desktop App Server](codex-desktop-app-server.md) | Renderer/app-server boundary and which operations appear to mutate persisted versus live state. | Medium; Handrail uses a narrow subset. |
 | [Codex Desktop Persistence](codex-desktop-persistence.md) | SQLite thread metadata, rollout files, pinned state, and Handrail's read model. | High for Handrail's current reader. |
 | [Handrail WebSocket Protocol](handrail-websocket-protocol.md) | CLI-to-iOS and iOS-to-CLI local WebSocket message contract. | High for Handrail-owned source. |
+| [Handrail iOS Pairing Persistence](handrail-ios-pairing-persistence.md) | Local pairing metadata, Keychain token storage, migration, and corrupt-data reporting. | High for Handrail-owned source. |
 | [Handrail Notification Suppression](handrail-notification-suppression.md) | Current push/local notification flow and the expected active-chat suppression contract. | High for Handrail code paths; Desktop notification internals are out of scope. |
 
 ## Integration Chain

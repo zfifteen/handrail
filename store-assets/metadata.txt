@@ -1,0 +1,53 @@
+Handrail App Store Metadata Package
+Last updated: 2026-05-02
+Target: iPhone only
+
+App name:
+Handrail
+
+Subtitle:
+Control Codex on your Mac
+
+Promotional text:
+Supervise local Codex Desktop chats from your iPhone while your Mac stays in control.
+
+Description:
+Handrail is a local-first iPhone companion for Codex Desktop on your Mac. Pair your iPhone with the Handrail desktop CLI on the same local network, then view Codex chats, follow task progress, continue existing chats, and stop running work from your phone.
+
+Handrail does not run a cloud workspace, does not require an account, and does not upload your chat data to a Handrail server. Codex Desktop remains local and authoritative on your Mac. The iPhone app connects to the Handrail CLI over your local Wi-Fi or LAN using a per-device pairing token.
+
+Handrail works with OpenAI Codex Desktop. Handrail is not affiliated with OpenAI.
+
+Keywords:
+Codex,developer,Mac,local,remote,automation,AI,coding,productivity
+
+Category:
+Developer Tools
+
+Support URL:
+https://github.com/zfifteen/handrail/issues
+
+Marketing URL:
+Not submitted for v1.
+
+Privacy Policy URL:
+TBD before submission. Source policy text lives in docs/privacy-policy.md.
+
+Review notes:
+Handrail requires Local Network access to connect to the Handrail CLI running on the user's Mac. The connection uses ws:// on the local network and is protected by a per-device pairing token. No Handrail backend account, sync service, payment, telemetry, or cloud relay is used.
+
+Screenshot inventory:
+- iPhone 6.9-inch Dashboard paired state: missing.
+- iPhone 6.9-inch Chats list: missing.
+- iPhone 6.9-inch Chat Detail with readable Codex chat: missing.
+- iPhone 6.9-inch New Chat sheet: missing.
+- iPhone 6.9-inch Approval request: deferred until first-class approval routing is verified in #2.
+
+Screenshot capture plan:
+See store-assets/screenshot-plan.md. The listing is not App Store ready until the required v1 iPhone screenshots are captured from verified simulator or device flows and copied into this directory.
+
+Scope exclusions:
+- Do not claim iPad support in the iPhone listing until the iPad MVP stabilization milestone is complete and verified.
+- Do not claim watchOS support until the watchOS companion milestone is complete and verified on paired hardware.
+- Do not claim approval-response support in the iPhone listing until #2 has first-class Desktop approval routing evidence.
+- Do not describe Handrail as a cloud IDE, generic terminal, SSH client, account product, payment product, or multi-agent control plane.

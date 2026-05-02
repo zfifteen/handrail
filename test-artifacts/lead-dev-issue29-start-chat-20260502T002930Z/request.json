@@ -1,0 +1,11 @@
+{
+  "type": "start_chat",
+  "prompt": "Reply exactly HANDRAIL_LEAD_DEV_START_CHAT_OK_20260502T002930Z",
+  "projectId": "handrail",
+  "projectPath": "/Users/velocityworks/IdeaProjects/handrail",
+  "workMode": "local",
+  "branch": "main",
+  "accessPreset": "read_only",
+  "model": "gpt-5.4-mini",
+  "reasoningEffort": "low"
+}

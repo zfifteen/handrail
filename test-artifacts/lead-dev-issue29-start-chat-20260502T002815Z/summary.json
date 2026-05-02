@@ -1,0 +1,11 @@
+{
+  "artifact": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/lead-dev-issue29-start-chat-20260502T002815Z",
+  "promptToken": "HANDRAIL_LEAD_DEV_START_CHAT_OK_20260502T002815Z",
+  "startedChatId": null,
+  "error": "Command failed: git checkout main\nfatal: not a git repository (or any of the parent directories): .git\n",
+  "sawChatStarted": false,
+  "messages": [
+    "machine_status",
+    "error"
+  ]
+}

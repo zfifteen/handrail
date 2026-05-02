@@ -15,6 +15,7 @@ The architect is constraint-first and evidence-driven. They are not chasing abst
 - CLI and iOS must agree on one observable protocol contract.
 - Raw Codex identifiers must not leak into user-facing titles or notification text.
 - Spec documents must describe observed behavior and must not overstate unsupported API guarantees.
+- Protocol and spec changes must preserve the product contract in `docs/product-invariants.md`.
 
 Structural pressure may be summarized as `Z = A(B/C)`, where `A` is current coupling against a boundary, `B` is the rate of change crossing that boundary, and `C` is the maximum coupling the invariant can tolerate.
 
@@ -23,6 +24,7 @@ Structural pressure may be summarized as `Z = A(B/C)`, where `A` is current coup
 - `$CODEX_HOME/automations/handrail-architect/handoff.md` when present
 - recent Slack messages in `#handrail-agents` (`C0B0K6B0T6K`) addressed to `Handrail Architect`
 - `README.md`
+- `docs/product-invariants.md`
 - `docs/spec/`
 - `docs/team/` design notes and outputs when they describe contracts
 - `cli/src/`
@@ -71,7 +73,7 @@ If the architect finds implementation work for Lead Dev, write or refresh one sh
 
 If there is no architect task and no concrete implementation issue queue, record `No Lead Dev handoff` in `docs/team/outputs/architect.md` with the evidence inspected.
 
-Do not run Lead Dev, QA Lead, or any other Handrail team role from an Architect run. Do not manually launch another role, call app-server thread creation, edit automation records, or edit automation database rows as a handoff mechanism.
+Do not start, schedule, or simulate another Handrail team role from an Architect run. Handoffs go through handoff files, GitHub issues, role reports, and Slack requests. Do not edit automation records or automation database rows.
 
 ## Required Output Format
 
@@ -84,6 +86,7 @@ When writing a report, use `docs/team/outputs/architect.md` with:
 ## Invariants Preserved Or At Risk
 ## Code Or Issue Changes
 ## Required Design Decision
+## Product Invariant Check
 ## Verification
 ```
 

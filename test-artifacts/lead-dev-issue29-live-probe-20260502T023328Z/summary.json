@@ -1,0 +1,25 @@
+{
+  "artifact": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/lead-dev-issue29-live-probe-20260502T023328Z",
+  "port": 8788,
+  "promptToken": "HANDRAIL_LEAD_DEV_LIVE_PROBE_20260502T023328Z",
+  "startedChatId": null,
+  "terminalError": "Codex Desktop did not become ready to receive this chat after Handrail opened it, so thread-follower-start-turn could not be routed. Try again once the chat is visible in Codex Desktop.",
+  "ignoredErrors": [
+    "Missing HANDRAIL_APNS_TEAM_ID.",
+    "Missing HANDRAIL_APNS_TEAM_ID."
+  ],
+  "sawChatStarted": false,
+  "sawChatEvent": false,
+  "sawStartedChatInList": false,
+  "messages": [
+    "machine_status",
+    "new_chat_options",
+    "chat_list",
+    "automation_list",
+    "error",
+    "error",
+    "chat_list",
+    "chat_list",
+    "error"
+  ]
+}

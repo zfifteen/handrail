@@ -137,6 +137,18 @@ final class ChatListQueryTests: XCTestCase {
         XCTAssertEqual(groups[1].rows.map(\.id), ["beta-chat"])
     }
 
+    func testProjectNamesUseReadableSlugDisplay() {
+        let chat = HandrailTestFixtures.chat(
+            id: "slug-project",
+            title: "Investigate file screenshot",
+            status: .completed,
+            offset: -20,
+            projectName: "files-mentioned-by-the-user-screenshot-2"
+        )
+
+        XCTAssertEqual(IPadChatListQuery.projectName(for: chat), "Files Mentioned By The User Screenshot 2")
+    }
+
     func testSortByUpdatedAndCreatedDates() {
         let chats = HandrailTestFixtures.dateSortedChats
 
@@ -190,5 +202,23 @@ final class ChatListQueryTests: XCTestCase {
         XCTAssertEqual(merged[0].transcript, ["User:\nInspect state.\n\n"])
         XCTAssertEqual(merged[0].thinking?.map(\.text), ["The detail request already loaded thinking."])
         XCTAssertEqual(merged[0].acceptsInput, true)
+    }
+
+    @MainActor
+    func testChatListThinkingReachesStoreChatModel() {
+        var chat = HandrailTestFixtures.runningChat
+        chat.thinking = [
+            ThinkingEntry(
+                id: "thinking-live",
+                round: 1,
+                text: "Inspect the Desktop IPC state before editing.",
+                at: HandrailTestFixtures.baseDate
+            )
+        ]
+
+        let store = HandrailStore(enableNetworking: false)
+        store.handle(.chatList([chat]))
+
+        XCTAssertEqual(store.chat(id: chat.id)?.thinking?.map(\.text), ["Inspect the Desktop IPC state before editing."])
     }
 }

@@ -25,26 +25,45 @@ describe_udid() {
 
 require_device_udid() {
   local device_name="$1"
+  local runtime_name="$2"
   local -a udids=()
+  local line
+  local rest
+  local udid
+  local current_runtime=""
 
-  mapfile -t udids < <(
-    xcrun simctl list devices available |
-      awk -v name="$device_name" '
-        $0 ~ name" \\(" {
-          match($0, /\\(([0-9A-F-]+)\\)/, m)
-          if (m[1] != "") { print m[1] }
-        }
-      '
-  )
+  while IFS= read -r line; do
+    case "$line" in
+      --\ *\ --)
+        current_runtime="${line#-- }"
+        current_runtime="${current_runtime% --}"
+        continue
+        ;;
+    esac
+
+    if [[ -n "$runtime_name" && "$current_runtime" != "$runtime_name" ]]; then
+      continue
+    fi
+
+    case "$line" in
+      *"$device_name ("*)
+        rest="${line#*"$device_name ("}"
+        udid="${rest%%)*}"
+        if [[ -n "$udid" ]]; then
+          udids+=("$udid")
+        fi
+        ;;
+    esac
+  done < <(xcrun simctl list devices available)
 
   if [[ "${#udids[@]}" -eq 0 ]]; then
-    echo "error: simulator device not found: '$device_name'" >&2
+    echo "error: simulator device not found: '$device_name' on '$runtime_name'" >&2
     echo "hint: list devices with: xcrun simctl list devices available" >&2
     exit 1
   fi
 
   if [[ "${#udids[@]}" -ne 1 ]]; then
-    echo "error: simulator device name is ambiguous: '$device_name'" >&2
+    echo "error: simulator device name is ambiguous: '$device_name' on '$runtime_name'" >&2
     printf "matches:\n" >&2
     printf "  %s\n" "${udids[@]}" >&2
     echo "hint: set IPHONE_UDID / IPAD_UDID explicitly for a deterministic target" >&2
@@ -63,7 +82,9 @@ main() {
   local bundle_id="com.velocityworks.Handrail"
 
   local iphone_device="${IPHONE_DEVICE:-iPhone 17}"
-  local ipad_device="${IPAD_DEVICE:-iPad Pro (13-inch) (M4)}"
+  local ipad_device="${IPAD_DEVICE:-iPad Pro 13-inch (M5)}"
+  local iphone_runtime="${IPHONE_RUNTIME:-iOS 26.4}"
+  local ipad_runtime="${IPAD_RUNTIME:-iOS 26.4}"
 
   local run_stamp
   run_stamp="$(date +%Y-%m-%d-%H%M%S)"
@@ -75,12 +96,12 @@ main() {
 
   local iphone_udid="${IPHONE_UDID:-}"
   if [[ -z "$iphone_udid" ]]; then
-    iphone_udid="$(require_device_udid "$iphone_device")"
+    iphone_udid="$(require_device_udid "$iphone_device" "$iphone_runtime")"
   fi
 
   local ipad_udid="${IPAD_UDID:-}"
   if [[ -z "$ipad_udid" ]]; then
-    ipad_udid="$(require_device_udid "$ipad_device")"
+    ipad_udid="$(require_device_udid "$ipad_device" "$ipad_runtime")"
   fi
 
   local iphone_desc

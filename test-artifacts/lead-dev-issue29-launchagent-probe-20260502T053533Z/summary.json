@@ -1,0 +1,12 @@
+{
+  "createdAt": "2026-05-02T05:36:14.915Z",
+  "outDir": "test-artifacts/lead-dev-issue29-launchagent-probe-20260502T053533Z",
+  "promptToken": "HANDRAIL_LEAD_DEV_LAUNCHAGENT_PROBE_20260502T053533Z",
+  "commandResult": {
+    "type": "error",
+    "message": "Codex Desktop did not become ready to receive this chat after Handrail opened it, so thread-follower-start-turn could not be routed. Try again once the chat is visible in Codex Desktop."
+  },
+  "chatStartedReceived": false,
+  "oldFollowerRouteErrorReceived": true,
+  "cliChatsContainsPrompt": false
+}

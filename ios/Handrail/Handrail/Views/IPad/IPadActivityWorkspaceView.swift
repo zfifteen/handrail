@@ -17,8 +17,7 @@ struct IPadActivityWorkspaceView: View {
                 ForEach(store.activity) { item in
                     if let chatId = item.chatId {
                         Button {
-                            selection.selectedChatId = chatId
-                            selection.selectedApprovalId = nil
+                            selection.selectChat(id: chatId)
                         } label: {
                             activityContent(item)
                                 .frame(maxWidth: .infinity, alignment: .leading)

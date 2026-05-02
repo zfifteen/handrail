@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { extractStatus, parseDesktopPinnedThreadIds } from "../src/codexSessions.js";
-import { codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame } from "../src/codexDesktopIpc.js";
+import { codexDesktopAppServerTurnStartParams, codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame, startCodexDesktopConversationOnAppServer } from "../src/codexDesktopIpc.js";
 import { discoverProjects } from "../src/newChatOptions.js";
 import { ChatManager } from "../src/chats.js";
 
@@ -50,6 +50,50 @@ test("builds Codex Desktop IPC follower requests", () => {
         cwd: "/Users/me/project"
       }
     }
+  });
+});
+
+test("builds Codex Desktop app-server turn-start params", () => {
+  assert.deepEqual(codexDesktopAppServerTurnStartParams({
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    cwd: "/Users/me/project",
+    prompt: "Start from phone"
+  }), {
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    input: [{ type: "text", text: "Start from phone", text_elements: [] }],
+    cwd: "/Users/me/project"
+  });
+});
+
+test("new Desktop conversations keep thread creation and first turn on one app-server connection", async () => {
+  const calls: Array<{ method: string; params: unknown }> = [];
+  const client = {
+    async request(method: string, params: unknown): Promise<unknown> {
+      calls.push({ method, params });
+      if (method === "thread/start") {
+        return { thread: { id: "019dc424-e857-76e0-8229-589ecf107eb4" } };
+      }
+      if (method === "turn/start") {
+        return { turn: { id: "turn-1" } };
+      }
+      throw new Error(`Unexpected app-server method ${method}.`);
+    }
+  };
+
+  const threadId = await startCodexDesktopConversationOnAppServer(client, {
+    cwd: "/Users/me/project",
+    prompt: "Start from phone",
+    model: "gpt-5.5",
+    reasoningEffort: "high",
+    accessPreset: "on_request"
+  });
+
+  assert.equal(threadId, "019dc424-e857-76e0-8229-589ecf107eb4");
+  assert.deepEqual(calls.map((call) => call.method), ["thread/start", "turn/start"]);
+  assert.deepEqual(calls[1].params, {
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    input: [{ type: "text", text: "Start from phone", text_elements: [] }],
+    cwd: "/Users/me/project"
   });
 });
 
@@ -114,6 +158,19 @@ test("chat manager refuses non-Codex chat ids", async () => {
   );
 });
 
+test("chat manager refuses approval routing until Desktop request ids are available", () => {
+  const manager = new ChatManager(() => {});
+
+  assert.throws(
+    () => manager.approve("codex:thread-1", "approval-1"),
+    /Approval routing for Codex chat codex:thread-1 is not enabled yet/
+  );
+  assert.throws(
+    () => manager.deny("codex:thread-1", "approval-1", "No"),
+    /Approval routing for Codex chat codex:thread-1 is not enabled yet/
+  );
+});
+
 test("new chat creation starts a Desktop-owned conversation", async () => {
   const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   const messages: unknown[] = [];
@@ -169,6 +226,54 @@ test("new chat creation starts a Desktop-owned conversation", async () => {
   assert.ok(messages.some((message) => {
     const serverMessage = message as { type?: string; chats?: Array<{ id: string }> };
     return serverMessage.type === "chat_list" && serverMessage.chats?.some((item) => item.id === `codex:${threadId}`);
+  }));
+});
+
+test("new chat creation waits for Desktop visibility before broadcasting", async () => {
+  const messages: unknown[] = [];
+  const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
+  let listCalls = 0;
+  const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
+    listCodexChats: async () => {
+      listCalls += 1;
+      if (listCalls < 2) {
+        return [];
+      }
+      return [{
+        id: `codex:${threadId}`,
+        repo: "/Users/me/project",
+        title: "Phone-created Desktop chat",
+        projectName: "project",
+        status: "idle",
+        startedAt: "2026-04-28T13:00:00.000Z",
+        updatedAt: "2026-04-28T13:00:00.000Z",
+        transcript: []
+      }];
+    },
+    readCodexChatDetail: async () => null,
+    prepareChatWorkspace: async () => "/Users/me/project",
+    startCodexDesktopConversation: async () => threadId,
+    startCodexDesktopTurn: async () => {},
+    interruptCodexDesktopTurn: async () => {}
+  });
+
+  const chat = await manager.startChat({
+    prompt: "Phone-created Desktop chat",
+    projectId: "/Users/me/project",
+    projectPath: "/Users/me/project",
+    workMode: "local",
+    branch: "main",
+    accessPreset: "on_request",
+    model: "gpt-5.5",
+    reasoningEffort: "high"
+  });
+
+  assert.equal(chat.id, `codex:${threadId}`);
+  assert.equal(chat.status, "running");
+  assert.equal(listCalls, 3);
+  assert.ok(messages.some((message) => {
+    const serverMessage = message as { type?: string; chats?: Array<{ id: string }> };
+    return serverMessage.type === "chat_list" && serverMessage.chats?.[0]?.id === `codex:${threadId}`;
   }));
 });
 

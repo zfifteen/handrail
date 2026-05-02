@@ -8,19 +8,19 @@ Observed Desktop build:
 - App version: `26.422.71525`
 - Build number: `2210`
 - Bundle id: `com.openai.codex`
-- Socket path: `/tmp/codex-ipc/ipc-{uid}.sock`
+- Socket path: `{os.tmpdir()}/codex-ipc/ipc-{uid}.sock`
 
 The protocol is not JSON-RPC. It is a local Desktop routing protocol used by the Electron main process to connect outside clients, Desktop windows, and Desktop-owned app-server clients.
 
 ## Transport
 
-The socket is a Unix domain socket on macOS:
+The socket is a Unix domain socket under the current user's macOS temp directory:
 
 ```text
-/tmp/codex-ipc/ipc-{uid}.sock
+{os.tmpdir()}/codex-ipc/ipc-{uid}.sock
 ```
 
-`{uid}` is the numeric Unix user id. Older or non-POSIX code paths may use `ipc.sock`, but current macOS Desktop builds use the uid-scoped path.
+`{os.tmpdir()}` resolves from the process environment, which is the Darwin user temp directory on macOS, for example `/var/folders/.../T`. `{uid}` is the numeric Unix user id. Older or non-POSIX code paths may use `ipc.sock`, but current macOS Desktop builds use the uid-scoped path.
 
 Each message is one binary frame:
 
@@ -367,7 +367,7 @@ This is not currently a Handrail feature surface. It is useful to know because i
 
 Handrail should keep the IPC client narrow:
 
-1. Connect to `/tmp/codex-ipc/ipc-{uid}.sock`.
+1. Connect to `{os.tmpdir()}/codex-ipc/ipc-{uid}.sock`.
 2. Send `initialize` with `sourceClientId: "initializing-client"` and `version: 0`.
 3. Store `result.clientId`.
 4. For each request, frame exactly one JSON object with a deterministic `requestId`.

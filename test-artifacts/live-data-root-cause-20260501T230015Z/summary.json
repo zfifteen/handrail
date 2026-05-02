@@ -1,0 +1,105 @@
+{
+  "outDir": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/live-data-root-cause-20260501T230015Z",
+  "baseline": {
+    "total": 50,
+    "counts": {
+      "running": 5,
+      "completed": 45
+    },
+    "newest": [
+      {
+        "id": "codex:019de540-a932-72b0-868b-52e5a185ca23",
+        "status": "running",
+        "title": "Handrail QA Lead",
+        "repo": "/Users/velocityworks/IdeaProjects/handrail",
+        "updatedAt": "2026-05-01T23:00:14.000Z"
+      },
+      {
+        "id": "codex:019de5c3-a5f3-7093-ab11-6d95e3c99e67",
+        "status": "running",
+        "title": "Handrail Architect",
+        "repo": "/Users/velocityworks/IdeaProjects/handrail",
+        "updatedAt": "2026-05-01T23:00:11.000Z"
+      },
+      {
+        "id": "codex:019de5a9-0921-7122-b975-67bd5d0a451b",
+        "status": "completed",
+        "title": "Handrail PM",
+        "repo": "/Users/velocityworks/IdeaProjects/handrail",
+        "updatedAt": "2026-05-01T22:54:22.000Z"
+      },
+      {
+        "id": "codex:019de51e-32c8-73f2-a4c1-e16a3c57156e",
+        "status": "completed",
+        "title": "List proof documents",
+        "repo": "/Users/velocityworks/IdeaProjects/prime-gap-structure",
+        "updatedAt": "2026-05-01T22:37:11.000Z"
+      },
+      {
+        "id": "codex:019de5a3-1598-71f0-adcd-441bad3a15b3",
+        "status": "completed",
+        "title": "Handrail Lead Dev",
+        "repo": "/Users/velocityworks/IdeaProjects/handrail",
+        "updatedAt": "2026-05-01T22:27:33.000Z"
+      },
+      {
+        "id": "codex:019de56b-3c0b-7732-9088-ec0d9b2185af",
+        "status": "completed",
+        "title": "Handrail Lead Dev",
+        "repo": "/Users/velocityworks/IdeaProjects/handrail",
+        "updatedAt": "2026-05-01T21:31:45.000Z"
+      },
+      {
+        "id": "codex:019de532-ef2c-73a1-be48-69cf8fb12bf0",
+        "status": "completed",
+        "title": "Handrail Lead Dev",
+        "repo": "/Users/velocityworks/IdeaProjects/handrail",
+        "updatedAt": "2026-05-01T20:25:54.000Z"
+      },
+      {
+        "id": "codex:019de507-90b5-73d0-aa28-6c8eb3e32636",
+        "status": "completed",
+        "title": "Finish environment setup",
+        "repo": "/Users/velocityworks/IdeaProjects/prime-gap-structure",
+        "updatedAt": "2026-05-01T20:01:13.000Z"
+      },
+      {
+        "id": "codex:019de339-8467-7342-a998-0b3acac2cbbf",
+        "status": "completed",
+        "title": "Defend the math",
+        "repo": "/Users/velocityworks/IdeaProjects/prime-gap-structure",
+        "updatedAt": "2026-05-01T19:54:23.000Z"
+      },
+      {
+        "id": "codex:019de501-7b34-7151-a245-de0cc9cba2d2",
+        "status": "completed",
+        "title": "Archive old chats",
+        "repo": "/Users/velocityworks/Documents/Codex/2026-05-01/archive-all-chats-older-than-48",
+        "updatedAt": "2026-05-01T19:29:58.000Z"
+      }
+    ]
+  },
+  "startChat": {
+    "sentAt": "2026-05-01T23:00:16.318Z",
+    "result": "error",
+    "error": "Codex Desktop did not become ready to receive this chat after Handrail opened it, so thread-follower-start-turn could not be routed. Try again once the chat is visible in Codex Desktop.",
+    "chatId": null,
+    "chatStartedReceived": false,
+    "chatStartedEventReceived": false,
+    "chatListContainsStartedChat": false
+  },
+  "approvalChat": {
+    "sentAt": "2026-05-01T23:00:25.601Z",
+    "result": "error",
+    "error": "Codex Desktop did not become ready to receive this chat after Handrail opened it, so thread-follower-start-turn could not be routed. Try again once the chat is visible in Codex Desktop.",
+    "chatId": null,
+    "chatStartedReceived": false,
+    "approvalRequiredReceived": false,
+    "waitingForApprovalInChatList": false
+  },
+  "conclusions": {
+    "issue21": "server did not emit chat_started for a real start_chat; investigate Desktop visibility wait or app-server start path",
+    "issue22": "server did not emit the expected chat-linked chat_event; investigate ChatManager start/continue broadcast path",
+    "issue24": "real Desktop repro did not produce an approval_required or waiting_for_approval signal through Handrail; investigate Desktop source state and CLI ingestion"
+  }
+}

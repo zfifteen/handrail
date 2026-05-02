@@ -93,3 +93,27 @@ The invariant is:
 ```text
 Protocol drift must become visible during development instead of being silently dropped.
 ```
+
+## Approval Routing Boundary
+
+Observed:
+
+- iOS can send `approve` and `deny` with `chatId` and `approvalId`.
+- `cli/src/chats.ts` currently rejects both commands with a visible error.
+- Codex Desktop IPC exposes owner-routed approval reply methods that require the Desktop/app-server request id for the pending approval, user input, or MCP elicitation.
+
+Inferred:
+
+- A Handrail `approvalId` must not be invented from transcript text.
+- First-class approval routing requires live Desktop/app-server request events that identify the pending request id and approval kind before iOS approval buttons can mutate Desktop state.
+- Pattern-detected transcript or status text may support notification copy, but it is not enough evidence to send an approval decision.
+
+Unknown:
+
+- The complete app-server notification envelope for pending approval, input, and MCP elicitation requests.
+
+The invariant is:
+
+```text
+Approval actions must route a real Desktop pending request id through the Desktop owner, not a guessed transcript marker.
+```

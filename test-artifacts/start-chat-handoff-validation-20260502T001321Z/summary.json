@@ -1,0 +1,17 @@
+{
+  "createdAt": "2026-05-02T00:13:49.266Z",
+  "outDir": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/start-chat-handoff-validation-20260502T001321Z",
+  "port": 63408,
+  "reproRoot": "/private/tmp/handrail-live-data-repro",
+  "promptMarker": "HANDRAIL_SAME_CHANNEL_OK_20260502T001321Z",
+  "sentAt": "2026-05-02T00:13:21.391Z",
+  "resultType": "error",
+  "error": "Codex Desktop did not expose chat codex:019de608-6002-7660-9c72-230f6919f046. Open Codex Desktop and refresh Handrail.",
+  "chatId": null,
+  "chatStarted": false,
+  "chatEventStarted": false,
+  "chatListContainsStartedChat": false,
+  "sawOldFollowerError": false,
+  "sawSessionPermissionError": false,
+  "relatedMessageTypes": []
+}

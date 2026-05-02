@@ -1,0 +1,14 @@
+{
+  "artifact": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/lead-dev-issue29-start-chat-20260502T002838Z",
+  "promptToken": "HANDRAIL_LEAD_DEV_START_CHAT_OK_20260502T002838Z",
+  "startedChatId": null,
+  "error": "Missing HANDRAIL_APNS_TEAM_ID.",
+  "sawChatStarted": false,
+  "messages": [
+    "machine_status",
+    "new_chat_options",
+    "chat_list",
+    "automation_list",
+    "error"
+  ]
+}

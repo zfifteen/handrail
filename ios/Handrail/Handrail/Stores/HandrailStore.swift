@@ -15,6 +15,7 @@ final class HandrailStore {
     var defaultRepo = ""
     var newChatOptions: NewChatOptions?
     var lastError: String?
+    var pairingError: String?
     var newChatError: String?
     var chatErrors: [String: String] = [:]
     var lastStartedChatId: String?
@@ -29,13 +30,17 @@ final class HandrailStore {
     private let pairingTokenAccount = "paired-machine-token"
     private let pinnedStorageKey = "handrail.pinnedChatIds"
     private let dismissedAttentionStorageKey = "handrail.dismissedAttentionChatIds"
-    private let client = HandrailWebSocketClient()
+    private let client: HandrailWebSocketClient
     private var awaitingStartedChat = false
     private var pendingErrorTarget: PendingErrorTarget?
     private var pushTokenRegistration: PushTokenRegistration?
     private var viewingChatCounts: [String: Int] = [:]
 
-    init(enableNetworking: Bool = true) {
+    init(
+        enableNetworking: Bool = true,
+        taskFactory: @escaping HandrailWebSocketClient.TaskFactory = { URLSession.shared.webSocketTask(with: $0) }
+    ) {
+        client = HandrailWebSocketClient(taskFactory: taskFactory)
         loadPairing()
         loadPinnedChats()
         loadDismissedAttentionChats()
@@ -65,9 +70,24 @@ final class HandrailStore {
             machineName: payload.machineName,
             isOnline: false
         )
+        pairingError = nil
         pairedMachine = machine
         savePairing(machine)
         client.connect(to: machine)
+    }
+
+    func resetPairing() {
+        pairedMachine = nil
+        UserDefaults.standard.removeObject(forKey: storageKey)
+        UserDefaults.standard.synchronize()
+        do {
+            try KeychainStore.delete(account: pairingTokenAccount)
+            pairingError = nil
+            lastError = nil
+            connectionText = "Offline"
+        } catch {
+            reportPairingError("Could not reset pairing token in Keychain: \(error.localizedDescription)")
+        }
     }
 
     func registerPushToken(_ registration: PushTokenRegistration) {
@@ -112,8 +132,11 @@ final class HandrailStore {
 
     func refreshChatDetail(chatId: String) {
         guard pairedMachine?.isOnline == true else {
+            reportChatError("Mac is offline. Reconnect before refreshing this chat.", chatId: chatId)
+            reconnect()
             return
         }
+        chatErrors[chatId] = nil
         client.send(.getChatDetail(chatId: chatId))
     }
 
@@ -502,6 +525,11 @@ final class HandrailStore {
         insertNotification(title: "Handrail error", detail: message, date: Date(), chatId: nil)
     }
 
+    private func reportPairingError(_ message: String) {
+        pairingError = message
+        reportError(message)
+    }
+
     private func reportNewChatError(_ message: String) {
         newChatError = message
         insertNotification(title: "Handrail error", detail: message, date: Date(), chatId: nil)
@@ -542,22 +570,31 @@ final class HandrailStore {
     }
 
     private func loadPairing() {
-        guard let data = UserDefaults.standard.data(forKey: storageKey) else { return }
-        if let metadata = try? JSONDecoder().decode(PairedMachineMetadata.self, from: data) {
+        guard let storedPairing = UserDefaults.standard.object(forKey: storageKey) else { return }
+        guard let data = storedPairing as? Data else {
+            reportPairingError("Stored pairing data is corrupt. Reset pairing, then pair Handrail with your Mac again.")
+            return
+        }
+        let decoder = JSONDecoder()
+        if let metadata = try? decoder.decode(PairedMachineMetadata.self, from: data) {
             do {
                 if let token = try KeychainStore.load(account: pairingTokenAccount) {
                     pairedMachine = metadata.machine(token: token)
                     return
                 }
+                reportPairingError("Stored pairing metadata is missing its Keychain token. Reset pairing, then pair Handrail with your Mac again.")
+                return
             } catch {
-                reportError("Could not read pairing token from Keychain: \(error.localizedDescription)")
+                reportPairingError("Could not read pairing token from Keychain: \(error.localizedDescription)")
                 return
             }
         }
-        if let legacyMachine = try? JSONDecoder().decode(PairedMachine.self, from: data) {
+        if let legacyMachine = try? decoder.decode(PairedMachine.self, from: data) {
             pairedMachine = legacyMachine
             savePairing(legacyMachine)
+            return
         }
+        reportPairingError("Stored pairing data is corrupt. Reset pairing, then pair Handrail with your Mac again.")
     }
 
     private func savePairing(_ machine: PairedMachine) {
@@ -567,7 +604,7 @@ final class HandrailStore {
             let data = try JSONEncoder().encode(metadata)
             UserDefaults.standard.set(data, forKey: storageKey)
         } catch {
-            reportError("Could not save pairing token to Keychain: \(error.localizedDescription)")
+            reportPairingError("Could not save pairing token to Keychain: \(error.localizedDescription)")
         }
     }
 

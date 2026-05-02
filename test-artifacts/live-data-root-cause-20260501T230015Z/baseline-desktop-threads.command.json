@@ -1,0 +1,11 @@
+{
+  "command": "sqlite3",
+  "args": [
+    "-readonly",
+    "-json",
+    "/Users/velocityworks/.codex/state_5.sqlite",
+    "SELECT id, archived, source, cwd, title, first_user_message, rollout_path, datetime(created_at, 'unixepoch') AS created_at, datetime(updated_at, 'unixepoch') AS updated_at FROM threads ORDER BY updated_at DESC, id DESC LIMIT 50"
+  ],
+  "cwd": "/Users/velocityworks/IdeaProjects/handrail",
+  "startedAt": "2026-05-01T23:00:16.208Z"
+}

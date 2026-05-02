@@ -1,0 +1,32 @@
+{
+  "createdAt": "2026-05-02T06:06:25.330Z",
+  "url": "ws://127.0.0.1:8788",
+  "promptToken": "HANDRAIL_ISSUE29_RESOLVE_20260502T060625Z",
+  "serverPort": 8788,
+  "result": {
+    "type": "chat_started",
+    "chat": {
+      "id": "codex:019de74b-9e6e-71e1-a6e1-14028304e776",
+      "repo": "/Users/velocityworks/IdeaProjects/handrail",
+      "title": "Handrail issue 29 acceptance probe. Reply exactly HANDRAIL_ISSUE29_RESOLVE_20260502T060625Z a...",
+      "projectName": "handrail",
+      "status": "running",
+      "startedAt": "2026-05-02T06:06:25.000Z",
+      "updatedAt": "2026-05-02T06:06:26.425Z",
+      "isPinned": false,
+      "isAutomationTarget": false,
+      "hasUnreadTurn": false,
+      "transcript": [
+        "User:\nHandrail issue 29 acceptance probe. Reply exactly HANDRAIL_ISSUE29_RESOLVE_20260502T060625Z and do not edit files.  \n\n"
+      ],
+      "acceptsInput": false
+    }
+  },
+  "chatId": "codex:019de74b-9e6e-71e1-a6e1-14028304e776",
+  "chatStartedReceived": true,
+  "chatStartedEventReceived": true,
+  "chatListContainsStartedChat": true,
+  "cliChatsContainsStartedChat": true,
+  "cliChatsContainsPrompt": true,
+  "commandError": null
+}

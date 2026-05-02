@@ -57,4 +57,22 @@ final class RootLayoutSelectionTests: XCTestCase {
         XCTAssertEqual(selection.selectedApprovalId, "approval-fixture")
         XCTAssertTrue(selection.hasDetailSelection)
     }
+
+    func testPhoneTabAccessibilityItemsMatchVisibleCompactTabs() {
+        XCTAssertEqual(
+            PhoneTabAccessibilityItem.allCases.map(\.rawValue),
+            ["Dashboard", "Chats", "Attention", "Activity", "More"]
+        )
+        XCTAssertEqual(PhoneTabAccessibilityItem.more.targetTab, .alerts)
+        XCTAssertTrue(PhoneTabAccessibilityItem.more.isSelected(.alerts))
+        XCTAssertTrue(PhoneTabAccessibilityItem.more.isSelected(.settings))
+        XCTAssertFalse(PhoneTabAccessibilityItem.more.isSelected(.dashboard))
+    }
+
+    func testPhoneTabContentInsetCoversTabBarHitRegion() {
+        XCTAssertGreaterThanOrEqual(
+            PhoneTabBarMetrics.contentBottomInset,
+            PhoneTabBarMetrics.accessibilityHeight
+        )
+    }
 }

@@ -1,0 +1,20 @@
+{
+  "artifactDir": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/start-chat-fix-validation-20260502T001756Z",
+  "port": 63492,
+  "marker": "HANDRAIL_START_CHAT_FIX_OK_20260502T001756Z",
+  "started": {
+    "id": "codex:019de60c-94cd-7cb3-8ca5-f4ca23ac2ed2",
+    "repo": "/private/tmp/handrail-live-data-repro",
+    "title": "Reply exactly HANDRAIL_START_CHAT_FIX_OK_20260502T001756Z",
+    "projectName": "handrail-live-data-repro",
+    "status": "running",
+    "startedAt": "2026-05-02T00:17:57.993Z",
+    "updatedAt": "2026-05-02T00:17:57.993Z",
+    "transcript": [
+      "User:\nReply exactly HANDRAIL_START_CHAT_FIX_OK_20260502T001756Z  \n\n"
+    ],
+    "acceptsInput": false
+  },
+  "cliChatsIncludesStartedId": false,
+  "cliChatsIncludesMarker": false
+}

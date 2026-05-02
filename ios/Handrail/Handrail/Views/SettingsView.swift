@@ -26,6 +26,26 @@ struct SettingsView: View {
                     }
                 }
 
+                if let pairingError = store.pairingError {
+                    Card {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Label("Pairing needs reset", systemImage: "exclamationmark.triangle")
+                                .font(.headline)
+                            Text(pairingError)
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Button(role: .destructive) {
+                                store.resetPairing()
+                            } label: {
+                                Label("Reset Pairing", systemImage: "trash")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                }
+
                 Card {
                     VStack(alignment: .leading, spacing: 10) {
                         Label("Pair new device", systemImage: "qrcode")

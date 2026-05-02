@@ -18,6 +18,20 @@ The team uses `zfifteen/handrail` as the GitHub repository target. GitHub issues
 
 Each run should prefer one narrow, deterministic path. Do not add fallback workflows, broad frameworks, or speculative future-proofing. If a role cannot complete the needed action with the available context and tools, it should state the blocker plainly in its output.
 
+## Product Invariant Gate
+
+Every role must preserve Handrail as a free, local-first iOS remote control for Codex Desktop chats on the user's Mac. The canonical contract is [Handrail Product Invariants](../product-invariants.md).
+
+Stop and record the product decision needed before implementing or claiming work that implies cloud relay, hosted execution, account state, payment, generic terminal behavior, multi-agent control, non-Codex agent support, or direct iOS file editing that bypasses Codex Desktop.
+
+When a run touches product scope, protocol behavior, App Store evidence, or visible iPhone/iPad UI, the role report must include:
+
+```markdown
+## Product Invariant Check
+```
+
+The check should state whether the run preserved free, local-first, Codex Desktop-only Handrail and name any drift risk found.
+
 ## Coordination
 
 The core team now runs as conventional independent Codex Desktop automations:
@@ -31,7 +45,7 @@ The core team now runs as conventional independent Codex Desktop automations:
 
 The Business Analyst remains on its separate daily App Store eligibility cadence, and the simulator sweep remains a separate broad confidence check.
 
-Roles coordinate through reports, GitHub issues, Slack requests, and handoff files. No role starts another role. A role may write or refresh a handoff for a later scheduled run, but it must not manually launch another role, call app-server thread creation, edit automation records, or edit automation database rows as a handoff mechanism. If two roles identify conflicting next actions, the later role should record the conflict directly rather than resolving it silently.
+Roles coordinate through reports, GitHub issues, Slack requests, and handoff files. No role starts, schedules, or simulates another role. Normal product validation is different: a role may fully exercise Handrail functionality when the selected issue requires it, including creating a real local Codex Desktop chat through Handrail `start_chat`. If two roles identify conflicting next actions, the later role should record the conflict directly rather than resolving it silently.
 
 ## Slack Coordination
 
@@ -73,4 +87,5 @@ Each output must state:
 - the strongest supported finding or action,
 - exact files, tests, commands, or issues touched,
 - remaining blocker or next action,
-- verification performed.
+- verification performed,
+- the product invariant check when the run touches product scope, protocol behavior, App Store evidence, or visible iPhone/iPad UI.

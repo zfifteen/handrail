@@ -37,7 +37,7 @@ Roles coordinate through durable artifacts:
 - Handoff files under `$CODEX_HOME/automations/<role>/handoff.md`.
 - Slack messages in `#handrail-agents` for role-addressed operational requests.
 
-No role starts another role. A role may write or refresh a handoff file for a later scheduled run, but it must not manually launch another role, call app-server thread creation, edit automation records, or edit automation database rows as a handoff mechanism.
+No role starts, schedules, or simulates another role. A role may write or refresh a handoff file for a later scheduled run, but it must not edit automation records or automation database rows as a handoff mechanism. Normal product validation is different: a role may fully exercise Handrail functionality when the selected issue requires it, including creating a real local Codex Desktop chat through Handrail `start_chat`.
 
 The useful rhythm is:
 

@@ -1,0 +1,15 @@
+{
+  "artifact": "/Users/velocityworks/IdeaProjects/handrail/test-artifacts/lead-dev-issue29-patched-server-20260502T003036Z",
+  "port": 63776,
+  "promptToken": "HANDRAIL_LEAD_DEV_PATCHED_SERVER_OK_20260502T003036Z",
+  "startedChatId": null,
+  "terminalError": "error creating thread: Fatal error: Codex cannot access session files at /Users/velocityworks/.codex/sessions (permission denied). If sessions were created using sudo, fix ownership: sudo chown -R $(whoami) /Users/velocityworks/.codex (underlying error: Operation not permitted (os error 1))",
+  "sawChatStarted": false,
+  "messages": [
+    "machine_status",
+    "new_chat_options",
+    "chat_list",
+    "automation_list",
+    "error"
+  ]
+}
