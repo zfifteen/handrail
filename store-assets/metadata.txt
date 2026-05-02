@@ -37,14 +37,14 @@ Review notes:
 Handrail requires Local Network access to connect to the Handrail CLI running on the user's Mac. The connection uses ws:// on the local network and is protected by a per-device pairing token. No Handrail backend account, sync service, payment, telemetry, or cloud relay is used.
 
 Screenshot inventory:
-- iPhone 6.9-inch Dashboard paired state: missing.
-- iPhone 6.9-inch Chats list: missing.
-- iPhone 6.9-inch Chat Detail with readable Codex chat: missing.
-- iPhone 6.9-inch New Chat sheet: missing.
+- iPhone Dashboard paired state: draft captured at store-assets/screenshots/iphone/iphone-dashboard-paired.png from iPhone 17 simulator; final 6.9-inch App Store capture still needed.
+- iPhone Chats list: draft captured at store-assets/screenshots/iphone/iphone-chats-list.png from iPhone 17 simulator; final 6.9-inch App Store capture still needed.
+- iPhone Chat Detail with readable Codex chat: draft captured at store-assets/screenshots/iphone/iphone-chat-detail.png from iPhone 17 simulator; final 6.9-inch App Store capture still needed.
+- iPhone New Chat sheet: draft captured at store-assets/screenshots/iphone/iphone-new-chat.png from iPhone 17 simulator; final 6.9-inch App Store capture still needed.
 - iPhone 6.9-inch Approval request: deferred until first-class approval routing is verified in #2.
 
 Screenshot capture plan:
-See store-assets/screenshot-plan.md. The listing is not App Store ready until the required v1 iPhone screenshots are captured from verified simulator or device flows and copied into this directory.
+See store-assets/screenshot-plan.md. The listing is not App Store ready until the required v1 iPhone screenshots are captured from a verified 6.9-inch simulator or device flow and copied into this directory.
 
 Scope exclusions:
 - Do not claim iPad support in the iPhone listing until the iPad MVP stabilization milestone is complete and verified.
