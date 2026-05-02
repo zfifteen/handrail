@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  cli-tests:
+    name: CLI tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cli/package-lock.json
+
+      - name: Install CLI dependencies
+        run: npm ci
+
+      - name: Run CLI tests
+        run: npm test
+
+  ios-simulator-build:
+    name: iOS simulator build
+    runs-on: macos-15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build Handrail for iOS Simulator
+        run: |
+          xcodebuild \
+            -project ios/Handrail/Handrail.xcodeproj \
+            -scheme Handrail \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

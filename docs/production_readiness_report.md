@@ -109,6 +109,10 @@ Current evidence:
 
 The next watchOS action requires either a usable paired iPhone + Apple Watch hardware path, or an explicit product decision to accept a partial simulator/build-only watchOS implementation before hardware acceptance. Do not close #5 from simulator layout evidence alone.
 
+## Lead Dev CI Hygiene Refresh - 2026-05-02 18:20Z
+
+The repo now has a narrow GitHub Actions smoke workflow at `.github/workflows/ci.yml`. It runs `npm ci` plus `npm test` for the CLI and builds the `Handrail` scheme for iOS Simulator with signing disabled. This adds a review gate for normal code movement without pretending to solve the signed Release archive or App Store upload path. Distribution automation remains blocked until the Apple signing inputs in #25 exist.
+
 ---
 
 ## Part 1: App Store Hard Blockers
@@ -141,10 +145,10 @@ These items will cause Apple review rejection or provisioning failure regardless
 **Finding:** `store-assets/metadata.txt` now contains iPhone-only listing copy, review notes, keyword/category proposal, explicit scope exclusions, a public support URL, a public privacy policy URL, and the v1 marketing URL omission decision. The copy no longer markets approval responses while #2 is open. `store-assets/screenshot-plan.md` lists four required v1 iPhone screenshots, records draft iPhone 17 live captures under `store-assets/screenshots/iphone/`, and defers the approval screenshot until first-class approval routing is verified. The package is still not complete because final 6.9-inch App Store screenshot-class captures are blocked by unavailable paired 6.9-inch simulator/device state in the current automation environment.
 **Action:** Recapture the four required v1 iPhone screenshots from a verified paired 6.9-inch simulator/device flow and place them under `store-assets/screenshots/iphone/`. Do not capture or submit an approval screenshot until #2 produces real approval-routing evidence.
 
-### 1.6 No Automated Build / Distribution Pipeline
+### 1.6 CI Exists; Distribution Pipeline Still Blocked
 
-**Finding:** All builds in the run log are manual `xcodebuild` calls and XcodeBuildMCP sessions. There is no CI/CD configuration (GitHub Actions, Xcode Cloud, or Fastlane) for archiving, signing, or uploading to App Store Connect.  
-**Action:** Add a GitHub Actions workflow (or Xcode Cloud trigger) that: runs `cd cli && npm test`, builds the iOS archive with `xcodebuild archive`, exports with a distribution provisioning profile, and uploads with `xcrun altool` or `xcodebuild -exportArchive`. Gate merges to main on the workflow passing.
+**Finding:** `.github/workflows/ci.yml` now runs CLI tests and an unsigned iOS Simulator build on pushes and pull requests. This catches ordinary TypeScript, protocol-test, and Swift build regressions before review. It does not archive, export, sign, or upload an App Store build.
+**Action:** After the #25 signing inputs exist, extend release automation to build a signed Release archive, export with a distribution/TestFlight/App Store provisioning profile, inspect the signed entitlements, and upload through App Store Connect tooling.
 
 ---
 
@@ -304,4 +308,4 @@ Execute in this order:
 10. **[iPad]** Close #24 only after live simulator evidence for a real `waiting_for_approval` row.
 11. **[iPad]** Run and record a full iPad walkthrough before closing umbrella issue #6 or claiming iPad App Store support.
 12. **[watchOS]** Provide a paired iPhone + Apple Watch hardware path for #5, or explicitly approve a partial simulator/build-only implementation before hardware acceptance.
-13. **[INFRA]** Add a distribution pipeline only after signing inputs exist; until then, document the manual Release archive command and evidence path.
+13. **[INFRA]** Keep the smoke CI workflow green; add a signed distribution pipeline only after signing inputs exist.
