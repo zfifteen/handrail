@@ -50,9 +50,9 @@ Open iPhone readiness scope:
 
 The next shippable release remains blocked until milestone 1 is closed with CLI test evidence and iPhone simulator validation for every affected visible flow. iPad stabilization, Desktop protocol hardening beyond #18, and watchOS remain separate milestones.
 
-## iPad Stabilization State Refresh - 2026-05-02 07:35Z
+## iPad Stabilization State Refresh - 2026-05-02 16:15Z
 
-Milestone 2, `iPad MVP stabilization`, has 2 open issues and 4 closed issues after the 2026-05-02 Lead Dev run. The live `start_chat` path now provides closure evidence for #21 and #22.
+Milestone 2, `iPad MVP stabilization`, has 2 open issues and 4 closed issues after the 2026-05-02 Lead Dev run. The live `start_chat` path now provides closure evidence for #21 and #22. Both remaining open issues are now labeled `blocked`: #24 is blocked by #2 live first-class approval evidence, and #6 is blocked by #24 because umbrella iPad acceptance requires a full walkthrough after the approval-row evidence exists.
 
 Closed in milestone 2:
 
@@ -63,7 +63,7 @@ Closed in milestone 2:
 
 Open iPad stabilization scope:
 
-- #6 Product spec: iPad Handrail version. This remains the umbrella product acceptance issue for the iPad surface; it should not be closed by individual bug fixes alone.
+- #6 Product spec: iPad Handrail version. This remains the umbrella product acceptance issue for the iPad surface; it should not be closed by individual bug fixes alone. It is now labeled `blocked` until #24 has real iPad simulator evidence for a live `waiting_for_approval` row and the full iPad walkthrough can be performed without fixture-only state.
 - #24 Waiting approvals look like running chats on Dashboard. Current iPad code path is reported fixed; #29 can now produce a live started chat, but closure still depends on #2 for first-class approval ingestion/routing.
 
 The strongest current iPad finding is that #21 and #22 are closed with live iPad simulator evidence. A real New Chat start dismissed the popover, switched to Chats, and selected the started chat in detail for #21. A live chat-linked Activity row switched from Activity to Chats and selected the same chat detail for #22. #24 still depends on #2 making approval state first-class enough to validate `waiting_for_approval` behavior. Do not broaden product code with test-only launch state to close the remaining iPad issue; use a real simulator-connected local Handrail feed that naturally contains the needed approval state.
@@ -84,13 +84,15 @@ The issue remains open and is now labeled `blocked` for live evidence. The local
 
 #3 is now implemented at the CLI protocol layer for Handrail-started app-server turns. The retained Codex app-server connection maps observed `turn/started`, `turn/completed`, and `item/agentMessage/delta` notifications into Handrail `chat_event` messages, overlays live status on the Desktop-visible `codex:` chat row, and broadcasts refreshed `chat_list` state without creating mobile-only chats. Verification: `cd cli && npm test` passed 44/44.
 
+Milestone 3 now has one open issue: #2. #3 is closed with deterministic CLI test evidence. #2 has code-level approval request-id routing but remains blocked for live evidence until the running server can expose the rebuilt CLI and a real approval request can be captured through iPad simulator validation.
+
 ## PM Milestone Reconciliation - 2026-05-02 11:08Z
 
 Milestone descriptions were reconciled to match the current GitHub issue state:
 
 - Milestone 1, `iPhone App Store readiness`, is now narrowed to #25 and #28. #25 is blocked on a non-expired APNs-capable distribution/TestFlight/App Store profile; #28 is narrowed to four required iPhone screenshots because #26 closed with a public privacy policy URL.
-- Milestone 2, `iPad MVP stabilization`, is now narrowed to umbrella acceptance issue #6 plus #24. #21 and #22 are closed with live iPad simulator evidence. #24 remains blocked by #2 because the live feed still lacks first-class `waiting_for_approval` state.
-- Milestone 3, `Desktop protocol hardening`, is now narrowed to #2 and #3. #29 is closed, so the remaining Desktop protocol blocker is first-class approval request ingestion/routing plus broader live app-server event ingestion.
+- Milestone 2, `iPad MVP stabilization`, is now narrowed to blocked umbrella acceptance issue #6 plus blocked approval-row evidence issue #24. #21 and #22 are closed with live iPad simulator evidence. #24 remains blocked by #2 because the live feed still lacks first-class `waiting_for_approval` state.
+- Milestone 3, `Desktop protocol hardening`, is now narrowed to blocked #2. #29 and #3 are closed, so the remaining Desktop protocol blocker is live first-class approval request evidence.
 
 No GitHub release exists yet, and no release should be created until the relevant milestone is closed with recorded CLI and required simulator/device evidence.
 
@@ -291,7 +293,7 @@ Execute in this order:
 12. **[FEATURE]** Suppress notifications for active foreground chat (issue #10).
 13. **[FEATURE]** Clear stale global errors on sheet/detail open.
 14. **[DESKTOP]** Closed 2026-05-02: Desktop `start_chat` handoff emits `chat_started` and chat-linked activity (#29).
-15. **[DESKTOP]** Add first-class approval ingestion/routing for live `waiting_for_approval` evidence (#2).
+15. **[DESKTOP]** Produce live first-class approval ingestion/routing evidence for `waiting_for_approval` (#2).
 16. **[iPad]** Close #24 only after live simulator evidence for a real `waiting_for_approval` row.
 17. **[iPad]** Keep project-grouped slug fix evidence attached to closed issue #12.
 18. **[watchOS]** Implement watchOS target per issue #5 spec.
