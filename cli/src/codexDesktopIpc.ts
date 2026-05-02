@@ -50,6 +50,7 @@ export interface DesktopConversationInput {
 export interface CodexDesktopAppServerConnection {
   request(method: string, params: unknown, id?: string): Promise<unknown>;
   setApprovalRequestHandler?(handler: (request: DesktopApprovalRequest) => void): void;
+  setLiveEventHandler?(handler: (event: DesktopLiveEvent) => void): void;
 }
 
 export interface DesktopApprovalRequest {
@@ -64,14 +65,23 @@ export interface DesktopApprovalRequest {
 
 export type DesktopApprovalDecision = "accept" | "decline";
 
+export type DesktopLiveEventKind = "turn_started" | "turn_completed" | "turn_failed" | "turn_interrupted" | "output";
+
+export interface DesktopLiveEvent {
+  threadId: string;
+  kind: DesktopLiveEventKind;
+  text?: string;
+}
+
 export async function startCodexDesktopConversation(
   input: DesktopConversationInput,
-  onApprovalRequest?: (request: DesktopApprovalRequest) => void
+  onApprovalRequest?: (request: DesktopApprovalRequest) => void,
+  onLiveEvent?: (event: DesktopLiveEvent) => void
 ): Promise<string> {
   const client = new CodexDesktopAppServerClient(codexDesktopAppServerPath());
   await client.connect();
   try {
-    const threadId = await startCodexDesktopConversationOnAppServer(client, input, onApprovalRequest);
+    const threadId = await startCodexDesktopConversationOnAppServer(client, input, onApprovalRequest, onLiveEvent);
     retainCodexDesktopAppServerUntilTurnCompletes(client, threadId);
     return threadId;
   } catch (error) {
@@ -83,10 +93,14 @@ export async function startCodexDesktopConversation(
 export async function startCodexDesktopConversationOnAppServer(
   client: CodexDesktopAppServerConnection,
   input: DesktopConversationInput,
-  onApprovalRequest?: (request: DesktopApprovalRequest) => void
+  onApprovalRequest?: (request: DesktopApprovalRequest) => void,
+  onLiveEvent?: (event: DesktopLiveEvent) => void
 ): Promise<string> {
   if (onApprovalRequest) {
     client.setApprovalRequestHandler?.(onApprovalRequest);
+  }
+  if (onLiveEvent) {
+    client.setLiveEventHandler?.(onLiveEvent);
   }
   const threadId = await createCodexDesktopThread(client, input);
   await startCodexDesktopAppServerTurn(client, { threadId, cwd: input.cwd, prompt: input.prompt });
@@ -398,6 +412,7 @@ class CodexDesktopAppServerClient {
   private pending = new Map<string, PendingAppServerResponse>();
   private notificationWaiters: PendingAppServerNotification[] = [];
   private approvalRequestHandler: ((request: DesktopApprovalRequest) => void) | null = null;
+  private liveEventHandler: ((event: DesktopLiveEvent) => void) | null = null;
   private nextRequestIndex = 1;
 
   constructor(private readonly executablePath: string) {}
@@ -452,6 +467,10 @@ class CodexDesktopAppServerClient {
 
   setApprovalRequestHandler(handler: (request: DesktopApprovalRequest) => void): void {
     this.approvalRequestHandler = handler;
+  }
+
+  setLiveEventHandler(handler: (event: DesktopLiveEvent) => void): void {
+    this.liveEventHandler = handler;
   }
 
   waitForNotification(predicate: PendingAppServerNotification["predicate"]): Promise<AppServerNotification> {
@@ -539,6 +558,10 @@ class CodexDesktopAppServerClient {
       method: message.method,
       params: "params" in message ? message.params : undefined
     };
+    const liveEvent = codexDesktopLiveEventFromNotification(notification.method, notification.params);
+    if (liveEvent) {
+      this.liveEventHandler?.(liveEvent);
+    }
     const waiterIndex = this.notificationWaiters.findIndex((waiter) => waiter.predicate(notification));
     if (waiterIndex < 0) {
       return;
@@ -626,6 +649,35 @@ export function codexDesktopApprovalRequestFromServerRequest(
   return null;
 }
 
+export function codexDesktopLiveEventFromNotification(method: string, params: unknown): DesktopLiveEvent | null {
+  if (!params || typeof params !== "object") {
+    return null;
+  }
+  const threadId = readString(params, "threadId");
+  if (!threadId) {
+    return null;
+  }
+  if (method === "turn/started") {
+    return { threadId, kind: "turn_started", text: "Codex Desktop turn started." };
+  }
+  if (method === "turn/completed") {
+    const turn = readObject(params, "turn");
+    const status = turn ? readString(turn, "status") : null;
+    if (status === "failed") {
+      return { threadId, kind: "turn_failed", text: readTurnErrorMessage(turn as object) ?? "Codex Desktop turn failed." };
+    }
+    if (status === "interrupted") {
+      return { threadId, kind: "turn_interrupted", text: "Codex Desktop turn was interrupted." };
+    }
+    return { threadId, kind: "turn_completed", text: "Codex Desktop turn completed." };
+  }
+  if (method === "item/agentMessage/delta") {
+    const text = readString(params, "delta");
+    return text ? { threadId, kind: "output", text } : null;
+  }
+  return null;
+}
+
 function readString(value: object, key: string): string | null {
   const fields = value as Record<string, unknown>;
   if (!(key in fields)) {
@@ -633,6 +685,17 @@ function readString(value: object, key: string): string | null {
   }
   const candidate = fields[key];
   return typeof candidate === "string" && candidate.trim() ? candidate : null;
+}
+
+function readObject(value: object, key: string): object | null {
+  const fields = value as Record<string, unknown>;
+  const candidate = fields[key];
+  return candidate && typeof candidate === "object" ? candidate : null;
+}
+
+function readTurnErrorMessage(turn: object): string | null {
+  const error = readObject(turn, "error");
+  return error ? readString(error, "message") : null;
 }
 
 function retainCodexDesktopAppServerUntilTurnCompletes(client: CodexDesktopAppServerClient, threadId: string): void {

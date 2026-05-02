@@ -1,8 +1,8 @@
 import { setTimeout as delay } from "node:timers/promises";
 import { prepareChatWorkspace } from "./newChatOptions.js";
-import type { ApprovalRequest, ChatRecord, ServerMessage, StartChatOptions } from "./types.js";
+import type { ApprovalRequest, ChatRecord, ChatStatus, ServerMessage, StartChatOptions } from "./types.js";
 import { formatCodexTranscriptEntry, listCodexChats, readCodexChatDetail } from "./codexSessions.js";
-import { interruptCodexDesktopTurn, startCodexDesktopConversation, startCodexDesktopTurn, type DesktopApprovalDecision, type DesktopApprovalRequest } from "./codexDesktopIpc.js";
+import { interruptCodexDesktopTurn, startCodexDesktopConversation, startCodexDesktopTurn, type DesktopApprovalDecision, type DesktopApprovalRequest, type DesktopLiveEvent } from "./codexDesktopIpc.js";
 
 type Broadcast = (message: ServerMessage) => void;
 const DESKTOP_VISIBLE_WAIT_ATTEMPTS = 24;
@@ -28,6 +28,7 @@ const defaultDeps: ChatManagerDeps = {
 
 export class ChatManager {
   private pendingApprovals = new Map<string, { request: ApprovalRequest; respond(decision: DesktopApprovalDecision): Promise<void> }>();
+  private liveStatuses = new Map<string, { status: ChatStatus; updatedAt: string }>();
 
   constructor(
     private readonly broadcast: Broadcast,
@@ -35,7 +36,7 @@ export class ChatManager {
   ) {}
 
   async list(): Promise<ChatRecord[]> {
-    return this.applyPendingApprovals(await this.deps.listCodexChats()).sort(
+    return this.applyPendingApprovals(this.applyLiveStatuses(await this.deps.listCodexChats())).sort(
       (left, right) => this.sortTime(right) - this.sortTime(left)
     );
   }
@@ -68,7 +69,8 @@ export class ChatManager {
         reasoningEffort: options.reasoningEffort,
         accessPreset: options.accessPreset
       },
-      (approval) => this.handleDesktopApprovalRequest(approval)
+      (approval) => this.handleDesktopApprovalRequest(approval),
+      (event) => void this.handleDesktopLiveEvent(event)
     );
     const now = new Date().toISOString();
     const visibleChat = await this.waitForDesktopVisibleChat(`codex:${threadId}`);
@@ -195,6 +197,26 @@ export class ChatManager {
     });
   }
 
+  private async handleDesktopLiveEvent(event: DesktopLiveEvent): Promise<void> {
+    const chatId = `codex:${event.threadId}`;
+    const now = new Date().toISOString();
+    const mapped = chatEventFromDesktopLiveEvent(event);
+    if (!mapped) {
+      return;
+    }
+    if (mapped.status) {
+      this.liveStatuses.set(chatId, { status: mapped.status, updatedAt: now });
+    }
+    this.broadcast({
+      type: "chat_event",
+      chatId,
+      event: { kind: mapped.kind, text: event.text, status: mapped.status, at: now }
+    });
+    if (mapped.status) {
+      this.broadcast({ type: "chat_list", chats: await this.list() });
+    }
+  }
+
   private pendingApproval(chatId: string, approvalId: string): { request: ApprovalRequest; respond(decision: DesktopApprovalDecision): Promise<void> } {
     const pending = this.pendingApprovals.get(approvalId);
     if (!pending || pending.request.chatId !== chatId) {
@@ -214,6 +236,31 @@ export class ChatManager {
       }
       return { ...chat, status: "waiting_for_approval", files: pending.request.files };
     });
+  }
+
+  private applyLiveStatuses(chats: ChatRecord[]): ChatRecord[] {
+    if (this.liveStatuses.size === 0) {
+      return chats;
+    }
+    return chats.map((chat) => {
+      const liveStatus = this.liveStatuses.get(chat.id);
+      return liveStatus ? { ...chat, status: liveStatus.status, updatedAt: liveStatus.updatedAt } : chat;
+    });
+  }
+}
+
+function chatEventFromDesktopLiveEvent(event: DesktopLiveEvent): { kind: string; status?: ChatStatus } | null {
+  switch (event.kind) {
+    case "turn_started":
+      return { kind: "turn_started", status: "running" };
+    case "turn_completed":
+      return { kind: "chat_completed", status: "completed" };
+    case "turn_failed":
+      return { kind: "chat_failed", status: "failed" };
+    case "turn_interrupted":
+      return { kind: "chat_stopped", status: "stopped" };
+    case "output":
+      return { kind: "output" };
   }
 }
 

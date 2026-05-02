@@ -80,6 +80,10 @@ The iPhone App Store metadata package no longer claims approval-response support
 
 The issue remains open and is now labeled `blocked` for live evidence. The local LaunchAgent still needs a permitted restart before the running server can expose the rebuilt `cli/dist`; `launchctl kickstart -k gui/501/com.velocityworks.handrail.server` returned `Operation not permitted` and listener PID `4657` did not change. #24 still needs simulator evidence from a real live `waiting_for_approval` row before closure.
 
+## Lead Dev Live App-server Event Refresh - 2026-05-02 15:44Z
+
+#3 is now implemented at the CLI protocol layer for Handrail-started app-server turns. The retained Codex app-server connection maps observed `turn/started`, `turn/completed`, and `item/agentMessage/delta` notifications into Handrail `chat_event` messages, overlays live status on the Desktop-visible `codex:` chat row, and broadcasts refreshed `chat_list` state without creating mobile-only chats. Verification: `cd cli && npm test` passed 44/44.
+
 ## PM Milestone Reconciliation - 2026-05-02 11:08Z
 
 Milestone descriptions were reconciled to match the current GitHub issue state:

@@ -51,6 +51,7 @@ Observed:
 - Handrail starts the first turn for a new Desktop thread over the same app-server connection with `turn/start`.
 - Handrail keeps that app-server child alive until it observes `turn/completed` for the thread.
 - For Handrail-started app-server turns, Handrail can receive `item/commandExecution/requestApproval` and `item/fileChange/requestApproval` requests from the app-server and respond on the same request id.
+- For Handrail-started app-server turns, Handrail ingests observed live app-server notifications and rebroadcasts thread-scoped state through the normal mobile `chat_event` and `chat_list` path.
 - Handrail continues existing Desktop-visible threads through Desktop IPC with `thread-follower-start-turn`.
 - Desktop renderer code uses `thread/list` to fetch recent conversations.
 - Desktop renderer code uses `thread/unsubscribe` when an inactive owner conversation should stop streaming.
@@ -235,6 +236,26 @@ The invariant is:
 
 ```text
 App-server request correlation must be auditable from the emitted request stream.
+```
+
+## Handrail Live Notifications
+
+Handrail maps only observed thread-scoped app-server notifications into mobile protocol events:
+
+| App-server notification | Handrail event |
+| --- | --- |
+| `turn/started` | `chat_event` kind `turn_started`, status `running` |
+| `turn/completed` with turn status `completed` | `chat_event` kind `chat_completed`, status `completed` |
+| `turn/completed` with turn status `failed` | `chat_event` kind `chat_failed`, status `failed` |
+| `turn/completed` with turn status `interrupted` | `chat_event` kind `chat_stopped`, status `stopped` |
+| `item/agentMessage/delta` | `chat_event` kind `output` |
+
+When a mapped live event carries a status, Handrail overlays that status on the Desktop-derived `codex:` chat row and broadcasts a refreshed `chat_list`. This keeps Codex Desktop visibility as the gate: live events can update a visible Desktop chat, but they do not create mobile-only chats.
+
+The invariant is:
+
+```text
+Live app-server events may enrich a Desktop-visible Handrail row; they must not create an independent Handrail chat source.
 ```
 
 ## Mutation Classes

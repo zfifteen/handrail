@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { extractStatus, parseDesktopPinnedThreadIds } from "../src/codexSessions.js";
-import { codexDesktopAppServerTurnStartParams, codexDesktopApprovalRequestFromServerRequest, codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame, startCodexDesktopConversationOnAppServer } from "../src/codexDesktopIpc.js";
+import { codexDesktopAppServerTurnStartParams, codexDesktopApprovalRequestFromServerRequest, codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopLiveEventFromNotification, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame, startCodexDesktopConversationOnAppServer } from "../src/codexDesktopIpc.js";
 import { discoverProjects } from "../src/newChatOptions.js";
 import { ChatManager } from "../src/chats.js";
 
@@ -68,9 +68,13 @@ test("builds Codex Desktop app-server turn-start params", () => {
 test("new Desktop conversations keep thread creation and first turn on one app-server connection", async () => {
   const calls: Array<{ method: string; params: unknown }> = [];
   let approvalHandlerWasSet = false;
+  let liveEventHandlerWasSet = false;
   const client = {
     setApprovalRequestHandler() {
       approvalHandlerWasSet = true;
+    },
+    setLiveEventHandler() {
+      liveEventHandlerWasSet = true;
     },
     async request(method: string, params: unknown): Promise<unknown> {
       calls.push({ method, params });
@@ -90,15 +94,47 @@ test("new Desktop conversations keep thread creation and first turn on one app-s
     model: "gpt-5.5",
     reasoningEffort: "high",
     accessPreset: "on_request"
-  }, () => {});
+  }, () => {}, () => {});
 
   assert.equal(threadId, "019dc424-e857-76e0-8229-589ecf107eb4");
   assert.equal(approvalHandlerWasSet, true);
+  assert.equal(liveEventHandlerWasSet, true);
   assert.deepEqual(calls.map((call) => call.method), ["thread/start", "turn/start"]);
   assert.deepEqual(calls[1].params, {
     threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
     input: [{ type: "text", text: "Start from phone", text_elements: [] }],
     cwd: "/Users/me/project"
+  });
+});
+
+test("converts Codex Desktop app-server notifications into live events", () => {
+  assert.deepEqual(codexDesktopLiveEventFromNotification("turn/started", {
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    turn: { id: "turn-1", status: "inProgress" }
+  }), {
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    kind: "turn_started",
+    text: "Codex Desktop turn started."
+  });
+
+  assert.deepEqual(codexDesktopLiveEventFromNotification("turn/completed", {
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    turn: { id: "turn-1", status: "failed", error: { message: "Tests failed." } }
+  }), {
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    kind: "turn_failed",
+    text: "Tests failed."
+  });
+
+  assert.deepEqual(codexDesktopLiveEventFromNotification("item/agentMessage/delta", {
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    turnId: "turn-1",
+    itemId: "item-1",
+    delta: "Hello"
+  }), {
+    threadId: "019dc424-e857-76e0-8229-589ecf107eb4",
+    kind: "output",
+    text: "Hello"
   });
 });
 
@@ -278,6 +314,56 @@ test("chat manager routes Codex Desktop approval decisions by server request id"
     const event = message as { type?: string; event?: { kind?: string } };
     return event.type === "chat_event" && event.event?.kind === "approval_approved";
   }));
+});
+
+test("chat manager broadcasts live app-server turn events for visible Desktop chats", async () => {
+  const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
+  const messages: unknown[] = [];
+  let desktopChats = [{
+    id: `codex:${threadId}`,
+    repo: "/Users/me/project",
+    title: "Live event route test",
+    projectName: "project",
+    status: "idle" as const,
+    startedAt: "2026-04-28T13:00:00.000Z",
+    updatedAt: "2026-04-28T13:00:00.000Z",
+    transcript: []
+  }];
+
+  const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
+    listCodexChats: async () => desktopChats,
+    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    prepareChatWorkspace: async () => "/Users/me/project",
+    startCodexDesktopConversation: async (_input, _onApprovalRequest, onLiveEvent) => {
+      onLiveEvent?.({ threadId, kind: "turn_started", text: "Codex Desktop turn started." });
+      onLiveEvent?.({ threadId, kind: "output", text: "Hello from Codex." });
+      onLiveEvent?.({ threadId, kind: "turn_completed", text: "Codex Desktop turn completed." });
+      return threadId;
+    },
+    startCodexDesktopTurn: async () => {},
+    interruptCodexDesktopTurn: async () => {}
+  });
+
+  await manager.startChat({
+    prompt: "Live event route test",
+    projectId: "/Users/me/project",
+    projectPath: "/Users/me/project",
+    workMode: "local",
+    branch: "main",
+    accessPreset: "on_request",
+    model: "gpt-5.5",
+    reasoningEffort: "high"
+  });
+
+  assert.ok(messages.some((message) => {
+    const event = message as { type?: string; event?: { kind?: string; text?: string } };
+    return event.type === "chat_event" && event.event?.kind === "output" && event.event.text === "Hello from Codex.";
+  }));
+  assert.ok(messages.some((message) => {
+    const event = message as { type?: string; event?: { kind?: string; status?: string } };
+    return event.type === "chat_event" && event.event?.kind === "chat_completed" && event.event.status === "completed";
+  }));
+  assert.equal((await manager.list())[0]?.status, "completed");
 });
 
 test("new chat creation starts a Desktop-owned conversation", async () => {
