@@ -68,6 +68,21 @@ Open iPad stabilization scope:
 
 The strongest current iPad finding is that #21 and #22 are closed with live iPad simulator evidence. A real New Chat start dismissed the popover, switched to Chats, and selected the started chat in detail for #21. A live chat-linked Activity row switched from Activity to Chats and selected the same chat detail for #22. #24 still depends on #2 live evidence: the running local server must expose the rebuilt approval-routing CLI, produce a real `waiting_for_approval` row, and let iOS approve/deny against the app-server request id. Do not broaden product code with test-only launch state to close the remaining iPad issue; use a real simulator-connected local Handrail feed that naturally contains the needed approval state.
 
+## Business Analyst iPad Scope Refresh - 2026-05-03 13:03Z
+
+Milestone 2, `iPad MVP stabilization`, briefly had #31 open because the iPad Dashboard paired-machine card rendered the local server endpoint as `127.0.0.1:8,788` instead of the literal `127.0.0.1:8788`. Lead Dev closed #31 on 2026-05-03 after changing paired-machine address rendering to a verbatim host:port string and validating the paired iPad Dashboard on iPad Pro 13-inch (M5), iOS Simulator 26.4.1.
+
+Open iPad stabilization scope:
+
+- #6 Product spec: iPad Handrail version. This remains the umbrella iPad acceptance issue.
+- #24 Waiting approvals look like running chats on Dashboard. This remains blocked by #2 live first-class approval evidence.
+
+Closed iPad stabilization scope added on 2026-05-03:
+
+- #31 iPad Dashboard formats local server port with thousands separator. Verification: XcodeBuildMCP `test_sim -only-testing:HandrailTests/PairedMachineFormattingTests` passed 1/1; full XcodeBuildMCP `test_sim` passed 49/49 on iPad Pro 13-inch (M5), iOS Simulator 26.4.1; XcodeBuildMCP `build_run_sim` launched the paired iPad Dashboard and screenshot evidence at `test-artifacts/issue31-port-format-20260503/ipad-dashboard-port-no-grouping.jpg` shows `127.0.0.1:8788` with no grouping separator.
+
+Do not claim iPad App Store readiness until #24 has live simulator evidence and #6 has a full iPad walkthrough recorded.
+
 ## Lead Dev Scope Refresh - 2026-05-02 06:07Z
 
 #29 is closed. The live Handrail listener on `127.0.0.1:8788` was restarted from stale PID `16041` to PID `70040` using LaunchAgent `com.velocityworks.handrail.server`. A real `start_chat` through the live server emitted `chat_started`, emitted a chat-linked `chat_event`, refreshed `chat_list`, and appeared in `node cli/dist/src/index.js chats` as Desktop-visible chat `codex:019de74b-9e6e-71e1-a6e1-14028304e776`. Evidence is in `test-artifacts/issue29-resolve-20260502T060625Z/`.

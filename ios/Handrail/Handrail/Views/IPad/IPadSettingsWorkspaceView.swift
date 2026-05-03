@@ -62,7 +62,7 @@ struct IPadSettingsWorkspaceView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(machine.machineName)
                                 .font(.headline)
-                            Text("\(machine.host):\(machine.port)")
+                            Text(verbatim: machine.address)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                             Text("Protocol \(machine.protocolVersion)")

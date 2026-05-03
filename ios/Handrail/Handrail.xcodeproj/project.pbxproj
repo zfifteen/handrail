@@ -52,6 +52,7 @@
 		200000000000000000000207 /* HandrailWebSocketClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000027 /* HandrailWebSocketClientTests.swift */; };
 		200000000000000000000208 /* TransientErrorStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000028 /* TransientErrorStateTests.swift */; };
 		200000000000000000000209 /* PairingPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000029 /* PairingPersistenceTests.swift */; };
+		200000000000000000000210 /* PairedMachineFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000002A /* PairedMachineFormattingTests.swift */; };
 		200000000000000000000302 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 200000000000000000000303 /* XCTest.framework */; };
 /* End PBXBuildFile section */
 
@@ -113,6 +114,7 @@
 		200000000000000000000027 /* HandrailWebSocketClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandrailWebSocketClientTests.swift; sourceTree = "<group>"; };
 		200000000000000000000028 /* TransientErrorStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransientErrorStateTests.swift; sourceTree = "<group>"; };
 		200000000000000000000029 /* PairingPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingPersistenceTests.swift; sourceTree = "<group>"; };
+		20000000000000000000002A /* PairedMachineFormattingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairedMachineFormattingTests.swift; sourceTree = "<group>"; };
 		200000000000000000000301 /* HandrailTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandrailTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		200000000000000000000303 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -210,6 +212,7 @@
 				200000000000000000000027 /* HandrailWebSocketClientTests.swift */,
 				200000000000000000000028 /* TransientErrorStateTests.swift */,
 				200000000000000000000029 /* PairingPersistenceTests.swift */,
+				20000000000000000000002A /* PairedMachineFormattingTests.swift */,
 			);
 			path = HandrailTests;
 			sourceTree = "<group>";
@@ -345,6 +348,7 @@
 				200000000000000000000207 /* HandrailWebSocketClientTests.swift in Sources */,
 				200000000000000000000208 /* TransientErrorStateTests.swift in Sources */,
 				200000000000000000000209 /* PairingPersistenceTests.swift in Sources */,
+				200000000000000000000210 /* PairedMachineFormattingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,0 +1,12 @@
+d9c0019 (HEAD -> main) Record approval live server blocker
+cb5b0cb Add CI line ending hygiene guard
+acffd56 Add repository line ending attributes
+58e97e3 Build iOS test bundle in CI
+45a2007 Tighten CI smoke workflow guardrails
+15b26bf Add CI smoke workflow
+b46b9ae Record blocked watchOS acceptance path
+16fce2b Mark blocked iPad acceptance dependency
+2a6f89d Ingest live app-server turn events
+f0ef76f Add app-server approval request routing
+3afe577 Record dashboard validation blocker
+6123cfa Fix iPhone simulator test pairing isolation

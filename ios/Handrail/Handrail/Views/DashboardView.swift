@@ -251,7 +251,7 @@ struct DashboardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(machine.machineName)
                         .font(.headline)
-                    Text("\(machine.host):\(machine.port)")
+                    Text(verbatim: machine.address)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

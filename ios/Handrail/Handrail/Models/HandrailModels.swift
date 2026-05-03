@@ -10,6 +10,7 @@ struct PairingPayload: Codable {
 
 struct PairedMachine: Codable, Identifiable, Hashable {
     var id: String { "\(host):\(port)" }
+    var address: String { "\(host):\(port)" }
     let protocolVersion: Int
     let host: String
     let port: Int

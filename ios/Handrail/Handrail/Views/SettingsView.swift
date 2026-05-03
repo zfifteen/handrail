@@ -13,7 +13,7 @@ struct SettingsView: View {
                             .font(.headline)
                         if let machine = store.pairedMachine {
                             Text(machine.machineName)
-                            Text("\(machine.host):\(machine.port)")
+                            Text(verbatim: machine.address)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Text(store.connectionText)

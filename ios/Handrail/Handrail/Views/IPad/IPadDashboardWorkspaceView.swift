@@ -85,7 +85,7 @@ struct IPadDashboardWorkspaceView: View {
                         .font(.headline)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
-                    Text("\(machine.host):\(machine.port)")
+                    Text(verbatim: machine.address)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
