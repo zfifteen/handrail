@@ -1,0 +1,125 @@
+{
+  "ok": true,
+  "chroma_key": {
+    "hex": "#FFFF00",
+    "rgb": [
+      255,
+      255,
+      0
+    ],
+    "threshold": 96.0
+  },
+  "rows": [
+    {
+      "state": "idle",
+      "frames": [
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/idle/00.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/idle/01.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/idle/02.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/idle/03.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/idle/04.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/idle/05.png"
+      ],
+      "method": "components"
+    },
+    {
+      "state": "running-right",
+      "frames": [
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-right/00.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-right/01.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-right/02.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-right/03.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-right/04.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-right/05.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-right/06.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-right/07.png"
+      ],
+      "method": "components"
+    },
+    {
+      "state": "running-left",
+      "frames": [
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-left/00.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-left/01.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-left/02.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-left/03.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-left/04.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-left/05.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-left/06.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running-left/07.png"
+      ],
+      "method": "components"
+    },
+    {
+      "state": "waving",
+      "frames": [
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waving/00.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waving/01.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waving/02.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waving/03.png"
+      ],
+      "method": "components"
+    },
+    {
+      "state": "jumping",
+      "frames": [
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/jumping/00.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/jumping/01.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/jumping/02.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/jumping/03.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/jumping/04.png"
+      ],
+      "method": "components"
+    },
+    {
+      "state": "failed",
+      "frames": [
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/failed/00.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/failed/01.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/failed/02.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/failed/03.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/failed/04.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/failed/05.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/failed/06.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/failed/07.png"
+      ],
+      "method": "components"
+    },
+    {
+      "state": "waiting",
+      "frames": [
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waiting/00.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waiting/01.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waiting/02.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waiting/03.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waiting/04.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/waiting/05.png"
+      ],
+      "method": "components"
+    },
+    {
+      "state": "running",
+      "frames": [
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running/00.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running/01.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running/02.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running/03.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running/04.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/running/05.png"
+      ],
+      "method": "components"
+    },
+    {
+      "state": "review",
+      "frames": [
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/review/00.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/review/01.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/review/02.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/review/03.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/review/04.png",
+        "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T134455Z/frames/review/05.png"
+      ],
+      "method": "components"
+    }
+  ]
+}

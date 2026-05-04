@@ -69,8 +69,8 @@ export class ChatManager {
         reasoningEffort: options.reasoningEffort,
         accessPreset: options.accessPreset
       },
-      (approval) => void this.handleDesktopApprovalRequest(approval),
-      (event) => void this.handleDesktopLiveEvent(event)
+      (approval) => void this.handleDesktopApprovalRequest(approval).catch((error) => this.broadcastError(error)),
+      (event) => void this.handleDesktopLiveEvent(event).catch((error) => this.broadcastError(error))
     );
     const now = new Date().toISOString();
     const visibleChat = await this.waitForDesktopVisibleChat(`codex:${threadId}`);
@@ -188,6 +188,7 @@ export class ChatManager {
       files: approval.files,
       diff: approval.diff
     };
+    await this.waitForDesktopVisibleChat(request.chatId);
     this.pendingApprovals.set(request.approvalId, { request, respond: approval.respond });
     this.broadcast({ type: "approval_required", ...request });
     this.broadcast({
@@ -205,6 +206,7 @@ export class ChatManager {
     if (!mapped) {
       return;
     }
+    await this.waitForDesktopVisibleChat(chatId);
     if (mapped.status) {
       this.liveStatuses.set(chatId, { status: mapped.status, updatedAt: now });
     }
@@ -247,6 +249,10 @@ export class ChatManager {
       const liveStatus = this.liveStatuses.get(chat.id);
       return liveStatus ? { ...chat, status: liveStatus.status, updatedAt: liveStatus.updatedAt } : chat;
     });
+  }
+
+  private broadcastError(error: unknown): void {
+    this.broadcast({ type: "error", message: error instanceof Error ? error.message : String(error) });
   }
 }
 

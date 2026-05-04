@@ -376,6 +376,92 @@ test("chat manager broadcasts chat list when approval state changes", async () =
   }));
 });
 
+test("app-server approval requests wait for Desktop visibility before mobile broadcast", async () => {
+  const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
+  const messages: unknown[] = [];
+  let resolveApprovalChatList = (): void => {};
+  const approvalChatListBroadcasted = new Promise<void>((resolve) => {
+    resolveApprovalChatList = resolve;
+  });
+  let desktopVisible = false;
+  let approvalHandler = (_approval: DesktopApprovalRequest): void => {
+    throw new Error("Approval handler was not installed.");
+  };
+  const desktopChat = {
+    id: `codex:${threadId}`,
+    repo: "/Users/me/project",
+    title: "Approval visibility test",
+    projectName: "project",
+    status: "running" as const,
+    startedAt: "2026-04-28T13:00:00.000Z",
+    updatedAt: "2026-04-28T13:00:00.000Z",
+    transcript: []
+  };
+
+  const manager = new ChatManager((message) => {
+    const snapshot = JSON.parse(JSON.stringify(message)) as { type?: string; chats?: Array<{ id?: string; status?: string }> };
+    messages.push(snapshot);
+    if (
+      snapshot.type === "chat_list" &&
+      snapshot.chats?.some((chat) => chat.id === `codex:${threadId}` && chat.status === "waiting_for_approval")
+    ) {
+      resolveApprovalChatList();
+    }
+  }, {
+    listCodexChats: async () => desktopVisible ? [desktopChat] : [],
+    readCodexChatDetail: async (chatId) => chatId === desktopChat.id ? desktopChat : null,
+    prepareChatWorkspace: async () => "/Users/me/project",
+    startCodexDesktopConversation: async (_input, onApprovalRequest) => {
+      assert.ok(onApprovalRequest);
+      approvalHandler = onApprovalRequest;
+      return threadId;
+    },
+    startCodexDesktopTurn: async () => {},
+    interruptCodexDesktopTurn: async () => {}
+  });
+
+  const started = manager.startChat({
+    prompt: "Approval visibility test",
+    projectId: "/Users/me/project",
+    projectPath: "/Users/me/project",
+    workMode: "local",
+    branch: "main",
+    accessPreset: "on_request",
+    model: "gpt-5.5",
+    reasoningEffort: "high"
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+
+  approvalHandler({
+    threadId,
+    approvalId: "server-request-1",
+    title: "Command approval required",
+    summary: "npm test",
+    files: [],
+    diff: "",
+    respond: async () => {}
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(messages.length, 0);
+
+  desktopVisible = true;
+  await started;
+  await approvalChatListBroadcasted;
+
+  assert.ok(messages.some((message) => {
+    const approval = message as { type?: string; approvalId?: string; chatId?: string };
+    return approval.type === "approval_required" &&
+      approval.approvalId === "server-request-1" &&
+      approval.chatId === `codex:${threadId}`;
+  }));
+  assert.ok(messages.some((message) => {
+    const chatList = message as { type?: string; chats?: Array<{ id?: string; status?: string }> };
+    return chatList.type === "chat_list" &&
+      chatList.chats?.some((chat) => chat.id === `codex:${threadId}` && chat.status === "waiting_for_approval");
+  }));
+});
+
 test("chat manager broadcasts live app-server turn events for visible Desktop chats", async () => {
   const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   const messages: unknown[] = [];

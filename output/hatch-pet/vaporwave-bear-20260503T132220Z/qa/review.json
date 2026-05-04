@@ -1,0 +1,1080 @@
+{
+  "ok": false,
+  "frames_root": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames",
+  "errors": [
+    "idle frame 00 has 1000 non-transparent pixels close to the chroma key",
+    "idle frame 01 has 886 non-transparent pixels close to the chroma key",
+    "idle frame 02 has 931 non-transparent pixels close to the chroma key",
+    "idle frame 03 has 957 non-transparent pixels close to the chroma key",
+    "idle frame 04 has 956 non-transparent pixels close to the chroma key",
+    "idle frame 05 has 888 non-transparent pixels close to the chroma key",
+    "running-right frame 00 has 4039 non-transparent pixels close to the chroma key",
+    "running-right frame 01 has 3476 non-transparent pixels close to the chroma key",
+    "running-right frame 02 has 3869 non-transparent pixels close to the chroma key",
+    "running-right frame 03 has 3318 non-transparent pixels close to the chroma key",
+    "running-right frame 04 has 3720 non-transparent pixels close to the chroma key",
+    "running-right frame 05 has 3375 non-transparent pixels close to the chroma key",
+    "running-right frame 06 has 3961 non-transparent pixels close to the chroma key",
+    "running-right frame 07 has 3601 non-transparent pixels close to the chroma key",
+    "running-left frame 00 has 3601 non-transparent pixels close to the chroma key",
+    "running-left frame 01 has 3961 non-transparent pixels close to the chroma key",
+    "running-left frame 02 has 3375 non-transparent pixels close to the chroma key",
+    "running-left frame 03 has 3720 non-transparent pixels close to the chroma key",
+    "running-left frame 04 has 3318 non-transparent pixels close to the chroma key",
+    "running-left frame 05 has 3869 non-transparent pixels close to the chroma key",
+    "running-left frame 06 has 3476 non-transparent pixels close to the chroma key",
+    "running-left frame 07 has 4039 non-transparent pixels close to the chroma key",
+    "waving frame 00 has 862 non-transparent pixels close to the chroma key",
+    "waving frame 01 has 907 non-transparent pixels close to the chroma key",
+    "waving frame 02 has 867 non-transparent pixels close to the chroma key",
+    "waving frame 03 has 956 non-transparent pixels close to the chroma key",
+    "jumping frame 00 has 1430 non-transparent pixels close to the chroma key",
+    "jumping frame 01 has 891 non-transparent pixels close to the chroma key",
+    "jumping frame 02 has 841 non-transparent pixels close to the chroma key",
+    "jumping frame 03 has 881 non-transparent pixels close to the chroma key",
+    "jumping frame 04 has 1053 non-transparent pixels close to the chroma key",
+    "failed frame 01 has 879 non-transparent pixels close to the chroma key",
+    "failed frame 02 has 850 non-transparent pixels close to the chroma key",
+    "failed frame 03 has 1105 non-transparent pixels close to the chroma key",
+    "failed frame 04 has 915 non-transparent pixels close to the chroma key",
+    "failed frame 05 has 1174 non-transparent pixels close to the chroma key",
+    "failed frame 06 has 1049 non-transparent pixels close to the chroma key",
+    "waiting frame 00 has 908 non-transparent pixels close to the chroma key",
+    "waiting frame 01 has 887 non-transparent pixels close to the chroma key",
+    "waiting frame 03 has 904 non-transparent pixels close to the chroma key",
+    "waiting frame 04 has 891 non-transparent pixels close to the chroma key",
+    "waiting frame 05 has 904 non-transparent pixels close to the chroma key",
+    "running frame 00 has 849 non-transparent pixels close to the chroma key",
+    "running frame 01 has 841 non-transparent pixels close to the chroma key",
+    "running frame 02 has 850 non-transparent pixels close to the chroma key",
+    "running frame 03 has 977 non-transparent pixels close to the chroma key",
+    "running frame 04 has 886 non-transparent pixels close to the chroma key",
+    "running frame 05 has 1019 non-transparent pixels close to the chroma key",
+    "review frame 00 has 3525 non-transparent pixels close to the chroma key",
+    "review frame 01 has 3471 non-transparent pixels close to the chroma key",
+    "review frame 02 has 3862 non-transparent pixels close to the chroma key",
+    "review frame 03 has 3568 non-transparent pixels close to the chroma key",
+    "review frame 04 has 2947 non-transparent pixels close to the chroma key",
+    "review frame 05 has 3518 non-transparent pixels close to the chroma key"
+  ],
+  "warnings": [],
+  "rows": [
+    {
+      "state": "idle",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": false,
+      "errors": [
+        "idle frame 00 has 1000 non-transparent pixels close to the chroma key",
+        "idle frame 01 has 886 non-transparent pixels close to the chroma key",
+        "idle frame 02 has 931 non-transparent pixels close to the chroma key",
+        "idle frame 03 has 957 non-transparent pixels close to the chroma key",
+        "idle frame 04 has 956 non-transparent pixels close to the chroma key",
+        "idle frame 05 has 888 non-transparent pixels close to the chroma key"
+      ],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/idle/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21905,
+          "bbox": [
+            28,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 1000
+        },
+        {
+          "index": 1,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/idle/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21759,
+          "bbox": [
+            29,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 886
+        },
+        {
+          "index": 2,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/idle/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21753,
+          "bbox": [
+            29,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 931
+        },
+        {
+          "index": 3,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/idle/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21732,
+          "bbox": [
+            29,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 957
+        },
+        {
+          "index": 4,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/idle/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21646,
+          "bbox": [
+            29,
+            5,
+            162,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 956
+        },
+        {
+          "index": 5,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/idle/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21748,
+          "bbox": [
+            29,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 888
+        }
+      ]
+    },
+    {
+      "state": "running-right",
+      "expected_frames": 8,
+      "actual_frames": 8,
+      "extraction_method": "components",
+      "ok": false,
+      "errors": [
+        "running-right frame 00 has 4039 non-transparent pixels close to the chroma key",
+        "running-right frame 01 has 3476 non-transparent pixels close to the chroma key",
+        "running-right frame 02 has 3869 non-transparent pixels close to the chroma key",
+        "running-right frame 03 has 3318 non-transparent pixels close to the chroma key",
+        "running-right frame 04 has 3720 non-transparent pixels close to the chroma key",
+        "running-right frame 05 has 3375 non-transparent pixels close to the chroma key",
+        "running-right frame 06 has 3961 non-transparent pixels close to the chroma key",
+        "running-right frame 07 has 3601 non-transparent pixels close to the chroma key"
+      ],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-right/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20744,
+          "bbox": [
+            28,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 4039
+        },
+        {
+          "index": 1,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-right/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20023,
+          "bbox": [
+            27,
+            5,
+            164,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3476
+        },
+        {
+          "index": 2,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-right/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21458,
+          "bbox": [
+            15,
+            5,
+            176,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3869
+        },
+        {
+          "index": 3,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-right/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18417,
+          "bbox": [
+            37,
+            5,
+            155,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3318
+        },
+        {
+          "index": 4,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-right/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20325,
+          "bbox": [
+            28,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3720
+        },
+        {
+          "index": 5,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-right/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19566,
+          "bbox": [
+            30,
+            5,
+            162,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3375
+        },
+        {
+          "index": 6,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-right/06.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20655,
+          "bbox": [
+            23,
+            5,
+            168,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3961
+        },
+        {
+          "index": 7,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-right/07.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20113,
+          "bbox": [
+            31,
+            5,
+            160,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3601
+        }
+      ]
+    },
+    {
+      "state": "running-left",
+      "expected_frames": 8,
+      "actual_frames": 8,
+      "extraction_method": "components",
+      "ok": false,
+      "errors": [
+        "running-left frame 00 has 3601 non-transparent pixels close to the chroma key",
+        "running-left frame 01 has 3961 non-transparent pixels close to the chroma key",
+        "running-left frame 02 has 3375 non-transparent pixels close to the chroma key",
+        "running-left frame 03 has 3720 non-transparent pixels close to the chroma key",
+        "running-left frame 04 has 3318 non-transparent pixels close to the chroma key",
+        "running-left frame 05 has 3869 non-transparent pixels close to the chroma key",
+        "running-left frame 06 has 3476 non-transparent pixels close to the chroma key",
+        "running-left frame 07 has 4039 non-transparent pixels close to the chroma key"
+      ],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-left/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20113,
+          "bbox": [
+            31,
+            5,
+            160,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3601
+        },
+        {
+          "index": 1,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-left/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20655,
+          "bbox": [
+            23,
+            5,
+            168,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3961
+        },
+        {
+          "index": 2,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-left/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19566,
+          "bbox": [
+            30,
+            5,
+            162,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3375
+        },
+        {
+          "index": 3,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-left/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20325,
+          "bbox": [
+            28,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3720
+        },
+        {
+          "index": 4,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-left/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18417,
+          "bbox": [
+            37,
+            5,
+            155,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3318
+        },
+        {
+          "index": 5,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-left/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21458,
+          "bbox": [
+            15,
+            5,
+            176,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3869
+        },
+        {
+          "index": 6,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-left/06.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20023,
+          "bbox": [
+            27,
+            5,
+            164,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3476
+        },
+        {
+          "index": 7,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running-left/07.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20744,
+          "bbox": [
+            28,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 4039
+        }
+      ]
+    },
+    {
+      "state": "waving",
+      "expected_frames": 4,
+      "actual_frames": 4,
+      "extraction_method": "components",
+      "ok": false,
+      "errors": [
+        "waving frame 00 has 862 non-transparent pixels close to the chroma key",
+        "waving frame 01 has 907 non-transparent pixels close to the chroma key",
+        "waving frame 02 has 867 non-transparent pixels close to the chroma key",
+        "waving frame 03 has 956 non-transparent pixels close to the chroma key"
+      ],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waving/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 22412,
+          "bbox": [
+            27,
+            5,
+            164,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 862
+        },
+        {
+          "index": 1,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waving/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 24756,
+          "bbox": [
+            10,
+            5,
+            182,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 907
+        },
+        {
+          "index": 2,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waving/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 23927,
+          "bbox": [
+            11,
+            5,
+            181,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 867
+        },
+        {
+          "index": 3,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waving/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 22239,
+          "bbox": [
+            27,
+            5,
+            164,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 956
+        }
+      ]
+    },
+    {
+      "state": "jumping",
+      "expected_frames": 5,
+      "actual_frames": 5,
+      "extraction_method": "components",
+      "ok": false,
+      "errors": [
+        "jumping frame 00 has 1430 non-transparent pixels close to the chroma key",
+        "jumping frame 01 has 891 non-transparent pixels close to the chroma key",
+        "jumping frame 02 has 841 non-transparent pixels close to the chroma key",
+        "jumping frame 03 has 881 non-transparent pixels close to the chroma key",
+        "jumping frame 04 has 1053 non-transparent pixels close to the chroma key"
+      ],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/jumping/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 29417,
+          "bbox": [
+            9,
+            5,
+            182,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 1430
+        },
+        {
+          "index": 1,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/jumping/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 23022,
+          "bbox": [
+            14,
+            5,
+            177,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 891
+        },
+        {
+          "index": 2,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/jumping/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 23514,
+          "bbox": [
+            5,
+            10,
+            187,
+            197
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 841
+        },
+        {
+          "index": 3,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/jumping/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 22667,
+          "bbox": [
+            17,
+            5,
+            175,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 881
+        },
+        {
+          "index": 4,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/jumping/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 23893,
+          "bbox": [
+            23,
+            5,
+            168,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 1053
+        }
+      ]
+    },
+    {
+      "state": "failed",
+      "expected_frames": 8,
+      "actual_frames": 8,
+      "extraction_method": "components",
+      "ok": false,
+      "errors": [
+        "failed frame 01 has 879 non-transparent pixels close to the chroma key",
+        "failed frame 02 has 850 non-transparent pixels close to the chroma key",
+        "failed frame 03 has 1105 non-transparent pixels close to the chroma key",
+        "failed frame 04 has 915 non-transparent pixels close to the chroma key",
+        "failed frame 05 has 1174 non-transparent pixels close to the chroma key",
+        "failed frame 06 has 1049 non-transparent pixels close to the chroma key"
+      ],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/failed/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21208,
+          "bbox": [
+            31,
+            5,
+            160,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 726
+        },
+        {
+          "index": 1,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/failed/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21326,
+          "bbox": [
+            32,
+            5,
+            160,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 879
+        },
+        {
+          "index": 2,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/failed/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 23907,
+          "bbox": [
+            20,
+            5,
+            171,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 850
+        },
+        {
+          "index": 3,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/failed/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 28857,
+          "bbox": [
+            7,
+            5,
+            184,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 1105
+        },
+        {
+          "index": 4,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/failed/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18539,
+          "bbox": [
+            5,
+            38,
+            187,
+            169
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 915
+        },
+        {
+          "index": 5,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/failed/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 29790,
+          "bbox": [
+            5,
+            5,
+            186,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 1174
+        },
+        {
+          "index": 6,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/failed/06.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 23921,
+          "bbox": [
+            26,
+            5,
+            165,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 1049
+        },
+        {
+          "index": 7,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/failed/07.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20917,
+          "bbox": [
+            32,
+            5,
+            159,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 704
+        }
+      ]
+    },
+    {
+      "state": "waiting",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": false,
+      "errors": [
+        "waiting frame 00 has 908 non-transparent pixels close to the chroma key",
+        "waiting frame 01 has 887 non-transparent pixels close to the chroma key",
+        "waiting frame 03 has 904 non-transparent pixels close to the chroma key",
+        "waiting frame 04 has 891 non-transparent pixels close to the chroma key",
+        "waiting frame 05 has 904 non-transparent pixels close to the chroma key"
+      ],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waiting/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 22199,
+          "bbox": [
+            28,
+            5,
+            164,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 908
+        },
+        {
+          "index": 1,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waiting/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 22038,
+          "bbox": [
+            30,
+            5,
+            162,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 887
+        },
+        {
+          "index": 2,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waiting/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21107,
+          "bbox": [
+            28,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 774
+        },
+        {
+          "index": 3,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waiting/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21984,
+          "bbox": [
+            29,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 904
+        },
+        {
+          "index": 4,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waiting/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21995,
+          "bbox": [
+            29,
+            5,
+            162,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 891
+        },
+        {
+          "index": 5,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/waiting/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 22250,
+          "bbox": [
+            28,
+            5,
+            164,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 904
+        }
+      ]
+    },
+    {
+      "state": "running",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": false,
+      "errors": [
+        "running frame 00 has 849 non-transparent pixels close to the chroma key",
+        "running frame 01 has 841 non-transparent pixels close to the chroma key",
+        "running frame 02 has 850 non-transparent pixels close to the chroma key",
+        "running frame 03 has 977 non-transparent pixels close to the chroma key",
+        "running frame 04 has 886 non-transparent pixels close to the chroma key",
+        "running frame 05 has 1019 non-transparent pixels close to the chroma key"
+      ],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19282,
+          "bbox": [
+            29,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 849
+        },
+        {
+          "index": 1,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20174,
+          "bbox": [
+            23,
+            5,
+            168,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 841
+        },
+        {
+          "index": 2,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18845,
+          "bbox": [
+            29,
+            5,
+            163,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 850
+        },
+        {
+          "index": 3,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19699,
+          "bbox": [
+            27,
+            5,
+            165,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 977
+        },
+        {
+          "index": 4,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19038,
+          "bbox": [
+            27,
+            5,
+            165,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 886
+        },
+        {
+          "index": 5,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/running/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20094,
+          "bbox": [
+            26,
+            5,
+            166,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 1019
+        }
+      ]
+    },
+    {
+      "state": "review",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": false,
+      "errors": [
+        "review frame 00 has 3525 non-transparent pixels close to the chroma key",
+        "review frame 01 has 3471 non-transparent pixels close to the chroma key",
+        "review frame 02 has 3862 non-transparent pixels close to the chroma key",
+        "review frame 03 has 3568 non-transparent pixels close to the chroma key",
+        "review frame 04 has 2947 non-transparent pixels close to the chroma key",
+        "review frame 05 has 3518 non-transparent pixels close to the chroma key"
+      ],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/review/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21223,
+          "bbox": [
+            31,
+            5,
+            161,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3525
+        },
+        {
+          "index": 1,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/review/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20140,
+          "bbox": [
+            37,
+            5,
+            155,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3471
+        },
+        {
+          "index": 2,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/review/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20828,
+          "bbox": [
+            33,
+            5,
+            159,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3862
+        },
+        {
+          "index": 3,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/review/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20144,
+          "bbox": [
+            29,
+            5,
+            162,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3568
+        },
+        {
+          "index": 4,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/review/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 19627,
+          "bbox": [
+            38,
+            5,
+            153,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 2947
+        },
+        {
+          "index": 5,
+          "file": "/Users/velocityworks/IdeaProjects/handrail/output/hatch-pet/vaporwave-bear-20260503T132220Z/frames/review/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21254,
+          "bbox": [
+            31,
+            5,
+            161,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 3518
+        }
+      ]
+    }
+  ]
+}

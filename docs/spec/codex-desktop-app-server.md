@@ -52,6 +52,7 @@ Observed:
 - Handrail keeps that app-server child alive until it observes `turn/completed` for the thread.
 - For Handrail-started app-server turns, Handrail can receive `item/commandExecution/requestApproval` and `item/fileChange/requestApproval` requests from the app-server and respond on the same request id.
 - For Handrail-started app-server turns, Handrail ingests observed live app-server notifications and rebroadcasts thread-scoped state through the normal mobile `chat_event` and `chat_list` path.
+- App-server approval requests and live events wait for the corresponding `codex:` thread to appear in Handrail's Desktop-derived read model before they become mobile-visible protocol state.
 - Handrail continues existing Desktop-visible threads through Desktop IPC with `thread-follower-start-turn`.
 - Desktop renderer code uses `thread/list` to fetch recent conversations.
 - Desktop renderer code uses `thread/unsubscribe` when an inactive owner conversation should stop streaming.
@@ -186,6 +187,8 @@ Handrail maps each request into:
 }
 ```
 
+Before emitting this message, Handrail waits for `listCodexChats()` to expose `codex:<threadId>`. If the thread never becomes Desktop-visible within the start-chat visibility window, the approval request is not converted into mobile approval state.
+
 After recording the pending approval, Handrail broadcasts a refreshed `chat_list` where the matching Desktop-visible `codex:` chat is overlaid as `waiting_for_approval`. The approval request does not create a mobile-only chat; the overlay applies only when the chat is already present in the Desktop-derived read model.
 
 When iOS approves or denies the request, Handrail responds to the same app-server child:
@@ -253,6 +256,8 @@ Handrail maps only observed thread-scoped app-server notifications into mobile p
 | `item/agentMessage/delta` | `chat_event` kind `output` |
 
 When a mapped live event carries a status, Handrail overlays that status on the Desktop-derived `codex:` chat row and broadcasts a refreshed `chat_list`. This keeps Codex Desktop visibility as the gate: live events can update a visible Desktop chat, but they do not create mobile-only chats.
+
+Handrail also waits for Desktop visibility before emitting the live event itself. This prevents an app-server notification for a just-created thread from reaching iOS before the Desktop-derived chat row exists.
 
 The invariant is:
 
