@@ -1,0 +1,206 @@
+4bd5492 (HEAD -> main) Record blocked queue hygiene state
+ cli/src/chats.ts                                   |   10 +-
+ cli/test/codex.test.ts                             |   86 ++
+ docs/spec/codex-desktop-app-server.md              |    5 +
+ docs/spec/handrail-websocket-protocol.md           |    7 +
+ docs/team/outputs/architect.md                     |   25 +-
+ docs/team/outputs/lead-dev.md                      |   53 +-
+ docs/team/outputs/qa-lead.md                       |   16 +-
+ .../decoded/base.png                               |  Bin 0 -> 1122641 bytes
+ .../decoded/failed.png                             |  Bin 0 -> 1318386 bytes
+ .../decoded/idle.png                               |  Bin 0 -> 1398881 bytes
+ .../decoded/jumping.png                            |  Bin 0 -> 1303590 bytes
+ .../decoded/review.png                             |  Bin 0 -> 1389275 bytes
+ .../decoded/running-left.png                       |  Bin 0 -> 1489877 bytes
+ .../decoded/running-right.png                      |  Bin 0 -> 1309419 bytes
+ .../decoded/running.png                            |  Bin 0 -> 1370706 bytes
+ .../decoded/waiting.png                            |  Bin 0 -> 1478483 bytes
+ .../decoded/waving.png                             |  Bin 0 -> 1384120 bytes
+ .../frames/failed/00.png                           |  Bin 0 -> 50125 bytes
+ .../frames/failed/01.png                           |  Bin 0 -> 49438 bytes
+ .../frames/failed/02.png                           |  Bin 0 -> 51100 bytes
+ .../frames/failed/03.png                           |  Bin 0 -> 58566 bytes
+ .../frames/failed/04.png                           |  Bin 0 -> 39349 bytes
+ .../frames/failed/05.png                           |  Bin 0 -> 59620 bytes
+ .../frames/failed/06.png                           |  Bin 0 -> 54412 bytes
+ .../frames/failed/07.png                           |  Bin 0 -> 49538 bytes
+ .../frames/frames-manifest.json                    |  125 +++
+ .../frames/idle/00.png                             |  Bin 0 -> 50065 bytes
+ .../frames/idle/01.png                             |  Bin 0 -> 50311 bytes
+ .../frames/idle/02.png                             |  Bin 0 -> 50162 bytes
+ .../frames/idle/03.png                             |  Bin 0 -> 50026 bytes
+ .../frames/idle/04.png                             |  Bin 0 -> 50387 bytes
+ .../frames/idle/05.png                             |  Bin 0 -> 50093 bytes
+ .../frames/jumping/00.png                          |  Bin 0 -> 64412 bytes
+ .../frames/jumping/01.png                          |  Bin 0 -> 53484 bytes
+ .../frames/jumping/02.png                          |  Bin 0 -> 54184 bytes
+ .../frames/jumping/03.png                          |  Bin 0 -> 52541 bytes
+ .../frames/jumping/04.png                          |  Bin 0 -> 54383 bytes
+ .../frames/review/00.png                           |  Bin 0 -> 50357 bytes
+ .../frames/review/01.png                           |  Bin 0 -> 48897 bytes
+ .../frames/review/02.png                           |  Bin 0 -> 48728 bytes
+ .../frames/review/03.png                           |  Bin 0 -> 49355 bytes
+ .../frames/review/04.png                           |  Bin 0 -> 47493 bytes
+ .../frames/review/05.png                           |  Bin 0 -> 50763 bytes
+ .../frames/running-left/00.png                     |  Bin 0 -> 49052 bytes
+ .../frames/running-left/01.png                     |  Bin 0 -> 49923 bytes
+ .../frames/running-left/02.png                     |  Bin 0 -> 47810 bytes
+ .../frames/running-left/03.png                     |  Bin 0 -> 49081 bytes
+ .../frames/running-left/04.png                     |  Bin 0 -> 44966 bytes
+ .../frames/running-left/05.png                     |  Bin 0 -> 50552 bytes
+ .../frames/running-left/06.png                     |  Bin 0 -> 48545 bytes
+ .../frames/running-left/07.png                     |  Bin 0 -> 49769 bytes
+ .../frames/running-right/00.png                    |  Bin 0 -> 49563 bytes
+ .../frames/running-right/01.png                    |  Bin 0 -> 48521 bytes
+ .../frames/running-right/02.png                    |  Bin 0 -> 50535 bytes
+ .../frames/running-right/03.png                    |  Bin 0 -> 44941 bytes
+ .../frames/running-right/04.png                    |  Bin 0 -> 49180 bytes
+ .../frames/running-right/05.png                    |  Bin 0 -> 47699 bytes
+ .../frames/running-right/06.png                    |  Bin 0 -> 49714 bytes
+ .../frames/running-right/07.png                    |  Bin 0 -> 48881 bytes
+ .../frames/running/00.png                          |  Bin 0 -> 45639 bytes
+ .../frames/running/01.png                          |  Bin 0 -> 47528 bytes
+ .../frames/running/02.png                          |  Bin 0 -> 45449 bytes
+ .../frames/running/03.png                          |  Bin 0 -> 46662 bytes
+ .../frames/running/04.png                          |  Bin 0 -> 45343 bytes
+ .../frames/running/05.png                          |  Bin 0 -> 47515 bytes
+ .../frames/waiting/00.png                          |  Bin 0 -> 50858 bytes
+ .../frames/waiting/01.png                          |  Bin 0 -> 51641 bytes
+ .../frames/waiting/02.png                          |  Bin 0 -> 52356 bytes
+ .../frames/waiting/03.png                          |  Bin 0 -> 50608 bytes
+ .../frames/waiting/04.png                          |  Bin 0 -> 50605 bytes
+ .../frames/waiting/05.png                          |  Bin 0 -> 50933 bytes
+ .../frames/waving/00.png                           |  Bin 0 -> 50523 bytes
+ .../frames/waving/01.png                           |  Bin 0 -> 55653 bytes
+ .../frames/waving/02.png                           |  Bin 0 -> 53859 bytes
+ .../frames/waving/03.png                           |  Bin 0 -> 49748 bytes
+ .../imagegen-jobs.json                             |  484 +++++++++
+ .../pet_request.json                               |  206 ++++
+ .../prompts/base-pet.md                            |    8 +
+ .../prompts/rows/failed.md                         |   51 +
+ .../prompts/rows/idle.md                           |   46 +
+ .../prompts/rows/jumping.md                        |   51 +
+ .../prompts/rows/review.md                         |   50 +
+ .../prompts/rows/running-left.md                   |   50 +
+ .../prompts/rows/running-right.md                  |   50 +
+ .../prompts/rows/running.md                        |   50 +
+ .../prompts/rows/waiting.md                        |   46 +
+ .../prompts/rows/waving.md                         |   50 +
+ .../vaporwave-bear-20260503T132220Z/qa/review.json | 1080 ++++++++++++++++++++
+ .../references/canonical-base.png                  |  Bin 0 -> 1122641 bytes
+ .../references/layout-guides/failed.png            |  Bin 0 -> 2416 bytes
+ .../references/layout-guides/idle.png              |  Bin 0 -> 2007 bytes
+ .../references/layout-guides/jumping.png           |  Bin 0 -> 1789 bytes
+ .../references/layout-guides/review.png            |  Bin 0 -> 2007 bytes
+ .../references/layout-guides/running-left.png      |  Bin 0 -> 2416 bytes
+ .../references/layout-guides/running-right.png     |  Bin 0 -> 2416 bytes
+ .../references/layout-guides/running.png           |  Bin 0 -> 2007 bytes
+ .../references/layout-guides/waiting.png           |  Bin 0 -> 2007 bytes
+ .../references/layout-guides/waving.png            |  Bin 0 -> 1536 bytes
+ .../decoded/base.png                               |  Bin 0 -> 1202392 bytes
+ .../decoded/failed.png                             |  Bin 0 -> 1242423 bytes
+ .../decoded/idle.png                               |  Bin 0 -> 1348064 bytes
+ .../decoded/jumping.png                            |  Bin 0 -> 1345094 bytes
+ .../decoded/review.png                             |  Bin 0 -> 1436475 bytes
+ .../decoded/running-left.png                       |  Bin 0 -> 1493847 bytes
+ .../decoded/running-right.png                      |  Bin 0 -> 1319290 bytes
+ .../decoded/running.png                            |  Bin 0 -> 1381937 bytes
+ .../decoded/waiting.png                            |  Bin 0 -> 1423117 bytes
+ .../decoded/waving.png                             |  Bin 0 -> 1383369 bytes
+ .../final/spritesheet.png                          |  Bin 0 -> 2885330 bytes
+ .../final/spritesheet.webp                         |  Bin 0 -> 2148492 bytes
+ .../final/validation.json                          |  516 ++++++++++
+ .../frames/failed/00.png                           |  Bin 0 -> 49775 bytes
+ .../frames/failed/01.png                           |  Bin 0 -> 48871 bytes
+ .../frames/failed/02.png                           |  Bin 0 -> 50117 bytes
+ .../frames/failed/03.png                           |  Bin 0 -> 58776 bytes
+ .../frames/failed/04.png                           |  Bin 0 -> 58916 bytes
+ .../frames/failed/05.png                           |  Bin 0 -> 58433 bytes
+ .../frames/failed/06.png                           |  Bin 0 -> 38703 bytes
+ .../frames/failed/07.png                           |  Bin 0 -> 26172 bytes
+ .../frames/frames-manifest.json                    |  125 +++
+ .../frames/idle/00.png                             |  Bin 0 -> 48523 bytes
+ .../frames/idle/01.png                             |  Bin 0 -> 49379 bytes
+ .../frames/idle/02.png                             |  Bin 0 -> 49533 bytes
+ .../frames/idle/03.png                             |  Bin 0 -> 48592 bytes
+ .../frames/idle/04.png                             |  Bin 0 -> 49200 bytes
+ .../frames/idle/05.png                             |  Bin 0 -> 48811 bytes
+ .../frames/jumping/00.png                          |  Bin 0 -> 58081 bytes
+ .../frames/jumping/01.png                          |  Bin 0 -> 51138 bytes
+ .../frames/jumping/02.png                          |  Bin 0 -> 55766 bytes
+ .../frames/jumping/03.png                          |  Bin 0 -> 52381 bytes
+ .../frames/jumping/04.png                          |  Bin 0 -> 57996 bytes
+ .../frames/review/00.png                           |  Bin 0 -> 49739 bytes
+ .../frames/review/01.png                           |  Bin 0 -> 51020 bytes
+ .../frames/review/02.png                           |  Bin 0 -> 49063 bytes
+ .../frames/review/03.png                           |  Bin 0 -> 51153 bytes
+ .../frames/review/04.png                           |  Bin 0 -> 50850 bytes
+ .../frames/review/05.png                           |  Bin 0 -> 52599 bytes
+ .../frames/running-left/00.png                     |  Bin 0 -> 49073 bytes
+ .../frames/running-left/01.png                     |  Bin 0 -> 49009 bytes
+ .../frames/running-left/02.png                     |  Bin 0 -> 51374 bytes
+ .../frames/running-left/03.png                     |  Bin 0 -> 49770 bytes
+ .../frames/running-left/04.png                     |  Bin 0 -> 51621 bytes
+ .../frames/running-left/05.png                     |  Bin 0 -> 49206 bytes
+ .../frames/running-left/06.png                     |  Bin 0 -> 52756 bytes
+ .../frames/running-left/07.png                     |  Bin 0 -> 49804 bytes
+ .../frames/running-right/00.png                    |  Bin 0 -> 49903 bytes
+ .../frames/running-right/01.png                    |  Bin 0 -> 52831 bytes
+ .../frames/running-right/02.png                    |  Bin 0 -> 49133 bytes
+ .../frames/running-right/03.png                    |  Bin 0 -> 51803 bytes
+ .../frames/running-right/04.png                    |  Bin 0 -> 49789 bytes
+ .../frames/running-right/05.png                    |  Bin 0 -> 51460 bytes
+ .../frames/running-right/06.png                    |  Bin 0 -> 49051 bytes
+ .../frames/running-right/07.png                    |  Bin 0 -> 49031 bytes
+ .../frames/running/00.png                          |  Bin 0 -> 50584 bytes
+ .../frames/running/01.png                          |  Bin 0 -> 51006 bytes
+ .../frames/running/02.png                          |  Bin 0 -> 51838 bytes
+ .../frames/running/03.png                          |  Bin 0 -> 49722 bytes
+ .../frames/running/04.png                          |  Bin 0 -> 51506 bytes
+ .../frames/running/05.png                          |  Bin 0 -> 50309 bytes
+ .../frames/waiting/00.png                          |  Bin 0 -> 50586 bytes
+ .../frames/waiting/01.png                          |  Bin 0 -> 55054 bytes
+ .../frames/waiting/02.png                          |  Bin 0 -> 52311 bytes
+ .../frames/waiting/03.png                          |  Bin 0 -> 47977 bytes
+ .../frames/waiting/04.png                          |  Bin 0 -> 52753 bytes
+ .../frames/waiting/05.png                          |  Bin 0 -> 50843 bytes
+ .../frames/waving/00.png                           |  Bin 0 -> 48819 bytes
+ .../frames/waving/01.png                           |  Bin 0 -> 52900 bytes
+ .../frames/waving/02.png                           |  Bin 0 -> 58065 bytes
+ .../frames/waving/03.png                           |  Bin 0 -> 48731 bytes
+ .../imagegen-jobs.json                             |  525 ++++++++++
+ .../pet_request.json                               |  216 ++++
+ .../prompts/base-pet.md                            |    8 +
+ .../prompts/rows/failed.md                         |   51 +
+ .../prompts/rows/idle.md                           |   46 +
+ .../prompts/rows/jumping.md                        |   51 +
+ .../prompts/rows/review.md                         |   50 +
+ .../prompts/rows/running-left.md                   |   50 +
+ .../prompts/rows/running-right.md                  |   50 +
+ .../prompts/rows/running.md                        |   50 +
+ .../prompts/rows/waiting.md                        |   46 +
+ .../prompts/rows/waving.md                         |   50 +
+ .../qa/contact-sheet.png                           |  Bin 0 -> 840348 bytes
+ .../vaporwave-bear-20260503T134455Z/qa/review.json |  962 +++++++++++++++++
+ .../qa/run-summary.json                            |   10 +
+ .../qa/videos/failed.mp4                           |  Bin 0 -> 323279 bytes
+ .../qa/videos/idle.mp4                             |  Bin 0 -> 80820 bytes
+ .../qa/videos/jumping.mp4                          |  Bin 0 -> 148886 bytes
+ .../qa/videos/review.mp4                           |  Bin 0 -> 118980 bytes
+ .../qa/videos/running-left.mp4                     |  Bin 0 -> 179186 bytes
+ .../qa/videos/running-right.mp4                    |  Bin 0 -> 175399 bytes
+ .../qa/videos/running.mp4                          |  Bin 0 -> 107548 bytes
+ .../qa/videos/waiting.mp4                          |  Bin 0 -> 144226 bytes
+ .../qa/videos/waving.mp4                           |  Bin 0 -> 74481 bytes
+ .../references/canonical-base.png                  |  Bin 0 -> 1202392 bytes
+ .../references/layout-guides/failed.png            |  Bin 0 -> 2416 bytes
+ .../references/layout-guides/idle.png              |  Bin 0 -> 2007 bytes
+ .../references/layout-guides/jumping.png           |  Bin 0 -> 1789 bytes
+ .../references/layout-guides/review.png            |  Bin 0 -> 2007 bytes
+ .../references/layout-guides/running-left.png      |  Bin 0 -> 2416 bytes
+ .../references/layout-guides/running-right.png     |  Bin 0 -> 2416 bytes
+ .../references/layout-guides/running.png           |  Bin 0 -> 2007 bytes
+ .../references/layout-guides/waiting.png           |  Bin 0 -> 2007 bytes
+ .../references/layout-guides/waving.png            |  Bin 0 -> 1536 bytes
+ .../references/reference-01.png                    |  Bin 0 -> 1122641 bytes
+ 204 files changed, 5305 insertions(+), 50 deletions(-)

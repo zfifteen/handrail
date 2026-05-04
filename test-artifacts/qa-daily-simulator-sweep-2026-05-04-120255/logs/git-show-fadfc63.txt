@@ -1,0 +1,35 @@
+fadfc63 Fix paired machine port formatting
+ docs/production_readiness_report.md                |  15 ++++++
+ docs/team/outputs/business-analyst.md              |  29 +++++-----
+ docs/team/outputs/lead-dev.md                      |  60 ++++++++++-----------
+ ios/Handrail/Handrail.xcodeproj/project.pbxproj    |   4 ++
+ ios/Handrail/Handrail/Models/HandrailModels.swift  |   1 +
+ ios/Handrail/Handrail/Views/ChatsView.swift        |   2 +-
+ ios/Handrail/Handrail/Views/DashboardView.swift    |   2 +-
+ .../Views/IPad/IPadDashboardWorkspaceView.swift    |   2 +-
+ .../Views/IPad/IPadSettingsWorkspaceView.swift     |   2 +-
+ ios/Handrail/Handrail/Views/SettingsView.swift     |   2 +-
+ .../PairedMachineFormattingTests.swift             |  18 +++++++
+ .../ipad-dashboard-port-no-grouping.jpg            | Bin 0 -> 71854 bytes
+ .../commands.md                                    |  18 +++++++
+ .../logs/cli-npm-test.txt                          |  60 +++++++++++++++++++++
+ .../logs/gh-all-issues.json                        |   1 +
+ .../logs/gh-bug-issues.json                        |   1 +
+ .../logs/gh-issue-31.json                          |   1 +
+ .../logs/git-log-since-last-run.txt                |  12 +++++
+ .../logs/lsof-8788.txt                             |   2 +
+ .../logs/simctl-list-devices.txt                   |  20 +++++++
+ .../logs/simulator-sweep-script.txt                |  22 ++++++++
+ .../ipad-01-dashboard-paired-port-grouping.jpg     | Bin 0 -> 72862 bytes
+ .../ipad-02-new-chat-disabled-add-prompt.jpg       | Bin 0 -> 51461 bytes
+ .../ipad-03-chats-detail-running-readonly.jpg      | Bin 0 -> 142099 bytes
+ .../ipad-04-project-grouping-readable.jpg          | Bin 0 -> 142701 bytes
+ .../iphone-01-dashboard-unpaired.jpg               | Bin 0 -> 30987 bytes
+ .../iphone-02-pairing-scanner-no-camera.jpg        | Bin 0 -> 14893 bytes
+ .../mcp-screenshots/iphone-03-chats-unpaired.jpg   | Bin 0 -> 29005 bytes
+ .../mcp-screenshots/iphone-04-attention-empty.jpg  | Bin 0 -> 25371 bytes
+ .../mcp-screenshots/iphone-05-activity-empty.jpg   | Bin 0 -> 19746 bytes
+ .../iphone-06-alerts-pairing-token-repair.jpg      | Bin 0 -> 27369 bytes
+ .../iphone-07-settings-pairing-repair.jpg          | Bin 0 -> 47226 bytes
+ .../notes.md                                       |  59 ++++++++++++++++++++
+ 33 files changed, 284 insertions(+), 49 deletions(-)

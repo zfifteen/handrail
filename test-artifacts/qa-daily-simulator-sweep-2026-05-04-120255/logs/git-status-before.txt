@@ -1,0 +1,3 @@
+ M docs/production_readiness_report.md
+ M docs/team/outputs/pm.md
+?? test-artifacts/qa-daily-simulator-sweep-2026-05-04-120255/

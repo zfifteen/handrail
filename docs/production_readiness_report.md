@@ -83,6 +83,19 @@ Closed iPad stabilization scope added on 2026-05-03:
 
 Do not claim iPad App Store readiness until #24 has live simulator evidence and #6 has a full iPad walkthrough recorded.
 
+## Lead Dev iPad Sidebar Accessibility Refresh - 2026-05-04 13:05Z
+
+Milestone 2, `iPad MVP stabilization`, has 2 open issues and 6 closed issues after #32. The iPad sidebar now renders explicit full-width accessible buttons for `Dashboard`, `Chats`, `Attention`, `Activity`, `Alerts`, and `Settings` instead of a `List` surface that collapsed into one `Sidebar` group in the accessibility hierarchy.
+
+Open iPad stabilization scope:
+
+- #6 Product spec: iPad Handrail version. This remains the umbrella iPad acceptance issue.
+- #24 Waiting approvals look like running chats on Dashboard. This remains blocked by #2 live first-class approval evidence.
+
+Closed iPad stabilization scope added on 2026-05-04:
+
+- #32 iPad sidebar navigation items are missing from accessibility tree. Verification: `cd cli && npm test` passed 45/45; XcodeBuildMCP `test_sim -only-testing:HandrailTests/RootLayoutSelectionTests` passed 8/8 on iPad Pro 13-inch (M5), iOS Simulator 26.4.1; XcodeBuildMCP `build_run_sim` launched the app on the same simulator; XcodeBuildMCP `snapshot_ui` showed individual `AXButton` elements for all six sidebar items; XcodeBuildMCP `tap(label:)` succeeded for `Dashboard`, `Chats`, `Attention`, `Activity`, `Alerts`, and `Settings`. Screenshot evidence is saved under `test-artifacts/issue32-ipad-sidebar-accessibility-20260504/`.
+
 ## Lead Dev Scope Refresh - 2026-05-02 06:07Z
 
 #29 is closed. The live Handrail listener on `127.0.0.1:8788` was restarted from stale PID `16041` to PID `70040` using LaunchAgent `com.velocityworks.handrail.server`. A real `start_chat` through the live server emitted `chat_started`, emitted a chat-linked `chat_event`, refreshed `chat_list`, and appeared in `node cli/dist/src/index.js chats` as Desktop-visible chat `codex:019de74b-9e6e-71e1-a6e1-14028304e776`. Evidence is in `test-artifacts/issue29-resolve-20260502T060625Z/`.
@@ -106,6 +119,12 @@ Milestone 3 now has one open issue: #2. #3 is closed with deterministic CLI test
 #2 now also has protocol/test coverage for approval-state list mutation. When the CLI records a structured app-server approval request, it immediately broadcasts `approval_required`, a chat-linked `chat_event`, and a refreshed `chat_list` whose Desktop-visible `codex:` row is overlaid as `waiting_for_approval`. Verification: `cd cli && npm test` passed 44/44.
 
 The remaining blocker is no longer an unspecified protocol shape. It is live acceptance evidence: restart or otherwise replace the running local Handrail server so it exposes the rebuilt CLI, produce a real approval request from a Handrail-started Codex Desktop/app-server turn, verify iOS approve/deny decisions route to the app-server request id, and then capture the dependent iPad #24 dashboard state.
+
+## Architect No-Orphan Approval/Event Refresh - 2026-05-04 00:48Z
+
+#2 now has one additional protocol guard: app-server-derived approval requests and live events wait for `listCodexChats()` to expose the matching Desktop-derived `codex:<threadId>` before the CLI emits `approval_required`, approval `chat_event`, or live app-server `chat_event` state to iOS. Async app-server callback failures are now surfaced as explicit WebSocket `error` messages instead of unhandled async work. Verification: `cd cli && npm test` passed 45/45.
+
+This improves the Desktop-visible chat ownership invariant but does not close #2. The remaining blocker is still live acceptance evidence against the running local server: replace PID `4657` or otherwise run the rebuilt CLI, produce one real approval-producing Handrail-started Codex Desktop/app-server turn, verify iOS approve/deny decisions route to the app-server request id, then capture the dependent iPad #24 `waiting_for_approval` dashboard row.
 
 ## Lead Dev Live Server Restart Attempt - 2026-05-02 23:51Z
 

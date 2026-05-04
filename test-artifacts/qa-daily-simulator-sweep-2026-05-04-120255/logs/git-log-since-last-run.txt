@@ -1,0 +1,2 @@
+4bd5492 (HEAD -> main) Record blocked queue hygiene state
+fadfc63 Fix paired machine port formatting

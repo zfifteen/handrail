@@ -2,7 +2,7 @@
 
 ## Strongest Eligibility Finding
 
-The iPhone App Store readiness milestone still has 2 open evidence blockers: #25 for production-capable Release signing evidence and #28 for final 6.9-inch screenshot-class assets. The iPad endpoint-format blocker #31 was classified under milestone 2, then closed by Lead Dev with iPad simulator evidence showing the paired Dashboard renders `127.0.0.1:8788` literally.
+The iPhone App Store readiness milestone still has 2 open evidence blockers: #25 for production-capable Release signing evidence and #28 for final 6.9-inch screenshot-class assets. The iPad sidebar accessibility blocker #32 is now closed with Lead Dev simulator evidence showing individual label-tappable navigation buttons.
 
 ## Current App Store Blockers
 
@@ -12,15 +12,15 @@ The iPhone App Store readiness milestone still has 2 open evidence blockers: #25
 
 ## Submission Artifacts Updated
 
-- Updated `docs/production_readiness_report.md` with the 2026-05-03 iPad scope refresh naming #31 as a target-platform blocker and then recording its Lead Dev closure evidence.
+- Updated `docs/production_readiness_report.md` with the 2026-05-04 iPad accessibility refresh recording #32 as closed with simulator evidence.
 - No App Store listing copy, screenshots, privacy copy, icon assets, or export-compliance drafts changed in this run.
 
 ## GitHub Issues Or Milestones Updated
 
-- Assigned #31 to milestone 2, `iPad MVP stabilization`: https://github.com/zfifteen/handrail/issues/31.
-- Added BA triage evidence to #31: https://github.com/zfifteen/handrail/issues/31#issuecomment-4366231940.
-- Lead Dev closed #31 with iPad simulator evidence: https://github.com/zfifteen/handrail/issues/31#issuecomment-4366236150.
-- Updated milestone 2 description to record #31 as closed and narrow remaining iPad readiness to #24 and #6.
+- Assigned #32 to milestone 2, `iPad MVP stabilization`: https://github.com/zfifteen/handrail/issues/32.
+- Added BA triage evidence to #32: https://github.com/zfifteen/handrail/issues/32#issuecomment-4371263772.
+- Lead Dev closed #32 with iPad simulator evidence: https://github.com/zfifteen/handrail/issues/32#issuecomment-4371280760.
+- Updated milestone 2 description to record #32 as closed and narrow remaining iPad readiness to #24 and #6.
 - No new issue was created. Existing open issues cover the current App Store eligibility gaps.
 - No release was created or updated; `gh release list --repo zfifteen/handrail --limit 20` returned no releases.
 
@@ -37,7 +37,7 @@ Advance #28 only when a paired 6.9-inch iPhone simulator/device, or XcodeBuildMC
 ## Product Invariant Check
 
 - Preserved free, local-first, Codex Desktop-only Handrail: yes.
-- Drift risk found: No product-invariant drift found. This run tightened the local-first endpoint evidence requirement and did not add cloud, account, payment, generic terminal, multi-agent, or non-Codex claims.
+- Drift risk found: No product-invariant drift found. This run kept iPad accessibility evidence tied to local simulator validation and did not add cloud, account, payment, generic terminal, multi-agent, or non-Codex claims.
 
 ## Verification
 
@@ -49,5 +49,7 @@ Advance #28 only when a paired 6.9-inch iPhone simulator/device, or XcodeBuildMC
 - Verified `gh auth status -h github.com` is authenticated as `zfifteen`.
 - Reviewed current git status and preserved unrelated local iOS source changes and test artifacts.
 - Reviewed `docs/product-invariants.md`, `docs/production_readiness_report.md`, `docs/privacy-policy.md`, `FEATURE_ROADMAP.md`, current team outputs, `store-assets/metadata.txt`, `store-assets/screenshot-plan.md`, open GitHub issues, milestones, and releases.
+- Reviewed #32 evidence in `test-artifacts/qa-daily-simulator-sweep-2026-05-04-120255/notes.md`.
+- Reviewed Lead Dev #32 closure evidence in `docs/team/outputs/lead-dev.md` and `test-artifacts/issue32-ipad-sidebar-accessibility-20260504/`.
 - Used local `gh` only for all GitHub reads and writes.
 - No build, unit test, or simulator validation was run because this Business Analyst run changed eligibility classification and reporting only, not product source or visible iPhone/iPad UI behavior.
