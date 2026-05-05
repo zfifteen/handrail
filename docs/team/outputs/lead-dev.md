@@ -2,58 +2,53 @@
 
 ## Strongest Implementation Finding
 
-#32 is fixed and simulator-verified: the iPad workspace sidebar now exposes `Dashboard`, `Chats`, `Attention`, `Activity`, `Alerts`, and `Settings` as individual accessible buttons, and XcodeBuildMCP can activate each route by label.
+Approval routing now preserves concurrent pending requests that reuse the same app-server request id. Handrail still exposes the raw Codex app-server request id as `approvalId`, but the CLI stores pending approval callbacks by `chatId + approvalId`, which matches the tuple iOS sends for approve/deny.
 
 ## Patch Or Issue Work Completed
 
-- Slack `#handrail-agents` had no request addressed to `Handrail Lead Dev`; the only channel request remains the no-action verification at TS `1777590711.698899`.
+- Slack `#handrail-agents` had no request addressed to `Handrail Lead Dev`; the only channel request remains the no-action verification with Slack Subject `Slack coordination layer verification` at TS `1777590711.698899`.
 - The readable lead-dev handoff has no active item.
 - Confirmed `gh auth status -h github.com` is authenticated for `zfifteen`.
-- Selected #32 because it was the only concrete unblocked open bug and included reproduction plus acceptance criteria.
-- Replaced the iPad sidebar `List` of plain buttons with explicit full-width sidebar buttons in a `ScrollView`/`VStack`.
-- Added explicit accessibility labels and button/selected traits to every sidebar route.
-- Added a focused Swift test locking the visible iPad sidebar section order.
-- Closed #32 with simulator accessibility and screenshot evidence.
-- Updated GitHub milestone 2 so #32 is listed as closed and #6/#24 remain the only open iPad stabilization issues.
+- All open GitHub bugs and enhancements are labeled `blocked`, so this run selected one hygiene/protocol patch with an obvious verification path.
+- Preserved the existing Architect patch and completed Lead Dev verification for it.
+- Updated `cli/src/chats.ts` so pending approval insert, lookup, and delete use `chatId + approvalId`.
+- Added `chat manager scopes duplicate approval ids by chat id`, proving two simultaneous chats can both receive `server-request-1` without one overwriting the other.
+- Updated the app-server and WebSocket protocol specs with the request-id scoping rule.
+- Did not add a duplicate GitHub comment because #2 already has the Architect update for this exact scoping correction at `https://github.com/zfifteen/handrail/issues/2#issuecomment-4375685240`.
 
 ## Files Changed
 
-- `ios/Handrail/Handrail/Views/IPad/IPadSidebarView.swift`
-- `ios/Handrail/HandrailTests/RootLayoutSelectionTests.swift`
+- `cli/src/chats.ts`
+- `cli/test/codex.test.ts`
+- `docs/spec/codex-desktop-app-server.md`
+- `docs/spec/handrail-websocket-protocol.md`
 - `docs/team/outputs/lead-dev.md`
 - `docs/production_readiness_report.md`
-- `test-artifacts/issue32-ipad-sidebar-accessibility-20260504/`
-- Preserved pre-existing PM/QA local changes:
-  - `docs/team/outputs/pm.md`
-  - `test-artifacts/qa-daily-simulator-sweep-2026-05-04-120255/`
+- Preserved pre-existing role report edits:
+  - `docs/team/outputs/architect.md`
+  - `docs/team/outputs/qa-lead.md`
 
 ## Remaining Blocker
 
-No blocker remains for #32. Product work still blocked elsewhere remains unchanged: #2 needs live approval-producing Desktop/app-server evidence against the running server; #24 and #6 depend on that iPad-visible approval state; #25 needs valid APNs-capable distribution signing; #28 needs final paired 6.9-inch screenshot captures; #5 needs a paired iPhone + Apple Watch acceptance path or a product decision accepting partial watchOS work.
+No blocker remains for this hygiene patch. #2 remains blocked on live acceptance evidence: the local LaunchAgent server is still PID `4657`, and closure still needs a permitted server replacement, one real approval-producing Handrail-started Codex Desktop/app-server turn, and iOS approve/deny evidence against the app-server request id. Dependent #24 and #6 remain blocked by that live approval state.
 
 ## Product Invariant Check
 
 - Preserved free, local-first, Codex Desktop-only Handrail: yes.
-- Drift risk found: No product-invariant drift found. This run changed only local iPad navigation accessibility and evidence docs; it did not add cloud relay, account state, payment, generic terminal behavior, multi-agent control, non-Codex support, or direct iOS file editing.
+- Drift risk found: No product-invariant drift found. This run changed only local CLI approval routing, protocol specs, and role reports; it did not add cloud relay, account state, payment, generic terminal behavior, multi-agent control, non-Codex support, or direct iOS file editing.
 
 ## Verification
 
 - Slack `#handrail-agents` (`C0B0K6B0T6K`): no message addressed to `Handrail Lead Dev`; no-action verification remains at TS `1777590711.698899`.
 - `gh auth status -h github.com`: authenticated as `zfifteen`.
-- `gh issue view 32 -R zfifteen/handrail --json number,title,body,labels,comments,url,createdAt,updatedAt`: inspected.
-- `gh issue edit 32 -R zfifteen/handrail --milestone "iPad MVP stabilization"`: assigned #32 to milestone 2 before closure.
-- `gh issue comment 32 -R zfifteen/handrail ...`: recorded fix and verification evidence.
-- `gh issue close 32 -R zfifteen/handrail ...`: closed #32.
-- `gh api repos/zfifteen/handrail/milestones/2 -X PATCH ...`: updated milestone 2 closure state for #32.
-- `cd cli && npm test`: passed 45/45.
-- XcodeBuildMCP defaults: project `ios/Handrail/Handrail.xcodeproj`, scheme `Handrail`, Debug, iPad Pro 13-inch (M5), simulator UDID `43913CAF-14DD-45B6-9633-0A9790474FC7`, bundle `com.velocityworks.Handrail`.
-- XcodeBuildMCP `test_sim -only-testing:HandrailTests/RootLayoutSelectionTests`: passed 8/8 on iPad Pro 13-inch (M5), iOS Simulator 26.4.1.
-- XcodeBuildMCP `build_run_sim`: succeeded and launched `com.velocityworks.Handrail` on iPad Pro 13-inch (M5), iOS Simulator 26.4.1.
-- XcodeBuildMCP `snapshot_ui`: confirmed individual `AXButton` elements for `Dashboard`, `Chats`, `Attention`, `Activity`, `Alerts`, and `Settings`.
-- XcodeBuildMCP `tap(label:)`: succeeded for `Dashboard`, `Chats`, `Attention`, `Activity`, `Alerts`, and `Settings`.
-- Screenshot evidence saved under `test-artifacts/issue32-ipad-sidebar-accessibility-20260504/`.
+- `gh issue list -R zfifteen/handrail --state open --limit 100 --json number,title,labels,updatedAt,url,milestone`: all open bugs/enhancements inspected; all are labeled `blocked`.
+- `gh issue view 2 -R zfifteen/handrail --comments --json number,title,labels,state,comments,url`: inspected current #2 approval-routing history and confirmed the existing Architect scoping comment.
+- `npm test` in `cli/`: passed 46/46.
+- `lsof -nP -iTCP:8788 -sTCP:LISTEN`: live server listener remains `node` PID `4657`.
+- `launchctl print gui/501/com.velocityworks.handrail.server | sed -n '1,140p'`: LaunchAgent is running `/Users/velocityworks/IdeaProjects/handrail/cli/dist/src/index.js serve` as PID `4657`.
 - `git diff --check`: passed.
+- No iPhone/iPad simulator validation was run because this patch changes CLI approval routing and protocol docs only; it does not change visible iOS UI, navigation, decoded screen data, gestures, context menus, sheets, tabs, lists, or empty states.
 
 ## QA Handoff
 
-No QA handoff is needed for #32 because Lead Dev completed the required iPad simulator validation in this run. Future QA can treat `test-artifacts/issue32-ipad-sidebar-accessibility-20260504/` as the closure evidence set.
+No QA handoff is needed for this hygiene patch. #2/#24 live approval validation is still blocked by the unchanged LaunchAgent/live-evidence gate already recorded in the QA report and #2.

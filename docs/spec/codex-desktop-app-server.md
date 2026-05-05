@@ -219,6 +219,8 @@ The invariant is:
 A Handrail approvalId is the app-server request id, not transcript text, a local UUID, or an inferred item id.
 ```
 
+App-server request ids are scoped to their retained app-server connection. Handrail exposes the raw request id unchanged as `approvalId`, but the pending approval table is keyed by `chatId` plus `approvalId` so concurrent Handrail-started chats cannot overwrite each other if two app-server children emit the same request id.
+
 ## Handrail Request IDs
 
 Observed:

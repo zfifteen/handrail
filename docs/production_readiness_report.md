@@ -126,6 +126,12 @@ The remaining blocker is no longer an unspecified protocol shape. It is live acc
 
 This improves the Desktop-visible chat ownership invariant but does not close #2. The remaining blocker is still live acceptance evidence against the running local server: replace PID `4657` or otherwise run the rebuilt CLI, produce one real approval-producing Handrail-started Codex Desktop/app-server turn, verify iOS approve/deny decisions route to the app-server request id, then capture the dependent iPad #24 `waiting_for_approval` dashboard row.
 
+## Lead Dev Approval Request Scope Refresh - 2026-05-05 01:01Z
+
+#2 now has an internal pending-approval scoping guard for concurrent app-server child connections. The public `approvalId` remains the raw Codex app-server request id, but `cli/src/chats.ts` now stores pending approval callbacks by `chatId + approvalId`, matching the tuple iOS returns for approve/deny. Verification: `cd cli && npm test` passed 46/46, including `chat manager scopes duplicate approval ids by chat id`.
+
+This does not close #2. The live LaunchAgent server is still PID `4657`; closure still requires a permitted server replacement, one real approval-producing Handrail-started Codex Desktop/app-server turn, iOS approve/deny evidence against the app-server request id, and the dependent iPad #24 `waiting_for_approval` dashboard evidence.
+
 ## Lead Dev Live Server Restart Attempt - 2026-05-02 23:51Z
 
 Lead Dev rebuilt the current CLI and reran the approval-routing test suite: `npm test` in `cli/` passed 44/44, including the approval-state `chat_list` broadcast contract. The local LaunchAgent still could not be replaced from this automation context. Before restart, `lsof -nP -iTCP:8788 -sTCP:LISTEN` showed `node` PID `4657`; `launchctl kickstart -k gui/501/com.velocityworks.handrail.server` returned `Operation not permitted`; after restart, the listener remained `node` PID `4657`.

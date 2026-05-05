@@ -316,6 +316,75 @@ test("chat manager routes Codex Desktop approval decisions by server request id"
   }));
 });
 
+test("chat manager scopes duplicate approval ids by chat id", async () => {
+  const threadIds = [
+    "019dc424-e857-76e0-8229-589ecf107eb4",
+    "019dc424-e857-76e0-8229-589ecf107eb5"
+  ];
+  const messages: unknown[] = [];
+  const approvalHandlers = new Map<string, (approval: DesktopApprovalRequest) => void>();
+  const decisions = new Map<string, string>();
+  let startIndex = 0;
+  let desktopChats = [] as Awaited<ReturnType<ChatManager["list"]>>;
+
+  const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
+    listCodexChats: async () => desktopChats,
+    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    prepareChatWorkspace: async () => "/Users/me/project",
+    startCodexDesktopConversation: async (_input, onApprovalRequest) => {
+      assert.ok(onApprovalRequest);
+      const threadId = threadIds[startIndex];
+      startIndex += 1;
+      approvalHandlers.set(threadId, onApprovalRequest);
+      desktopChats = [...desktopChats, {
+        id: `codex:${threadId}`,
+        repo: "/Users/me/project",
+        title: `Approval scope test ${startIndex}`,
+        projectName: "project",
+        status: "running" as const,
+        startedAt: "2026-04-28T13:00:00.000Z",
+        updatedAt: `2026-04-28T13:00:0${startIndex}.000Z`,
+        transcript: []
+      }];
+      return threadId;
+    },
+    startCodexDesktopTurn: async () => {},
+    interruptCodexDesktopTurn: async () => {}
+  });
+
+  for (const threadId of threadIds) {
+    await manager.startChat({
+      prompt: `Approval scope test ${threadId}`,
+      projectId: "/Users/me/project",
+      projectPath: "/Users/me/project",
+      workMode: "local",
+      branch: "main",
+      accessPreset: "on_request",
+      model: "gpt-5.5",
+      reasoningEffort: "high"
+    });
+    approvalHandlers.get(threadId)?.({
+      threadId,
+      approvalId: "server-request-1",
+      title: "Command approval required",
+      summary: "npm test",
+      files: [],
+      diff: "",
+      respond: async (decision) => {
+        decisions.set(threadId, decision);
+      }
+    });
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+
+  await manager.approve(`codex:${threadIds[0]}`, "server-request-1");
+
+  assert.equal(decisions.get(threadIds[0]), "accept");
+  assert.equal(decisions.has(threadIds[1]), false);
+  assert.equal((await manager.list()).find((chat) => chat.id === `codex:${threadIds[0]}`)?.status, "running");
+  assert.equal((await manager.list()).find((chat) => chat.id === `codex:${threadIds[1]}`)?.status, "waiting_for_approval");
+});
+
 test("chat manager broadcasts chat list when approval state changes", async () => {
   const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   const messages: unknown[] = [];

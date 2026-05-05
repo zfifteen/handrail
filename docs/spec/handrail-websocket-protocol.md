@@ -99,7 +99,7 @@ Protocol drift must become visible during development instead of being silently 
 Observed:
 
 - iOS can send `approve` and `deny` with `chatId` and `approvalId`.
-- For Handrail-started app-server turns, `cli/src/chats.ts` accepts both commands only when `approvalId` matches a pending structured app-server approval request.
+- For Handrail-started app-server turns, `cli/src/chats.ts` accepts both commands only when `chatId` plus `approvalId` matches a pending structured app-server approval request.
 - Unknown or stale approval ids are rejected with a visible error.
 - `approval_required` is emitted from structured app-server requests handled in `cli/src/codexDesktopIpc.ts`, not from transcript text.
 - App-server approval requests wait until the corresponding `codex:` thread appears in Handrail's Desktop-derived chat list before the CLI emits mobile-visible approval state.
@@ -122,6 +122,14 @@ The invariant is:
 ```text
 Approval actions must route a real Desktop pending request id through the Desktop owner, not a guessed transcript marker.
 ```
+
+The route key in the mobile protocol is the pair:
+
+```text
+chatId + approvalId
+```
+
+The `approvalId` remains the raw app-server request id. Handrail must not treat that id as globally unique across independent app-server child processes.
 
 The related no-orphan invariant is:
 

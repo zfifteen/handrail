@@ -127,7 +127,7 @@ export class ChatManager {
   async approve(chatId: string, approvalId: string): Promise<ApprovalRequest> {
     const pending = this.pendingApproval(chatId, approvalId);
     await pending.respond("accept");
-    this.pendingApprovals.delete(approvalId);
+    this.pendingApprovals.delete(approvalKey(chatId, approvalId));
     const now = new Date().toISOString();
     this.broadcast({ type: "chat_event", chatId, event: { kind: "approval_approved", text: pending.request.summary, status: "running", at: now } });
     this.broadcast({ type: "chat_list", chats: await this.list() });
@@ -137,7 +137,7 @@ export class ChatManager {
   async deny(chatId: string, approvalId: string, _reason?: string): Promise<ApprovalRequest> {
     const pending = this.pendingApproval(chatId, approvalId);
     await pending.respond("decline");
-    this.pendingApprovals.delete(approvalId);
+    this.pendingApprovals.delete(approvalKey(chatId, approvalId));
     const now = new Date().toISOString();
     this.broadcast({ type: "chat_event", chatId, event: { kind: "approval_denied", text: pending.request.summary, status: "running", at: now } });
     this.broadcast({ type: "chat_list", chats: await this.list() });
@@ -189,7 +189,7 @@ export class ChatManager {
       diff: approval.diff
     };
     await this.waitForDesktopVisibleChat(request.chatId);
-    this.pendingApprovals.set(request.approvalId, { request, respond: approval.respond });
+    this.pendingApprovals.set(approvalKey(request.chatId, request.approvalId), { request, respond: approval.respond });
     this.broadcast({ type: "approval_required", ...request });
     this.broadcast({
       type: "chat_event",
@@ -221,7 +221,7 @@ export class ChatManager {
   }
 
   private pendingApproval(chatId: string, approvalId: string): { request: ApprovalRequest; respond(decision: DesktopApprovalDecision): Promise<void> } {
-    const pending = this.pendingApprovals.get(approvalId);
+    const pending = this.pendingApprovals.get(approvalKey(chatId, approvalId));
     if (!pending || pending.request.chatId !== chatId) {
       throw new Error(`No pending approval ${approvalId} for Codex chat ${chatId}.`);
     }
@@ -276,4 +276,8 @@ function desktopThreadId(chatId: string): string {
     throw new Error(`No Codex chat with id ${chatId}.`);
   }
   return chatId.replace(/^codex:/, "");
+}
+
+function approvalKey(chatId: string, approvalId: string): string {
+  return `${chatId}\n${approvalId}`;
 }
