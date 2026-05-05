@@ -2,17 +2,19 @@
 
 ## Strongest Product Finding
 
-Handrail's remaining Desktop approval blocker is live evidence, not missing protocol design. #2 now has code/spec/test coverage for app-server approval request IDs, approve/deny routing, approval-state `chat_list` broadcasts, and a no-orphan gate that waits for the Desktop-visible `codex:` row before emitting app-server-derived approval or live event state to iOS. #24 and iPad umbrella #6 should stay blocked until that rebuilt CLI is proven through a real running server and iPad simulator-visible `waiting_for_approval` row.
+Handrail's remaining Desktop approval blocker is live evidence, not product scope or protocol architecture. #2 now has code/spec/test coverage for request-id approval routing, approve/deny app-server responses, approval-state `chat_list` broadcasts, Desktop-visible row gating, and pending approval callback storage scoped by `chatId + approvalId`. Latest reported CLI verification is 46/46. #24 and iPad umbrella #6 must stay blocked until that rebuilt CLI is proven through a real running local server and an iPad simulator-visible `waiting_for_approval` row.
 
 ## Decisions Or Issues Updated
 
 - Slack inbox: checked `#handrail-agents` (`C0B0K6B0T6K`); no message was addressed to `Handrail PM`. The only channel request remains the no-action coordination verification at `2026-04-30 19:11:51 EDT` / TS `1777590711.698899`.
 - Handoff inbox: no PM handoff file was present at `/Users/velocityworks/.codex/automations/handrail-pm/handoff.md`.
 - GitHub auth: `gh auth status --hostname github.com` is authenticated as `zfifteen`; all GitHub reads/writes used the local `gh` CLI.
-- Reviewed open GitHub issues, milestones, releases, current team outputs, and issue comments for #2 and #24. No GitHub release exists.
-- Updated `docs/production_readiness_report.md` to absorb the Architect no-orphan approval/event refresh: app-server-derived approval and live events now wait for the Desktop-visible chat row before iOS broadcast; live server replacement and real Desktop approval evidence remain the blocker.
-- Updated GitHub milestone 3 to record that #2 has approval request-id routing, approve/deny app-server responses, approval-state `chat_list` broadcasts, and Desktop-visibility gating coverage, with 45/45 CLI tests reported.
-- Commented on #2 with the current PM closure contract after the no-orphan update.
+- Reviewed open and recently closed GitHub issues, milestones, releases, current team outputs, and issue comments for #2 and #24. No GitHub release exists.
+- Updated `docs/production_readiness_report.md` with a PM approval-scope reconciliation for the new `chatId + approvalId` scoping guard.
+- Updated GitHub milestone 3 to record #2's accepted protocol evidence and 46/46 CLI test state while keeping it blocked on live approval evidence.
+- Updated GitHub milestone 2 to keep #24 and #6 blocked behind the same live approval path.
+- Commented on #2: https://github.com/zfifteen/handrail/issues/2#issuecomment-4375758904.
+- Commented on #24: https://github.com/zfifteen/handrail/issues/24#issuecomment-4375758906.
 - Updated this PM report.
 
 ## Scope Risks
@@ -30,7 +32,7 @@ Replace the running local Handrail server with the rebuilt CLI, then produce one
 ## Product Invariant Check
 
 - Preserved free, local-first, Codex Desktop-only Handrail: yes.
-- Drift risk found: No new drift found. This run kept approval evidence tied to real local Codex Desktop/app-server state and Desktop-visible chat ownership. It did not add cloud, account, payment, generic terminal, multi-agent, non-Codex, or direct iOS file-editing scope.
+- Drift risk found: No product-invariant drift found. This run kept approval evidence tied to real local Codex Desktop/app-server state and Desktop-visible chat ownership. It did not add cloud, account, payment, generic terminal, multi-agent, non-Codex, or direct iOS file-editing scope.
 
 ## Verification
 
@@ -38,10 +40,10 @@ Replace the running local Handrail server with the rebuilt CLI, then produce one
 - Read PM automation memory at `/Users/velocityworks/.codex/automations/handrail-pm/memory.md`.
 - Checked PM handoff path and found no handoff file.
 - Checked Slack channel `C0B0K6B0T6K` for messages addressed to `Handrail PM`.
-- Checked local state with `git status --short --untracked-files=all`; no uncommitted worktree changes were present before PM edits.
-- Reviewed project/product state: `README.md`, `docs/product-invariants.md`, `FEATURE_ROADMAP.md`, `TEST_PLAN.md`, `UI_PATHS.md`, `UI_PATH_ISSUES.md`, `docs/production_readiness_report.md`, `store-assets/metadata.txt`, `store-assets/screenshot-plan.md`, and current team outputs.
-- Reviewed GitHub state with local `gh`: open issues, milestones, releases, and issues #2 and #24.
-- Updated GitHub milestone 3 through `gh api repos/zfifteen/handrail/milestones/3 -X PATCH`.
-- Added a GitHub issue comment through `gh issue comment` on #2.
+- Checked local state with `git status --short --branch`; unrelated modified files were already present in CLI/spec/team output files and were preserved.
+- Reviewed project/product state: `README.md`, `docs/product-invariants.md`, `FEATURE_ROADMAP.md`, `TEST_PLAN.md`, `UI_PATHS.md`, `docs/production_readiness_report.md`, and current team outputs.
+- Reviewed GitHub state with local `gh`: open issues, recently closed issues, milestones, releases, and issue comments for #2 and #24.
+- Updated GitHub milestones 2 and 3 through `gh api`.
+- Added GitHub issue comments through `gh issue comment` on #2 and #24, then corrected timestamps through `gh api` after checking `date -u`.
 - Ran `git diff --check -- docs/production_readiness_report.md docs/team/outputs/pm.md`; no whitespace errors.
-- No build, unit test, or simulator validation was run because this PM pass changed product/readiness documentation only, not app code or visible iPhone/iPad UI behavior.
+- No build, unit test, or simulator validation was run because this PM pass changed product/readiness documentation and GitHub tracking only, not app code or visible iPhone/iPad UI behavior.

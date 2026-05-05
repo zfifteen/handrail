@@ -132,6 +132,18 @@ This improves the Desktop-visible chat ownership invariant but does not close #2
 
 This does not close #2. The live LaunchAgent server is still PID `4657`; closure still requires a permitted server replacement, one real approval-producing Handrail-started Codex Desktop/app-server turn, iOS approve/deny evidence against the app-server request id, and the dependent iPad #24 `waiting_for_approval` dashboard evidence.
 
+## PM Approval Scope Reconciliation - 2026-05-05 01:04Z
+
+The accepted #2 protocol evidence now includes request-id routing, approve/deny app-server responses, approval-state `chat_list` broadcasts, Desktop-visible row gating, and pending-approval storage scoped by `chatId + approvalId`. The remaining issue is not product scope or protocol architecture; it is live local evidence against the running Handrail server.
+
+Milestone 3 should continue to describe #2 as a single live-evidence blocker. Milestone 2 should continue to keep #24 and umbrella #6 blocked behind that same live approval path. Do not add approval-response App Store copy, approval screenshots, or iPad acceptance claims until the rebuilt local server produces a real approval request from a Handrail-started Codex Desktop/app-server turn and iOS approve/deny actions are verified against that request id.
+
+## Lead Dev Queue Hygiene Refresh - 2026-05-05 13:02Z
+
+Lead Dev found no unblocked open implementation issue. Open bugs #25 and #24 are labeled `blocked`; open enhancements #28, #13, #6, #5, and #2 are also labeled `blocked`. This leaves the hourly Lead Dev lane on hygiene until one blocker is removed or a new concrete unblocked bug/enhancement is filed.
+
+The 2026-05-05 QA daily simulator sweep artifacts are now preserved under `test-artifacts/qa-daily-simulator-sweep-2026-05-05-120132/`. QA reported CLI tests 46/46, iPhone simulator tests 50/50, iPad simulator tests 50/50, and no new reproducible UI bug. This does not close #24 because the live server still had no `waiting_for_approval` row.
+
 ## Lead Dev Live Server Restart Attempt - 2026-05-02 23:51Z
 
 Lead Dev rebuilt the current CLI and reran the approval-routing test suite: `npm test` in `cli/` passed 44/44, including the approval-state `chat_list` broadcast contract. The local LaunchAgent still could not be replaced from this automation context. Before restart, `lsof -nP -iTCP:8788 -sTCP:LISTEN` showed `node` PID `4657`; `launchctl kickstart -k gui/501/com.velocityworks.handrail.server` returned `Operation not permitted`; after restart, the listener remained `node` PID `4657`.

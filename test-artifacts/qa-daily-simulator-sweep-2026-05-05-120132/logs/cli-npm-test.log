@@ -1,0 +1,62 @@
+
+> handrail@0.1.0 test
+> npm run build && node --test dist/test/*.test.js
+
+
+> handrail@0.1.0 build
+> rm -rf dist && tsc
+
+✔ parses active cron automations for mobile display (2.162125ms)
+✔ parses heartbeat target threads for mobile display (2.054083ms)
+✔ discovers New Chat projects from Codex Desktop state and config (2.310459ms)
+✔ builds Codex Desktop IPC follower requests (0.174417ms)
+✔ builds Codex Desktop app-server turn-start params (0.082542ms)
+✔ new Desktop conversations keep thread creation and first turn on one app-server connection (0.234667ms)
+✔ converts Codex Desktop app-server notifications into live events (0.12975ms)
+✔ converts Codex Desktop command approval requests into Handrail approval ids (0.11275ms)
+✔ builds Codex Desktop thread deeplinks (0.053917ms)
+✔ uses the Darwin user temp dir for Codex Desktop IPC (0.114458ms)
+✔ builds Codex Desktop app-server thread-start params (0.082708ms)
+✔ encodes Codex Desktop IPC frames with little-endian length prefix (0.151583ms)
+✔ chat manager refuses non-Codex chat ids (0.304583ms)
+✔ chat manager rejects unknown approval ids (0.180333ms)
+✔ chat manager routes Codex Desktop approval decisions by server request id (1.490666ms)
+✔ chat manager scopes duplicate approval ids by chat id (4.749584ms)
+✔ chat manager broadcasts chat list when approval state changes (0.487083ms)
+✔ app-server approval requests wait for Desktop visibility before mobile broadcast (252.337333ms)
+✔ chat manager broadcasts live app-server turn events for visible Desktop chats (0.376083ms)
+✔ new chat creation starts a Desktop-owned conversation (0.1635ms)
+✔ new chat creation waits for Desktop visibility before broadcasting (250.469125ms)
+✔ new chat creation fails instead of broadcasting an orphan when Desktop does not expose the chat (6027.832667ms)
+✔ projectless new chat provides a Desktop projectless workspace (0.344417ms)
+✔ continued Codex chats route through Codex Desktop IPC (0.502458ms)
+✔ reads Codex Desktop pinned thread ids (0.104166ms)
+✔ reads Codex Desktop status from the latest rollout event (0.095167ms)
+✔ formats imported Codex transcript entries for rich mobile rendering (0.861125ms)
+✔ imports only visible desktop chat rows (1.009375ms)
+✔ normalizes raw Codex thread ids out of user-visible chat titles (0.293583ms)
+✔ uses Codex Desktop project names for imported chat metadata (0.080708ms)
+✔ uses the newest SQLite lifecycle status per Codex thread (0.157708ms)
+✔ extracts automation target thread ids from automation TOML (0.126042ms)
+✔ extracts desktop thinking summaries by visible chat round (0.279208ms)
+✔ bounds extracted thinking summaries (0.299583ms)
+✔ reads large Codex rollout files from bounded head and tail (14.497917ms)
+✔ infers active Codex status when the bounded tail omits task_started (13.207041ms)
+✔ builds APNs alert request deterministically (0.963209ms)
+✔ notification dispatcher sends completed and failed events once (0.385334ms)
+✔ notification dispatcher reports missing APNs config when push is required (0.302417ms)
+✔ notification event detects input-required transcript marker (0.38975ms)
+✔ notification event body falls back from raw Codex ids to a human chat label (0.103875ms)
+✔ WebSocket server pairs, refreshes chats, stops chats, and reports command errors (12.665791ms)
+✔ WebSocket server accepts and persists push token registration (13.596542ms)
+✔ WebSocket server broadcasts chat list when thinking appears during polling (22.542667ms)
+✔ WebSocket server broadcasts chat list when transcript content changes during polling (21.785583ms)
+✔ state stores pairing metadata without chat records (11.867834ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6631.1785
