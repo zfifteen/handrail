@@ -58,6 +58,7 @@ Observed:
 
 - `HandrailStore.handleMessage` handles WebSocket messages.
 - `approval_required` inserts an in-app notification and calls `notifyApproval`.
+- Approval local notification request identifiers use `chatId + approvalId`, matching the approval route key rather than treating `approvalId` as globally unique.
 - `chat_event` with `chat_completed` calls `notifyChatCompleted`.
 - `chat_event` with `chat_failed` calls `notifyChatFailed`.
 - Output text containing `input required` calls `notifyInputRequired`.
@@ -91,4 +92,3 @@ The invariant is:
 ```text
 Notification eligibility depends on receiver attention, not on chat status alone.
 ```
-

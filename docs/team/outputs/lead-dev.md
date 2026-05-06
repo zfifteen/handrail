@@ -2,31 +2,35 @@
 
 ## Strongest Implementation Finding
 
-No unblocked implementation issue is currently available for Lead Dev selection. The active queue is constrained by explicit blockers: #25 needs Release/APNs signing inputs, #28 needs final paired 6.9-inch iPhone screenshot-class captures, #24 and #6 need #2 live approval evidence, #5 needs paired Apple Watch acceptance hardware or a product decision, and #2 needs live local approval evidence against the running server.
+Approval notification identity now matches the approval route invariant: one approval is identified by `chatId + approvalId`, not by `approvalId` alone. This prevents two concurrent Handrail-started Codex Desktop chats with the same app-server request id, such as `server-request-1`, from sharing one local notification request identifier.
 
 ## Patch Or Issue Work Completed
 
 - Slack `#handrail-agents` had no request addressed to `Handrail Lead Dev`; the only channel request remains the no-action verification with Slack Subject `Slack coordination layer verification` at TS `1777590711.698899`.
-- The readable lead-dev handoff has no active item.
+- The readable Lead Dev handoff has no active item.
 - Confirmed `gh auth status -h github.com` is authenticated for `zfifteen`.
 - Open GitHub bugs: #25 and #24, both labeled `blocked`.
 - Open GitHub enhancements: #28, #13, #6, #5, and #2, all labeled `blocked`.
-- Selected one repository hygiene target: preserve the current PM/QA readiness evidence and refresh Lead Dev state so the all-blocked queue remains auditable.
-- Preserved pre-existing PM approval-scope reconciliation edits in `docs/production_readiness_report.md` and `docs/team/outputs/pm.md`.
-- Preserved pre-existing QA daily simulator sweep report edits and artifacts under `test-artifacts/qa-daily-simulator-sweep-2026-05-05-120132/`.
-- Added a Lead Dev readiness refresh to `docs/production_readiness_report.md`.
-- Updated this Lead Dev report.
-- No GitHub issue comment was added because no new issue-specific implementation or unblock evidence was produced.
+- Selected one hygiene/protocol patch with an obvious verification path because no unblocked bug or enhancement was available.
+- Preserved the existing Architect notification-identity patch:
+  - `notifyApproval` schedules approval notifications with `approvalNotificationIdentifier(chatId:approvalId:)`.
+  - `NotificationIdentifierTests.testApprovalNotificationIdentifierUsesChatIdAndApprovalId` proves the deterministic request identifier.
+  - `docs/spec/handrail-notification-suppression.md` records the route-key contract.
+- Preserved existing production-readiness, PM, Business Analyst, and QA report edits.
+- No GitHub issue comment was added by Lead Dev because Architect already recorded the #2 notification-identity evidence in `https://github.com/zfifteen/handrail/issues/2#issuecomment-4384308442`.
 
 ## Files Changed
 
-- `docs/team/outputs/lead-dev.md`
+- `ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift`
+- `ios/Handrail/HandrailTests/HandrailCommandAvailabilityTests.swift`
+- `docs/spec/handrail-notification-suppression.md`
 - `docs/production_readiness_report.md`
-- Preserved pre-existing role report edits:
+- `docs/team/outputs/lead-dev.md`
+- Preserved existing role report edits:
+  - `docs/team/outputs/architect.md`
   - `docs/team/outputs/pm.md`
+  - `docs/team/outputs/business-analyst.md`
   - `docs/team/outputs/qa-lead.md`
-- Preserved pre-existing QA sweep artifacts:
-  - `test-artifacts/qa-daily-simulator-sweep-2026-05-05-120132/`
 
 ## Remaining Blocker
 
@@ -41,18 +45,20 @@ No blocker remains for this hygiene patch. The implementation queue remains bloc
 ## Product Invariant Check
 
 - Preserved free, local-first, Codex Desktop-only Handrail: yes.
-- Drift risk found: No product-invariant drift found. This run changed only readiness documentation and preserved QA evidence; it did not add cloud relay, account state, payment, generic terminal behavior, multi-agent control, non-Codex support, or direct iOS file editing.
+- Drift risk found: No product-invariant drift found. This run changed only local iOS notification request identity plus documentation/tests; it did not add cloud relay, account state, payment, generic terminal behavior, multi-agent control, non-Codex support, or direct iOS file editing.
 
 ## Verification
 
 - Slack `#handrail-agents` (`C0B0K6B0T6K`): no message addressed to `Handrail Lead Dev`; no-action verification remains at TS `1777590711.698899`.
 - `gh auth status -h github.com`: authenticated as `zfifteen`.
-- `gh issue list -R zfifteen/handrail --label bug --state open --limit 100 --json number,title,labels,updatedAt,milestone`: inspected #25 and #24; both are labeled `blocked`.
-- `gh issue list -R zfifteen/handrail --label enhancement --state open --limit 100 --json number,title,labels,updatedAt,milestone`: inspected #28, #13, #6, #5, and #2; all are labeled `blocked`.
+- `gh issue list -R zfifteen/handrail --label bug --state open --limit 100 --json number,title,labels,updatedAt,milestone,body`: inspected #25 and #24; both are labeled `blocked`.
+- `gh issue list -R zfifteen/handrail --label enhancement --state open --limit 100 --json number,title,labels,updatedAt,milestone,body`: inspected #28, #13, #6, #5, and #2; all are labeled `blocked`.
+- XcodeBuildMCP `test_sim -only-testing:HandrailTests/NotificationIdentifierTests`: passed 1/1 on iPhone 17, iOS Simulator 26.4.1.
 - `npm test` in `cli/`: passed 46/46.
 - `git diff --check`: passed.
-- No iPhone/iPad simulator validation was run because this patch changes readiness documentation only; it does not change visible iOS UI, navigation, decoded screen data, gestures, context menus, sheets, tabs, lists, or empty states.
+- `LC_ALL=C rg -n $'\r' ...`: no carriage returns found in touched text files.
+- No iPhone/iPad visible UI screenshot validation was run because this patch changes notification request identity only; it does not change visible screens, navigation, decoded screen data, gestures, context menus, sheets, tabs, lists, or empty states.
 
 ## QA Handoff
 
-No QA handoff is needed for this hygiene patch. QA already recorded the 2026-05-05 daily simulator sweep artifacts and #2/#24 remain blocked by the live approval-evidence gate.
+No QA handoff is needed for this hygiene patch. The focused simulator test proves the deterministic notification request identifier, and no visible iPhone/iPad screen behavior changed.

@@ -2,19 +2,17 @@
 
 ## Strongest Product Finding
 
-Handrail's remaining Desktop approval blocker is live evidence, not product scope or protocol architecture. #2 now has code/spec/test coverage for request-id approval routing, approve/deny app-server responses, approval-state `chat_list` broadcasts, Desktop-visible row gating, and pending approval callback storage scoped by `chatId + approvalId`. Latest reported CLI verification is 46/46. #24 and iPad umbrella #6 must stay blocked until that rebuilt CLI is proven through a real running local server and an iPad simulator-visible `waiting_for_approval` row.
+Handrail's remaining Desktop approval blocker is still live evidence, not product scope or protocol architecture. Since the last PM run, Architect added iOS approval notification identity coverage: local approval notification request identifiers now use `chatId + approvalId`, matching the mobile approve/deny route key. The accepted #2 surface now includes request-id routing, approve/deny app-server responses, approval-state `chat_list` broadcasts, Desktop-visible row gating, pending callback scoping by `chatId + approvalId`, and iOS notification identity by that same tuple. #2, #24, and iPad umbrella #6 remain blocked until the rebuilt local server produces a real approval request and iPad shows the resulting `waiting_for_approval` row.
 
 ## Decisions Or Issues Updated
 
 - Slack inbox: checked `#handrail-agents` (`C0B0K6B0T6K`); no message was addressed to `Handrail PM`. The only channel request remains the no-action coordination verification at `2026-04-30 19:11:51 EDT` / TS `1777590711.698899`.
 - Handoff inbox: no PM handoff file was present at `/Users/velocityworks/.codex/automations/handrail-pm/handoff.md`.
 - GitHub auth: `gh auth status --hostname github.com` is authenticated as `zfifteen`; all GitHub reads/writes used the local `gh` CLI.
-- Reviewed open and recently closed GitHub issues, milestones, releases, current team outputs, and issue comments for #2 and #24. No GitHub release exists.
-- Updated `docs/production_readiness_report.md` with a PM approval-scope reconciliation for the new `chatId + approvalId` scoping guard.
-- Updated GitHub milestone 3 to record #2's accepted protocol evidence and 46/46 CLI test state while keeping it blocked on live approval evidence.
-- Updated GitHub milestone 2 to keep #24 and #6 blocked behind the same live approval path.
-- Commented on #2: https://github.com/zfifteen/handrail/issues/2#issuecomment-4375758904.
-- Commented on #24: https://github.com/zfifteen/handrail/issues/24#issuecomment-4375758906.
+- Reviewed README, product invariants, roadmap, test/UI docs, production readiness, current team outputs, open/recently closed GitHub issues, milestones, releases, and #2/#24/#28 comments. No GitHub release exists.
+- Updated `docs/production_readiness_report.md` with the 2026-05-06 Architect approval notification identity refresh.
+- Updated GitHub milestone 3 to include iOS approval notification identity coverage while keeping #2 blocked on live approval evidence.
+- Commented on #2 with the PM reconciliation for the notification identity evidence: https://github.com/zfifteen/handrail/issues/2#issuecomment-4384356494.
 - Updated this PM report.
 
 ## Scope Risks
@@ -23,7 +21,7 @@ Handrail's remaining Desktop approval blocker is live evidence, not product scop
 - #28 is still a screenshot-class evidence issue: final Dashboard, Chats list, Chat Detail, and New Chat captures must come from a paired 6.9-inch iPhone simulator/device and must not use fixture-only or launch-injected state.
 - #2 remains blocked because the running LaunchAgent server has not been replaced with the rebuilt CLI and no real approval-producing Handrail-started Desktop turn has been captured live.
 - #24 and #6 remain blocked behind #2 live approval evidence and an iPad simulator walkthrough.
-- #13 remains outside milestone 1 unless PM explicitly adds it; final #28 Dashboard screenshots should validate the real current Dashboard state if #13 is present at capture time.
+- #5 remains blocked on paired iPhone + Apple Watch hardware acceptance, unless PM explicitly accepts a partial simulator/build-only watchOS phase.
 
 ## Next Product Action
 
@@ -40,10 +38,10 @@ Replace the running local Handrail server with the rebuilt CLI, then produce one
 - Read PM automation memory at `/Users/velocityworks/.codex/automations/handrail-pm/memory.md`.
 - Checked PM handoff path and found no handoff file.
 - Checked Slack channel `C0B0K6B0T6K` for messages addressed to `Handrail PM`.
-- Checked local state with `git status --short --branch`; unrelated modified files were already present in CLI/spec/team output files and were preserved.
-- Reviewed project/product state: `README.md`, `docs/product-invariants.md`, `FEATURE_ROADMAP.md`, `TEST_PLAN.md`, `UI_PATHS.md`, `docs/production_readiness_report.md`, and current team outputs.
-- Reviewed GitHub state with local `gh`: open issues, recently closed issues, milestones, releases, and issue comments for #2 and #24.
-- Updated GitHub milestones 2 and 3 through `gh api`.
-- Added GitHub issue comments through `gh issue comment` on #2 and #24, then corrected timestamps through `gh api` after checking `date -u`.
+- Checked local state with `git status --short`; unrelated modified files were already present in spec, team output, Swift utility, and Swift test files and were preserved.
+- Reviewed project/product state: `README.md`, `docs/product-invariants.md`, `FEATURE_ROADMAP.md`, `TEST_PLAN.md`, `UI_PATHS.md`, `UI_PATH_ISSUES.md`, `docs/production_readiness_report.md`, and current team outputs.
+- Reviewed GitHub state with local `gh`: open issues, recently closed issues, milestones, releases, and issue comments for #2, #24, and #28.
+- Updated GitHub milestone 3 through `gh api`.
+- Added a GitHub issue comment through `gh issue comment` on #2.
 - Ran `git diff --check -- docs/production_readiness_report.md docs/team/outputs/pm.md`; no whitespace errors.
 - No build, unit test, or simulator validation was run because this PM pass changed product/readiness documentation and GitHub tracking only, not app code or visible iPhone/iPad UI behavior.

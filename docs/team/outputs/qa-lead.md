@@ -2,30 +2,32 @@
 
 ## Strongest Evidence Finding
 
-The 2026-05-05 daily simulator sweep found no new reproducible Handrail UI bug. The current branch passed `cli` tests 46/46, iPhone simulator `HandrailTests` 50/50, and iPad simulator `HandrailTests` 50/50. The iPad sidebar accessibility fix #32 remains fixed under live simulator navigation.
+The #2/#24 approval validation gate is still blocked by the unchanged LaunchAgent listener. The rebuilt CLI passed 46/46 tests, but the live Handrail server on `127.0.0.1:8788` stayed on `node` PID `4657` after the prescribed `launchctl kickstart -k` attempt, and the live chat list still contains no `waiting_for_approval` row.
 
 ## Verified Behavior
 
-- Slack public search found no new `To: Handrail QA Lead` request in `#handrail-agents` after the last daily sweep timestamp.
-- `gh auth status -h github.com` is authenticated as `zfifteen`; GitHub reads and the #32 comment used local `gh` only.
-- iPhone 17, iOS Simulator 26.4.1, launched and exercised unpaired Dashboard, Pairing Scanner no-camera, Chats unpaired, Attention empty, Activity empty, More, Alerts, and Settings pairing repair.
-- iPad Pro 13-inch (M5), iOS Simulator 26.4.1, launched paired and online against `127.0.0.1:8788`.
-- iPad paths covered Dashboard, Chats, Chat Detail, New Chat disabled state, Activity, Alerts, Settings, and sidebar navigation.
-- #32 remains fixed: label taps succeeded for `Dashboard`, `Chats`, `Attention`, `Activity`, `Alerts`, and `Settings`.
-- #12 remains fixed in the visible iPad chat list: project names were readable, including `Prime Gap Structure`, rather than raw slug identifiers.
+- Slack `#handrail-agents` (`C0B0K6B0T6K`) had no recent message addressed to `Handrail QA Lead`; the only channel request remains the no-action verification with Subject `Slack coordination layer verification` at TS `1777590711.698899`.
+- `gh auth status -h github.com` is authenticated as `zfifteen`; GitHub reads used local `gh` only.
+- Open issue state is unchanged for QA selection: #2 and #24 remain labeled `blocked`, with #24 dependent on #2 live approval evidence.
+- `npm test` in `cli/` rebuilt `cli/dist` and passed 46/46, including the approval request-id routing, Desktop-visible broadcast gate, approval-state `chat_list` broadcast, and duplicate request-id scoping tests.
+- Before restart, `lsof -nP -iTCP:8788 -sTCP:LISTEN` showed `node` PID `4657`.
+- `node cli/dist/src/index.js chats` showed running, idle, and completed chats only; no `waiting_for_approval` row existed.
+- `launchctl print gui/501/com.velocityworks.handrail.server` showed `/usr/local/bin/node /Users/velocityworks/IdeaProjects/handrail/cli/dist/src/index.js serve` running as PID `4657`.
 
 ## Missing Evidence Or Regressions
 
-- #24 remains blocked by #2 live approval evidence. The live server had no `waiting_for_approval` row, so the iPad Dashboard approval-row closure path was not available.
-- #25 remains outside simulator scope because it requires Release/APNs signing evidence.
-- Shell `xcodebuild` still logs CoreSimulatorService access errors in this automation context, even though XcodeBuildMCP simulator build/test/run worked.
+- `launchctl kickstart -k gui/501/com.velocityworks.handrail.server` returned `Operation not permitted`.
+- After the restart attempt, `lsof -nP -iTCP:8788 -sTCP:LISTEN` still showed `node` PID `4657`, and `launchctl print` still reported PID `4657`.
+- #2 cannot be closed until the running server is replaced or otherwise exposes the rebuilt CLI, then produces one real approval-producing Handrail-started Codex Desktop/app-server turn with approve/deny evidence against the app-server request id.
+- #24 cannot be closed until that same live feed contains a simulator-visible `waiting_for_approval` row on iPad Dashboard.
 
 ## Code, Test, Or Issue Changes
 
-- Added daily sweep artifacts under `test-artifacts/qa-daily-simulator-sweep-2026-05-05-120132/`.
-- Commented on #32 with QA re-verification evidence: https://github.com/zfifteen/handrail/issues/32#issuecomment-4379096246
+- Updated `docs/team/outputs/qa-lead.md`.
+- Updated `$CODEX_HOME/automations/handrail-qa-lead/handoff.md`.
 - No product source code was edited.
-- Existing local modifications in `docs/production_readiness_report.md` and `docs/team/outputs/pm.md` were preserved.
+- No GitHub issue comment was added because the run reproduced the same PID `4657` restart blocker already recorded on #2/#24, with no new live acceptance evidence.
+- Preserved unrelated local user changes in `docs/team/outputs/business-analyst.md`, `docs/spec/handrail-notification-suppression.md`, `ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift`, and `ios/Handrail/HandrailTests/HandrailCommandAvailabilityTests.swift`.
 
 ## Product Invariant Check
 
@@ -35,10 +37,11 @@ The 2026-05-05 daily simulator sweep found no new reproducible Handrail UI bug. 
 ## Verification
 
 - `npm test` in `cli/`: passed 46/46.
-- XcodeBuildMCP `test_sim` on iPhone 17: passed 50/50.
-- XcodeBuildMCP `build_run_sim` on iPhone 17: succeeded.
-- XcodeBuildMCP `test_sim` on iPad Pro 13-inch (M5): passed 50/50.
-- XcodeBuildMCP `build_run_sim` on iPad Pro 13-inch (M5): succeeded.
-- `lsof -nP -iTCP:8788 -sTCP:LISTEN`: live server listener is `node` PID `4657`.
+- `gh issue list -R zfifteen/handrail --state open --limit 100 --json number,title,labels,milestone,updatedAt,url`: inspected.
+- `gh issue view -R zfifteen/handrail 2 --comments`: inspected.
+- `gh issue view -R zfifteen/handrail 24 --comments`: inspected.
+- `lsof -nP -iTCP:8788 -sTCP:LISTEN`: listener remained `node` PID `4657`.
+- `launchctl kickstart -k gui/501/com.velocityworks.handrail.server`: failed with `Operation not permitted`.
+- `launchctl print gui/501/com.velocityworks.handrail.server`: service still running as PID `4657`.
 - `node cli/dist/src/index.js chats`: no `waiting_for_approval` row.
-- Evidence notes and screenshots: `test-artifacts/qa-daily-simulator-sweep-2026-05-05-120132/`.
+- No iPhone or iPad simulator validation was run because the selected visible iPad issue #24 still lacks the real live approval state required for closure; no UI fix was reported as fully verified.

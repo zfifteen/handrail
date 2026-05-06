@@ -133,3 +133,15 @@ final class HandrailCommandAvailabilityTests: XCTestCase {
         )
     }
 }
+
+final class NotificationIdentifierTests: XCTestCase {
+    func testApprovalNotificationIdentifierUsesChatIdAndApprovalId() {
+        XCTAssertEqual(
+            approvalNotificationIdentifier(
+                chatId: "codex:019dc424-e857-76e0-8229-589ecf107eb4",
+                approvalId: "server-request-1"
+            ),
+            "handrail.approval.codex:019dc424-e857-76e0-8229-589ecf107eb4.server-request-1"
+        )
+    }
+}

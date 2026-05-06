@@ -57,7 +57,7 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
         )
         content.subtitle = chatTitle
         content.userInfo["approvalId"] = approval.approvalId
-        schedule(content, identifier: "handrail.approval.\(approval.approvalId)")
+        schedule(content, identifier: approvalNotificationIdentifier(chatId: approval.chatId, approvalId: approval.approvalId))
     }
 
     @MainActor
@@ -223,4 +223,8 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
     }
+}
+
+func approvalNotificationIdentifier(chatId: String, approvalId: String) -> String {
+    "handrail.approval.\(chatId).\(approvalId)"
 }

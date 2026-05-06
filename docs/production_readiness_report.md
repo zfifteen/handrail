@@ -144,6 +144,12 @@ Lead Dev found no unblocked open implementation issue. Open bugs #25 and #24 are
 
 The 2026-05-05 QA daily simulator sweep artifacts are now preserved under `test-artifacts/qa-daily-simulator-sweep-2026-05-05-120132/`. QA reported CLI tests 46/46, iPhone simulator tests 50/50, iPad simulator tests 50/50, and no new reproducible UI bug. This does not close #24 because the live server still had no `waiting_for_approval` row.
 
+## Architect Approval Notification Identity Refresh - 2026-05-06 00:52Z
+
+#2 now also has iOS-side notification identity coverage for concurrent approval requests. Approval local notification request identifiers use `chatId + approvalId`, matching the route key iOS sends back for approve/deny instead of treating the raw app-server `approvalId` as globally unique. Verification: direct shell `xcodebuild test` was blocked by CoreSimulatorService access and exited 70, but XcodeBuildMCP `test_sim -only-testing:HandrailTests/NotificationIdentifierTests` passed 1/1 on iPhone 17, iOS Simulator 26.4.1.
+
+This does not close #2 or change the public protocol. The accepted #2 evidence now covers Desktop request-id routing, approve/deny app-server responses, approval-state `chat_list` broadcasts, Desktop-visible row gating, pending callback scoping by `chatId + approvalId`, and iOS approval notification identity by the same tuple. The remaining blocker is still live local evidence against the running server: replace PID `4657` or otherwise expose the rebuilt CLI, produce one real approval-producing Handrail-started Codex Desktop/app-server turn, verify iOS approve/deny decisions against the app-server request id, and then capture the dependent iPad #24 `waiting_for_approval` dashboard row.
+
 ## Lead Dev Live Server Restart Attempt - 2026-05-02 23:51Z
 
 Lead Dev rebuilt the current CLI and reran the approval-routing test suite: `npm test` in `cli/` passed 44/44, including the approval-state `chat_list` broadcast contract. The local LaunchAgent still could not be replaced from this automation context. Before restart, `lsof -nP -iTCP:8788 -sTCP:LISTEN` showed `node` PID `4657`; `launchctl kickstart -k gui/501/com.velocityworks.handrail.server` returned `Operation not permitted`; after restart, the listener remained `node` PID `4657`.
