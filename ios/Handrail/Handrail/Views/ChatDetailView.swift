@@ -20,7 +20,7 @@ struct ChatDetailView: View {
             if canControlChat {
                 if canSendInput {
                     sendingInputStatus
-                    composer(placeholder: "Ask Codex") { text in
+                    composer(placeholder: "Ask Codex", isPending: pendingSendInput != nil) { text in
                         let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
                         pendingSendInput = prompt
                         if !store.usesStaticPreviewData {
@@ -29,7 +29,7 @@ struct ChatDetailView: View {
                     }
                 }
             } else if canStartFollowUp {
-                composer(placeholder: "Ask Codex") { text in
+                composer(placeholder: "Ask Codex", isPending: pendingContinuePrompt != nil) { text in
                     let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
                     pendingContinuePrompt = prompt
                     store.continueChat(chatId: chatId, prompt: prompt)
@@ -352,7 +352,7 @@ struct ChatDetailView: View {
         )
     }
 
-    private func composer(placeholder: String, action: @escaping (String) -> Void) -> some View {
+    private func composer(placeholder: String, isPending: Bool, action: @escaping (String) -> Void) -> some View {
         HStack(spacing: 10) {
             TextField(placeholder, text: $input, axis: .vertical)
                 .lineLimit(1...4)
@@ -367,7 +367,7 @@ struct ChatDetailView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(.primary)
-            .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || pendingSendInput != nil)
+            .disabled(ChatDetailComposerState.isSendDisabled(input: input, isPending: isPending))
         }
         .padding()
         .background(Color.black)
@@ -498,5 +498,11 @@ struct ChatDetailView: View {
             return String(title.dropFirst("Codex: ".count))
         }
         return title
+    }
+}
+
+enum ChatDetailComposerState {
+    static func isSendDisabled(input: String, isPending: Bool) -> Bool {
+        input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isPending
     }
 }

@@ -65,3 +65,14 @@ final class RootLayoutSelectionTests: XCTestCase {
         )
     }
 }
+
+final class ChatDetailComposerStateTests: XCTestCase {
+    func testFollowUpPendingStateDisablesSendControl() {
+        XCTAssertTrue(ChatDetailComposerState.isSendDisabled(input: "Continue", isPending: true))
+        XCTAssertFalse(ChatDetailComposerState.isSendDisabled(input: "Continue", isPending: false))
+    }
+
+    func testEmptyComposerInputDisablesSendControl() {
+        XCTAssertTrue(ChatDetailComposerState.isSendDisabled(input: "  \n", isPending: false))
+    }
+}
