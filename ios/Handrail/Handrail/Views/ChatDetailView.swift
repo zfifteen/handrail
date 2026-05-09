@@ -9,7 +9,7 @@ struct ChatDetailView: View {
     @State private var pendingSendInput: String?
     @State private var expandedThinkingRounds: Set<Int> = []
     @State private var showsStopConfirmation = false
-    @State private var approvalResultText: String?
+    @State private var approvalResult: ChatDetailApprovalResult?
     @State private var deniedApproval: ApprovalRequest?
     @State private var denialReason = ""
     @FocusState private var isComposerFocused: Bool
@@ -151,6 +151,11 @@ struct ChatDetailView: View {
                         pendingContinuePrompt = nil
                     }
                 }
+                .onChange(of: store.latestApproval?.id) { _, approvalId in
+                    if approvalResult?.approvalId != approvalId {
+                        approvalResult = nil
+                    }
+                }
                 .simultaneousGesture(
                     DragGesture().onChanged { value in
                         if value.translation.height < -12 {
@@ -261,7 +266,7 @@ struct ChatDetailView: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
 
-                if let approvalResultText {
+                if let approvalResultText = approvalResult?.text(for: approval) {
                     Label(approvalResultText, systemImage: approvalResultText == "Approved" ? "checkmark.circle.fill" : "xmark.circle.fill")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(approvalResultText == "Approved" ? .green : .red)
@@ -317,13 +322,13 @@ struct ChatDetailView: View {
     }
 
     private func approve(_ approval: ApprovalRequest) {
-        approvalResultText = "Approved"
+        approvalResult = ChatDetailApprovalResult(approvalId: approval.id, text: "Approved")
         guard !store.usesStaticPreviewData else { return }
         store.approve(approval)
     }
 
     private func deny(_ approval: ApprovalRequest, reason: String) {
-        approvalResultText = "Denied"
+        approvalResult = ChatDetailApprovalResult(approvalId: approval.id, text: "Denied")
         deniedApproval = nil
         denialReason = ""
         guard !store.usesStaticPreviewData else { return }
@@ -504,5 +509,14 @@ struct ChatDetailView: View {
 enum ChatDetailComposerState {
     static func isSendDisabled(input: String, isPending: Bool) -> Bool {
         input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isPending
+    }
+}
+
+struct ChatDetailApprovalResult: Equatable {
+    let approvalId: String
+    let text: String
+
+    func text(for approval: ApprovalRequest) -> String? {
+        approval.id == approvalId ? text : nil
     }
 }

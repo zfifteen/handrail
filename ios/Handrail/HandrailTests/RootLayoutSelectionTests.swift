@@ -76,3 +76,14 @@ final class ChatDetailComposerStateTests: XCTestCase {
         XCTAssertTrue(ChatDetailComposerState.isSendDisabled(input: "  \n", isPending: false))
     }
 }
+
+final class ChatDetailApprovalResultTests: XCTestCase {
+    func testApprovalResultAppearsOnlyForMatchingApprovalIdentity() {
+        let approvalA = ApprovalRequest(chatId: "chat-a", approvalId: "shared", title: "Approval Required", summary: "A", files: [], diff: "")
+        let approvalB = ApprovalRequest(chatId: "chat-b", approvalId: "shared", title: "Approval Required", summary: "B", files: [], diff: "")
+        let result = ChatDetailApprovalResult(approvalId: approvalA.id, text: "Approved")
+
+        XCTAssertEqual(result.text(for: approvalA), "Approved")
+        XCTAssertNil(result.text(for: approvalB))
+    }
+}
