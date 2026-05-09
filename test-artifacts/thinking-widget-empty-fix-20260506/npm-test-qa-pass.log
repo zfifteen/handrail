@@ -1,0 +1,66 @@
+
+> handrail@0.1.0 test
+> npm run build && node --test dist/test/*.test.js
+
+
+> handrail@0.1.0 build
+> rm -rf dist && tsc
+
+✔ parses active cron automations for mobile display (2.361583ms)
+✔ parses heartbeat target threads for mobile display (1.836667ms)
+✔ discovers New Chat projects from Codex Desktop state and config (1.017334ms)
+✔ builds Codex Desktop IPC follower requests (1.306333ms)
+✔ builds Codex Desktop app-server turn-start params (0.215792ms)
+✔ new Desktop conversations keep thread creation and first turn on one app-server connection (0.460041ms)
+✔ converts Codex Desktop app-server notifications into live events (0.161084ms)
+✔ converts Codex Desktop command approval requests into Handrail approval ids (0.129333ms)
+✔ builds Codex Desktop thread deeplinks (0.062084ms)
+✔ uses the Darwin user temp dir for Codex Desktop IPC (0.11775ms)
+✔ builds Codex Desktop app-server thread-start params (0.089709ms)
+✔ encodes Codex Desktop IPC frames with little-endian length prefix (0.153917ms)
+✔ chat manager refuses non-Codex chat ids (0.328792ms)
+✔ chat manager rejects unknown approval ids (0.161916ms)
+✔ chat manager routes Codex Desktop approval decisions by server request id (3.493125ms)
+✔ chat manager scopes duplicate approval ids by chat id (5.816084ms)
+✔ chat manager broadcasts chat list when approval state changes (0.812958ms)
+✔ app-server approval requests wait for Desktop visibility before mobile broadcast (250.948ms)
+✔ chat manager broadcasts live app-server turn events for visible Desktop chats (0.396916ms)
+✔ new chat creation starts a Desktop-owned conversation (0.163833ms)
+✔ new chat creation waits for Desktop visibility before broadcasting (251.481ms)
+✔ new chat creation fails instead of broadcasting an orphan when Desktop does not expose the chat (6036.184666ms)
+✔ projectless new chat provides a Desktop projectless workspace (0.465375ms)
+✔ continued Codex chats route through Codex Desktop IPC (0.310791ms)
+✔ reads Codex Desktop pinned thread ids (0.090833ms)
+✔ reads Codex Desktop status from the latest rollout event (0.091959ms)
+✔ formats imported Codex transcript entries for rich mobile rendering (3.487875ms)
+✔ does not import commentary assistant messages as transcript blocks (0.5785ms)
+✔ preserves long assistant transcript entries without truncation markers (0.129833ms)
+✔ imports only visible desktop chat rows (0.168417ms)
+✔ normalizes raw Codex thread ids out of user-visible chat titles (0.28625ms)
+✔ uses Codex Desktop project names for imported chat metadata (0.07275ms)
+✔ uses the newest SQLite lifecycle status per Codex thread (0.138459ms)
+✔ extracts automation target thread ids from automation TOML (0.122625ms)
+✔ extracts desktop thinking summaries by visible chat round (0.246166ms)
+✔ extracts commentary agent messages as thinking entries (0.13175ms)
+✔ routes desktop worked stream to thinking while preserving final answer transcript (0.32125ms)
+✔ bounds extracted thinking summaries (2.645ms)
+✔ reads large Codex rollout files from bounded head and tail (18.056958ms)
+✔ infers active Codex status when the bounded tail omits task_started (9.300584ms)
+✔ builds APNs alert request deterministically (0.936833ms)
+✔ notification dispatcher sends completed and failed events once (1.044333ms)
+✔ notification dispatcher reports missing APNs config when push is required (0.355417ms)
+✔ notification event detects input-required transcript marker (0.461833ms)
+✔ notification event body falls back from raw Codex ids to a human chat label (0.113167ms)
+✔ WebSocket server pairs, refreshes chats, stops chats, and reports command errors (12.69575ms)
+✔ WebSocket server accepts and persists push token registration (13.525875ms)
+✔ WebSocket server broadcasts chat list when thinking appears during polling (22.590291ms)
+✔ WebSocket server broadcasts chat list when transcript content changes during polling (22.064792ms)
+✔ state stores pairing metadata without chat records (16.79175ms)
+ℹ tests 50
+ℹ suites 0
+ℹ pass 50
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6649.786667

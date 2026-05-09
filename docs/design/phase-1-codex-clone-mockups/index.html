@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Handrail Phase 1 Codex Clone Mockups</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #080808;
+      --phone: #0f0f10;
+      --panel: #171719;
+      --panel-2: #1f1f21;
+      --line: #343437;
+      --line-soft: #242426;
+      --text: #f2f2f3;
+      --muted: #aaaab1;
+      --faint: #77777f;
+      --accent: #e8e8ea;
+      --amber: #d6a84f;
+      --red: #f87171;
+      --green: #9fbfa5;
+      --user-bubble: #2b2b2e;
+      --assistant-bubble: #18181a;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--text);
+      font-family: var(--sans);
+    }
+
+    header {
+      padding: 28px 32px 18px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #0c0c0d;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    header p {
+      margin: 0;
+      max-width: 980px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(334px, 1fr));
+      gap: 28px;
+      padding: 28px;
+      align-items: start;
+    }
+
+    .shot {
+      display: grid;
+      gap: 10px;
+    }
+
+    .shot-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 620;
+    }
+
+    .shot-title span {
+      color: var(--faint);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .phone {
+      width: 320px;
+      min-height: 694px;
+      border: 1px solid #3a3a3e;
+      border-radius: 38px;
+      background: #101011;
+      overflow: hidden;
+      box-shadow: 0 18px 50px rgb(0 0 0 / 0.36);
+      position: relative;
+    }
+
+    .statusbar {
+      height: 42px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      padding: 0 22px 8px;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .shell {
+      min-height: 652px;
+      display: flex;
+      flex-direction: column;
+      background: #101011;
+    }
+
+    .topbar {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .titleblock {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .title {
+      font-size: 17px;
+      line-height: 1.2;
+      font-weight: 650;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .subtitle {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .icon, .button, .pill {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .icon {
+      width: 31px;
+      height: 31px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      flex: 0 0 auto;
+    }
+
+    .button {
+      min-height: 34px;
+      border-radius: 9px;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 590;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .button.primary {
+      background: #eeeeef;
+      color: #111113;
+      border-color: #eeeeef;
+    }
+
+    .button.danger {
+      background: #2a1718;
+      border-color: #573033;
+      color: #fecaca;
+    }
+
+    .content {
+      flex: 1;
+      overflow: hidden;
+      padding: 12px 14px;
+    }
+
+    .content.flush {
+      padding: 0;
+    }
+
+    .list {
+      display: grid;
+      gap: 2px;
+    }
+
+    .section-label {
+      color: var(--faint);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 12px 4px 6px;
+    }
+
+    .row {
+      min-height: 58px;
+      padding: 9px 8px;
+      border-radius: 8px;
+      display: grid;
+      gap: 4px;
+      border: 1px solid transparent;
+    }
+
+    .row.selected, .row:hover {
+      background: var(--panel);
+      border-color: var(--line-soft);
+    }
+
+    .row-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .row-title {
+      font-size: 13px;
+      font-weight: 600;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .row-meta {
+      color: var(--muted);
+      font-size: 11px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 99px;
+      background: var(--faint);
+      flex: 0 0 auto;
+    }
+
+    .dot.run { background: var(--green); }
+    .dot.wait { background: var(--amber); }
+    .dot.err { background: var(--red); }
+
+    .search {
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .transcript {
+      display: grid;
+      gap: 14px;
+      padding: 14px;
+      padding-bottom: 92px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .turn {
+      display: grid;
+      gap: 5px;
+    }
+
+    .turn.user {
+      justify-items: end;
+    }
+
+    .turn.assistant {
+      justify-items: start;
+    }
+
+    .bubble {
+      max-width: 78%;
+      border-radius: 18px;
+      padding: 9px 11px;
+      border: 1px solid var(--line-soft);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .turn.user .bubble {
+      background: var(--user-bubble);
+      color: var(--text);
+      border-bottom-right-radius: 6px;
+    }
+
+    .turn.assistant .bubble {
+      background: var(--assistant-bubble);
+      color: var(--text);
+      border-bottom-left-radius: 6px;
+    }
+
+    .turn.user .role {
+      padding-right: 4px;
+    }
+
+    .turn.assistant .role {
+      padding-left: 4px;
+    }
+
+    .role {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 620;
+    }
+
+    .text {
+      color: var(--text);
+    }
+
+    .muted { color: var(--muted); }
+    .faint { color: var(--faint); }
+    .mono { font-family: var(--mono); }
+
+    .artifact {
+      border: 1px solid var(--line);
+      background: #161618;
+      border-radius: 10px;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .artifact-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .artifact.warning { border-color: #594a2b; background: #1b1710; }
+    .artifact.error { border-color: #5b3034; background: #1c1113; }
+    .artifact.ok { border-color: #31543b; background: #111a14; }
+
+    .file-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 5px 0;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .diff {
+      overflow: hidden;
+      border-radius: 8px;
+      background: #0d0d0e;
+      border: 1px solid var(--line-soft);
+      padding: 8px;
+      font-family: var(--mono);
+      font-size: 10px;
+      line-height: 1.45;
+      color: #d4d4d8;
+      white-space: pre-wrap;
+    }
+
+    .composer {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #171719;
+      padding: 8px;
+      display: grid;
+      gap: 7px;
+      box-shadow: 0 -12px 28px rgb(0 0 0 / 0.22);
+    }
+
+    .composer-input {
+      min-height: 38px;
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+    }
+
+    .composer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tiny {
+      font-size: 11px;
+      color: var(--faint);
+    }
+
+    .keyboard {
+      height: 226px;
+      background: #1f1f22;
+      border-top: 1px solid var(--line);
+      padding: 8px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .keyrow {
+      display: flex;
+      gap: 5px;
+      justify-content: center;
+    }
+
+    .key {
+      width: 24px;
+      height: 32px;
+      border-radius: 6px;
+      background: #3a3a3f;
+    }
+
+    .empty {
+      height: 420px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      gap: 12px;
+      color: var(--muted);
+      padding: 24px;
+    }
+
+    .empty h2 {
+      margin: 0;
+      color: var(--text);
+      font-size: 17px;
+    }
+
+    .empty p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .choice {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 11px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .choice.selected {
+      background: var(--panel-2);
+      border-color: #46464a;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .input {
+      min-height: 42px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 11px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .banner {
+      margin: 0 14px 10px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 10px;
+      padding: 9px 10px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .banner.warn { border-color: #594a2b; color: #e8d8ae; background: #1a1711; }
+    .banner.err { border-color: #5b3034; color: #fecaca; background: #1c1113; }
+
+    .menu-list {
+      display: grid;
+      gap: 1px;
+      border: 1px solid var(--line-soft);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .menu-item {
+      min-height: 45px;
+      background: var(--panel);
+      padding: 11px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      align-items: center;
+    }
+
+    .sheet {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      background: #18181a;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      box-shadow: 0 -18px 50px rgb(0 0 0 / 0.35);
+    }
+
+    .camera {
+      height: 430px;
+      margin: 12px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, transparent 47%, #3f3f46 47% 53%, transparent 53%),
+        linear-gradient(0deg, transparent 47%, #3f3f46 47% 53%, transparent 53%),
+        #151517;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .scan-box {
+      width: 190px;
+      height: 190px;
+      border: 2px solid #f4f4f5;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+    }
+
+    .home-indicator {
+      height: 18px;
+      display: grid;
+      place-items: center;
+    }
+
+    .home-indicator:before {
+      content: "";
+      width: 108px;
+      height: 4px;
+      border-radius: 99px;
+      background: #dedee3;
+      opacity: 0.55;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Handrail Phase 1: Codex Desktop Clone Mockups</h1>
+    <p>Mockups only. These iPhone paths use a neutral Codex-style dark system and intentionally remove the current legacy dashboard/tab/card language. Desktop reference screenshots are still required before final QC can pass.</p>
+  </header>
+
+  <main class="board">
+    <section class="shot" id="unpaired-first-launch">
+      <div class="shot-title">Unpaired first launch <span>unpaired-first-launch</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="content">
+            <div class="empty">
+              <div>
+                <h2>Codex</h2>
+                <p>Connect to Codex on your Mac.</p>
+              </div>
+              <div class="button primary">Scan Pairing QR</div>
+              <div class="button">Enter URL manually</div>
+              <p class="mono">Run handrail pair on your Mac.</p>
+            </div>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="qr-pairing">
+      <div class="shot-title">QR pairing <span>qr-pairing</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="topbar"><div class="icon">x</div><div class="titleblock"><div class="title">Pair Handrail</div><div class="subtitle">Scan the QR code printed by handrail pair.</div></div></div>
+          <div class="camera"><div class="scan-box">QR</div></div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="pairing-success">
+      <div class="shot-title">Pairing success <span>pairing-success</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="content">
+            <div class="empty">
+              <div>
+                <h2>Connected</h2>
+                <p>MacBook Pro<br>192.168.1.20:8787</p>
+              </div>
+              <div class="button primary">Continue</div>
+            </div>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="paired-chat-list">
+      <div class="shot-title">Paired chat list <span>paired-chat-list</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="topbar"><div class="titleblock"><div class="title">Codex</div><div class="subtitle">MacBook Pro connected</div></div><div class="icon">+</div><div class="icon">...</div></div>
+          <div class="content">
+            <div class="search">Search</div>
+            <div class="section-label">Pinned</div>
+            <div class="list">
+              <div class="row selected"><div class="row-main"><div class="row-title">Fix transcript rendering</div><div class="dot run"></div></div><div class="row-meta">handrail / ios/Handrail · 3m</div></div>
+              <div class="row"><div class="row-main"><div class="row-title">Release checklist</div><div class="dot wait"></div></div><div class="row-meta">handrail · Approval required</div></div>
+            </div>
+            <div class="section-label">Recent</div>
+            <div class="list">
+              <div class="row"><div class="row-main"><div class="row-title">Codex desktop clone plan</div><span class="tiny">12m</span></div><div class="row-meta">docs/design</div></div>
+              <div class="row"><div class="row-main"><div class="row-title">Simulator sweep failures</div><div class="dot err"></div></div><div class="row-meta">tools/qa · Failed</div></div>
+              <div class="row"><div class="row-main"><div class="row-title">Pairing token persistence</div><span class="tiny">1h</span></div><div class="row-meta">ios tests</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="empty-chat-list">
+      <div class="shot-title">Empty chat list <span>empty-chat-list</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="topbar"><div class="titleblock"><div class="title">Codex</div><div class="subtitle">MacBook Pro connected</div></div><div class="icon">+</div><div class="icon">...</div></div>
+          <div class="content"><div class="search">Search</div><div class="empty"><div><h2>No chats yet</h2><p>Start a new Codex chat on your Mac.</p></div><div class="button primary">New chat</div></div></div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="search-chats">
+      <div class="shot-title">Search chats <span>search-chats</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="topbar"><div class="search" style="flex:1">transcript</div><div class="button">Cancel</div></div>
+          <div class="content">
+            <div class="section-label">Search</div>
+            <div class="list">
+              <div class="row selected"><div class="row-main"><div class="row-title">Fix transcript rendering</div><span class="tiny">3m</span></div><div class="row-meta">Matched transcript and parser labels</div></div>
+              <div class="row"><div class="row-main"><div class="row-title">Codex desktop clone plan</div><span class="tiny">12m</span></div><div class="row-meta">Matched transcript hierarchy</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="new-chat">
+      <div class="shot-title">New chat <span>new-chat</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">New chat</div><div class="subtitle">Choose where Codex starts</div></div></div>
+          <div class="content">
+            <div class="form">
+              <div class="field">
+                <div class="label">Project</div>
+                <div class="choice-list">
+                  <div class="choice selected"><span>handrail</span><span>✓</span></div>
+                  <div class="choice"><span>codex</span><span></span></div>
+                  <div class="choice"><span>No project</span><span></span></div>
+                </div>
+              </div>
+              <div class="field"><div class="label">Branch</div><div class="input">current branch</div></div>
+              <div class="field"><div class="label">Prompt</div><div class="input" style="min-height:112px;color:var(--muted)">Ask Codex</div></div>
+              <div class="button primary">Start chat</div>
+            </div>
+          </div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="active-chat-thread">
+      <div class="shot-title">Active chat thread <span>active-chat-thread</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Fix transcript rendering</div><div class="subtitle">handrail / ios/Handrail</div></div><div class="button">Stop</div><div class="icon">...</div></div>
+          <div class="content flush"><div class="transcript">
+            <div class="turn user"><div class="role">You</div><div class="bubble">Recreate the desktop chat thread screen as accurately as possible.</div></div>
+            <div class="turn assistant"><div class="role">Codex</div><div class="bubble">I am replacing the phone chat surface with desktop message geometry.</div></div>
+            <div class="artifact"><div class="artifact-head"><span>Thinking</span><span class="tiny">running</span></div><div class="muted">Reading the current SwiftUI shell and transcript views.</div></div>
+          </div></div>
+          <div class="composer"><div class="composer-input">Ask Codex</div><div class="composer-row"><span class="tiny">Working</span><div class="icon">↑</div></div></div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="completed-chat-thread">
+      <div class="shot-title">Completed chat thread <span>completed-chat-thread</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Codex desktop clone plan</div><div class="subtitle">docs/design</div></div><div class="icon">...</div></div>
+          <div class="content flush"><div class="transcript">
+            <div class="turn user"><div class="role">You</div><div class="bubble">Where is the plan?</div></div>
+            <div class="turn assistant"><div class="role">Codex</div><div class="bubble">The implementation target is unambiguous: replace the iPhone UI shell with a Codex Desktop clone.</div></div>
+          </div></div>
+          <div class="composer"><div class="composer-input">Ask Codex</div><div class="composer-row"><span class="tiny">Ready</span><div class="icon">↑</div></div></div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="focused-composer">
+      <div class="shot-title">Focused composer <span>focused-composer</span></div>
+      <div class="phone">
+        <div class="statusbar"><span>9:41</span><span>5G 100%</span></div>
+        <div class="shell">
+          <div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Codex desktop clone plan</div><div class="subtitle">docs/design</div></div><div class="icon">...</div></div>
+          <div class="content flush"><div class="transcript"><div class="turn assistant"><div class="role">Codex</div><div class="bubble">Mockups are ready for review.</div></div></div></div>
+          <div class="composer" style="bottom:244px"><div class="composer-input" style="color:var(--text)">Tighten the approval state copy</div><div class="composer-row"><span class="tiny">Shift Return for newline</span><div class="icon">↑</div></div></div>
+          <div class="keyboard"><div class="keyrow"><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span></div><div class="keyrow"><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span></div><div class="keyrow"><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span><span class="key"></span></div><div class="keyrow"><span class="key" style="width:160px"></span><span class="key" style="width:68px"></span></div></div>
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </section>
+
+    <section class="shot" id="sending-input">
+      <div class="shot-title">Sending input <span>sending-input</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Fix transcript rendering</div><div class="subtitle">handrail / ios/Handrail</div></div><div class="button">Stop</div></div><div class="banner">Sending...</div><div class="content flush"><div class="transcript"><div class="turn user"><div class="role">You</div><div class="bubble">Remove the tab bar from the primary flow.</div></div></div></div><div class="composer"><div class="composer-input">Ask Codex</div><div class="composer-row"><span class="tiny">Sending...</span><div class="icon">↑</div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="running-thinking">
+      <div class="shot-title">Codex running/thinking <span>running-thinking</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Fix transcript rendering</div><div class="subtitle">handrail / ios/Handrail</div></div><div class="button">Stop</div></div><div class="content flush"><div class="transcript"><div class="turn assistant"><div class="role">Codex</div><div class="bubble">Replacing chat cards with desktop-style message bubbles.</div></div><div class="artifact"><div class="artifact-head"><span>Thinking</span><span class="tiny">12s</span></div><div class="muted">Planning edits across RootView, chat list, transcript, and composer.</div></div></div></div><div class="composer"><div class="composer-input">Ask Codex</div><div class="composer-row"><span class="tiny">Working</span><div class="icon">■</div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="stop-codex">
+      <div class="shot-title">Stop Codex <span>stop-codex</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Fix transcript rendering</div><div class="subtitle">handrail / ios/Handrail</div></div><div class="button">Stop</div></div><div class="content flush"><div class="transcript"><div class="artifact"><div class="artifact-head"><span>Thinking</span><span class="tiny">running</span></div><div class="muted">Working on the UI shell.</div></div></div></div><div class="sheet"><div><div class="title">Stop Codex?</div><div class="subtitle">This stops the running task.</div></div><div class="button danger">Stop</div><div class="button">Cancel</div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="approval-required">
+      <div class="shot-title">Approval required <span>approval-required</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Release checklist</div><div class="subtitle">handrail</div></div><div class="icon">...</div></div><div class="content flush"><div class="transcript"><div class="artifact warning"><div class="artifact-head"><span>Approval required</span><span class="tiny">pending</span></div><div class="text">Codex wants to modify release metadata.</div><div class="file-row"><span>store-assets/metadata.txt</span><span>modified</span></div><div class="button">Diff</div><div class="composer-row"><div class="button">Deny</div><div class="button primary">Approve</div></div></div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="approve-flow">
+      <div class="shot-title">Approve flow <span>approve-flow</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Release checklist</div><div class="subtitle">handrail</div></div></div><div class="content flush"><div class="transcript"><div class="artifact warning"><div class="artifact-head"><span>Approval required</span><span class="tiny">pending</span></div><div class="button primary">Approve</div></div><div class="artifact ok"><div class="artifact-head"><span>Approval sent</span><span class="tiny">now</span></div><div class="muted">Codex can continue.</div></div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="deny-flow">
+      <div class="shot-title">Deny flow <span>deny-flow</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Release checklist</div><div class="subtitle">handrail</div></div></div><div class="content flush"><div class="transcript"><div class="artifact warning"><div class="artifact-head"><span>Approval required</span><span class="tiny">pending</span></div><div class="button">Deny</div></div></div></div><div class="sheet"><div class="title">Deny</div><div class="input" style="min-height:82px;color:var(--muted)">Reason</div><div class="button danger">Send denial</div><div class="button">Cancel</div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="approval-result">
+      <div class="shot-title">Approval result <span>approval-result</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Release checklist</div><div class="subtitle">handrail</div></div></div><div class="content flush"><div class="transcript"><div class="artifact ok"><div class="artifact-head"><span>Approved</span><span class="tiny">2m</span></div><div class="muted">Codex continued after approval.</div></div><div class="artifact"><div class="artifact-head"><span>Denied</span><span class="tiny">example</span></div><div class="muted">Reason sent to Codex.</div></div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="file-artifact">
+      <div class="shot-title">File artifact <span>file-artifact</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Fix transcript rendering</div><div class="subtitle">handrail / ios/Handrail</div></div></div><div class="content flush"><div class="transcript"><div class="turn assistant"><div class="role">Codex</div><div class="bubble">I changed the chat shell and transcript view.</div></div><div class="artifact"><div class="artifact-head"><span>Files</span><span class="tiny">4</span></div><div class="file-row"><span>RootView.swift</span><span>modified</span></div><div class="file-row"><span>CodexPhoneShellView.swift</span><span>modified</span></div><div class="file-row"><span>ChatDetailView.swift</span><span>modified</span></div><div class="file-row"><span>ChatTranscriptView.swift</span><span>modified</span></div></div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="diff-artifact">
+      <div class="shot-title">Diff artifact <span>diff-artifact</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Fix transcript rendering</div><div class="subtitle">handrail / ios/Handrail</div></div></div><div class="content flush"><div class="transcript"><div class="artifact"><div class="artifact-head"><span>Diff</span><span class="tiny">RootView.swift</span></div><div class="diff">- OldPhoneShell(selection: $selected)
++ NavigationStack(path: $path)
+  CodexChatListView()
+
+- LegacyAccent()
++ NeutralCodexSurface()</div></div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="error-state">
+      <div class="shot-title">Error state <span>error-state</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Simulator sweep failures</div><div class="subtitle">tools/qa</div></div></div><div class="content flush"><div class="transcript"><div class="artifact error"><div class="artifact-head"><span>Error</span><span class="tiny">failed</span></div><div class="text">The simulator app did not reach the chat list.</div><div class="composer-row"><div class="button">Copy details</div><div class="button">Retry</div></div></div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="disconnected-mac">
+      <div class="shot-title">Disconnected Mac <span>disconnected-mac</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="titleblock"><div class="title">Codex</div><div class="subtitle">MacBook Pro disconnected</div></div><div class="icon">...</div></div><div class="banner err"><div class="dot err"></div><span>Disconnected</span><span style="margin-left:auto">Reconnect</span></div><div class="content"><div class="search">Search</div><div class="section-label">Recent</div><div class="row"><div class="row-main"><div class="row-title">Codex desktop clone plan</div><span class="tiny">12m</span></div><div class="row-meta">Last synced before disconnect</div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="reconnecting">
+      <div class="shot-title">Reconnecting <span>reconnecting</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="titleblock"><div class="title">Codex</div><div class="subtitle">MacBook Pro</div></div><div class="icon">...</div></div><div class="banner warn"><div class="dot wait"></div><span>Reconnecting...</span></div><div class="content"><div class="search">Search</div><div class="section-label">Pinned</div><div class="row selected"><div class="row-main"><div class="row-title">Fix transcript rendering</div><span class="tiny">3m</span></div><div class="row-meta">handrail / ios/Handrail</div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="settings">
+      <div class="shot-title">Settings <span>settings</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Settings</div><div class="subtitle">Handrail local control</div></div></div><div class="content"><div class="menu-list"><div class="menu-item"><span>Pairing</span><span>&gt;</span></div><div class="menu-item"><span>Local network</span><span>&gt;</span></div><div class="menu-item"><span>Automations</span><span>&gt;</span></div><div class="menu-item"><span>Alerts</span><span>&gt;</span></div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="pairing-management">
+      <div class="shot-title">Pairing management <span>pairing-management</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Pairing</div><div class="subtitle">MacBook Pro</div></div></div><div class="content"><div class="artifact"><div class="artifact-head"><span>MacBook Pro</span><span class="tiny">connected</span></div><div class="file-row"><span>Host</span><span>192.168.1.20</span></div><div class="file-row"><span>Port</span><span>8787</span></div></div><div style="height:12px"></div><div class="button">Scan QR</div><div style="height:8px"></div><div class="button danger">Reset Pairing</div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="local-network-help">
+      <div class="shot-title">Local network/help <span>local-network-help</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Local network</div><div class="subtitle">Mac setup</div></div></div><div class="content"><div class="artifact"><div class="artifact-head"><span>Start pairing</span><span></span></div><div class="diff">handrail pair</div><div class="button">Copy command</div></div><div style="height:12px"></div><div class="artifact"><div class="artifact-head"><span>Start server</span><span></span></div><div class="diff">handrail serve</div><div class="button">Copy command</div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="automations">
+      <div class="shot-title">Automations <span>automations</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Automations</div><div class="subtitle">Secondary Handrail surface</div></div><div class="icon">+</div></div><div class="content"><div class="empty"><div><h2>No automations</h2><p>Automations stay behind Settings and do not replace the Codex chat list.</p></div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+
+    <section class="shot" id="alerts-attention">
+      <div class="shot-title">Alerts / Attention <span>alerts-attention</span></div>
+      <div class="phone"><div class="statusbar"><span>9:41</span><span>5G 100%</span></div><div class="shell"><div class="topbar"><div class="icon">&lt;</div><div class="titleblock"><div class="title">Alerts</div><div class="subtitle">Approvals and failures</div></div></div><div class="content"><div class="list"><div class="row selected"><div class="row-main"><div class="row-title">Approval required</div><div class="dot wait"></div></div><div class="row-meta">Release checklist · Open chat</div></div><div class="row"><div class="row-main"><div class="row-title">Failed</div><div class="dot err"></div></div><div class="row-meta">Simulator sweep failures · Open chat</div></div></div></div></div><div class="home-indicator"></div></div>
+    </section>
+  </main>
+</body>
+</html>

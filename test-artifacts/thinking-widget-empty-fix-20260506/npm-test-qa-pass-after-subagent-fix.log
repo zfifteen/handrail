@@ -1,0 +1,67 @@
+
+> handrail@0.1.0 test
+> npm run build && node --test dist/test/*.test.js
+
+
+> handrail@0.1.0 build
+> rm -rf dist && tsc
+
+✔ parses active cron automations for mobile display (1.627042ms)
+✔ parses heartbeat target threads for mobile display (1.315208ms)
+✔ discovers New Chat projects from Codex Desktop state and config (2.188792ms)
+✔ builds Codex Desktop IPC follower requests (0.176542ms)
+✔ builds Codex Desktop app-server turn-start params (0.082167ms)
+✔ new Desktop conversations keep thread creation and first turn on one app-server connection (0.23075ms)
+✔ converts Codex Desktop app-server notifications into live events (0.139375ms)
+✔ converts Codex Desktop command approval requests into Handrail approval ids (0.117958ms)
+✔ builds Codex Desktop thread deeplinks (0.054083ms)
+✔ uses the Darwin user temp dir for Codex Desktop IPC (0.11175ms)
+✔ builds Codex Desktop app-server thread-start params (0.081625ms)
+✔ encodes Codex Desktop IPC frames with little-endian length prefix (0.146417ms)
+✔ chat manager refuses non-Codex chat ids (0.849333ms)
+✔ chat manager rejects unknown approval ids (0.558542ms)
+✔ chat manager routes Codex Desktop approval decisions by server request id (2.363333ms)
+✔ chat manager scopes duplicate approval ids by chat id (4.846292ms)
+✔ chat manager broadcasts chat list when approval state changes (0.791834ms)
+✔ app-server approval requests wait for Desktop visibility before mobile broadcast (258.57525ms)
+✔ chat manager broadcasts live app-server turn events for visible Desktop chats (1.135666ms)
+✔ new chat creation starts a Desktop-owned conversation (0.246791ms)
+✔ new chat creation waits for Desktop visibility before broadcasting (251.8805ms)
+✔ new chat creation fails instead of broadcasting an orphan when Desktop does not expose the chat (6024.207458ms)
+✔ projectless new chat provides a Desktop projectless workspace (0.769459ms)
+✔ continued Codex chats route through Codex Desktop IPC (1.07175ms)
+✔ reads Codex Desktop pinned thread ids (0.264459ms)
+✔ reads Codex Desktop status from the latest rollout event (0.66075ms)
+✔ formats imported Codex transcript entries for rich mobile rendering (0.655583ms)
+✔ does not import commentary assistant messages as transcript blocks (0.55425ms)
+✔ does not import subagent notifications as visible transcript blocks (0.207ms)
+✔ preserves long assistant transcript entries without truncation markers (0.190917ms)
+✔ imports only visible desktop chat rows (0.181167ms)
+✔ normalizes raw Codex thread ids out of user-visible chat titles (0.266208ms)
+✔ uses Codex Desktop project names for imported chat metadata (0.0715ms)
+✔ uses the newest SQLite lifecycle status per Codex thread (0.134125ms)
+✔ extracts automation target thread ids from automation TOML (0.127042ms)
+✔ extracts desktop thinking summaries by visible chat round (0.179209ms)
+✔ extracts commentary agent messages as thinking entries (0.086ms)
+✔ routes desktop worked stream to thinking while preserving final answer transcript (1.517333ms)
+✔ bounds extracted thinking summaries (0.234625ms)
+✔ reads large Codex rollout files from bounded head and tail (15.595375ms)
+✔ infers active Codex status when the bounded tail omits task_started (8.220833ms)
+✔ builds APNs alert request deterministically (1.113083ms)
+✔ notification dispatcher sends completed and failed events once (0.695166ms)
+✔ notification dispatcher reports missing APNs config when push is required (0.339542ms)
+✔ notification event detects input-required transcript marker (0.458458ms)
+✔ notification event body falls back from raw Codex ids to a human chat label (0.170375ms)
+✔ WebSocket server pairs, refreshes chats, stops chats, and reports command errors (13.509ms)
+✔ WebSocket server accepts and persists push token registration (13.671791ms)
+✔ WebSocket server broadcasts chat list when thinking appears during polling (22.341375ms)
+✔ WebSocket server broadcasts chat list when transcript content changes during polling (21.614583ms)
+✔ state stores pairing metadata without chat records (17.333583ms)
+ℹ tests 51
+ℹ suites 0
+ℹ pass 51
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6651.183
