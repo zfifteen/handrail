@@ -1,9 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { desktopProjectName, extractStatus, extractThinking, extractTranscript, formatCodexTranscriptEntry, humanCodexTitle, latestCodexLogStatuses, parseAutomationTargetThreadId, readCodexSessionStatus, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
+import { promisify } from "node:util";
+import { desktopProjectName, extractStatus, extractThinking, extractTranscript, formatCodexTranscriptEntry, humanCodexTitle, latestCodexLogStatuses, listCodexChats, parseAutomationTargetThreadId, readCodexSessionStatus, readRolloutLines, visibleDesktopThreads, type CodexDesktopThreadRow } from "../src/codexSessions.js";
+
+const execFileAsync = promisify(execFile);
 
 test("formats imported Codex transcript entries for rich mobile rendering", () => {
   const entry = formatCodexTranscriptEntry("assistant", [
@@ -179,6 +183,46 @@ test("uses the newest SQLite lifecycle status per Codex thread", () => {
     ["done", "completed"],
     ["failed", "failed"]
   ]));
+});
+
+test("lists desktop chats as idle when Codex logs database is absent", async () => {
+  const tempHome = await mkdtemp(join(tmpdir(), "handrail-codex-home-"));
+  const codexDir = join(tempHome, ".codex");
+  const stateDatabase = join(codexDir, "state_5.sqlite");
+  const originalHome = process.env.HOME;
+  const originalCodexHome = process.env.CODEX_HOME;
+
+  await mkdir(codexDir, { recursive: true });
+  await execFileAsync("sqlite3", [
+    stateDatabase,
+    [
+      "CREATE TABLE threads (id TEXT, rollout_path TEXT, cwd TEXT, title TEXT, created_at REAL, updated_at REAL, archived INTEGER, source TEXT, first_user_message TEXT);",
+      "INSERT INTO threads VALUES ('thread-without-logs', '/tmp/thread-without-logs.jsonl', '/tmp/project', 'Desktop Chat', 1, 2, 0, 'vscode', 'Hello Codex');"
+    ].join(" ")
+  ]);
+
+  process.env.HOME = tempHome;
+  delete process.env.CODEX_HOME;
+
+  try {
+    const chats = await listCodexChats();
+
+    assert.equal(chats.length, 1);
+    assert.equal(chats[0].id, "codex:thread-without-logs");
+    assert.equal(chats[0].status, "idle");
+  } finally {
+    if (originalHome === undefined) {
+      delete process.env.HOME;
+    } else {
+      process.env.HOME = originalHome;
+    }
+    if (originalCodexHome === undefined) {
+      delete process.env.CODEX_HOME;
+    } else {
+      process.env.CODEX_HOME = originalCodexHome;
+    }
+    await rm(tempHome, { recursive: true, force: true });
+  }
 });
 
 test("extracts automation target thread ids from automation TOML", () => {

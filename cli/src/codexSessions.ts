@@ -124,7 +124,14 @@ async function readDesktopThreadStatuses(threadIds: string[]): Promise<Map<strin
   }
 
   const databasePath = join(homedir(), ".codex", "logs_2.sqlite");
-  await access(databasePath);
+  try {
+    await access(databasePath);
+  } catch (error) {
+    if (isMissingFileError(error)) {
+      return new Map();
+    }
+    throw error;
+  }
   const ids = threadIds.map(sqlString).join(",");
   const sql = [
     "SELECT id, ts, ts_nanos, thread_id, status FROM (",
@@ -149,6 +156,13 @@ async function readDesktopThreadStatuses(threadIds: string[]): Promise<Map<strin
   ].join(" ");
   const { stdout } = await execFileAsync("sqlite3", ["-json", databasePath, sql], { maxBuffer: 5_000_000 });
   return latestCodexLogStatuses(JSON.parse(stdout || "[]") as CodexLogStatusRow[]);
+}
+
+function isMissingFileError(error: unknown): boolean {
+  return typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "ENOENT";
 }
 
 export function latestCodexLogStatuses(rows: CodexLogStatusRow[]): Map<string, ChatRecord["status"]> {
