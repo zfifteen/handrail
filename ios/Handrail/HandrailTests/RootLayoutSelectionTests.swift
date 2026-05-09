@@ -87,3 +87,14 @@ final class ChatDetailApprovalResultTests: XCTestCase {
         XCTAssertNil(result.text(for: approvalB))
     }
 }
+
+final class NewChatBranchSelectionTests: XCTestCase {
+    func testPathBackedNonDefaultProjectCanSelectBranch() {
+        XCTAssertTrue(NewChatBranchSelection.canSelectBranch(projectPath: "/Users/me/OtherProject"))
+    }
+
+    func testProjectWithoutPathCannotSelectBranch() {
+        XCTAssertFalse(NewChatBranchSelection.canSelectBranch(projectPath: nil))
+        XCTAssertFalse(NewChatBranchSelection.canSelectBranch(projectPath: ""))
+    }
+}

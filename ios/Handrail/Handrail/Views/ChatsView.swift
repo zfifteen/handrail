@@ -747,7 +747,7 @@ struct NewChatView: View {
     }
 
     private var canSelectBranch: Bool {
-        selectedProject?.path != nil && projectId == options?.defaultProjectId
+        NewChatBranchSelection.canSelectBranch(projectPath: selectedProject?.path)
     }
 
     private var workModes: [String] {
@@ -855,5 +855,11 @@ struct NewChatView: View {
         case "xhigh": "Extra High"
         default: "High"
         }
+    }
+}
+
+enum NewChatBranchSelection {
+    static func canSelectBranch(projectPath: String?) -> Bool {
+        projectPath?.isEmpty == false
     }
 }
