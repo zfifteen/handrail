@@ -58,28 +58,10 @@ final class RootLayoutSelectionTests: XCTestCase {
         XCTAssertTrue(selection.hasDetailSelection)
     }
 
-    func testPhoneTabAccessibilityItemsMatchVisibleCompactTabs() {
-        XCTAssertEqual(
-            PhoneTabAccessibilityItem.allCases.map(\.rawValue),
-            ["Dashboard", "Chats", "Attention", "Activity", "More"]
-        )
-        XCTAssertEqual(PhoneTabAccessibilityItem.more.targetTab, .alerts)
-        XCTAssertTrue(PhoneTabAccessibilityItem.more.isSelected(.alerts))
-        XCTAssertTrue(PhoneTabAccessibilityItem.more.isSelected(.settings))
-        XCTAssertFalse(PhoneTabAccessibilityItem.more.isSelected(.dashboard))
-    }
-
     func testIPadSidebarSectionsMatchVisibleNavigationItems() {
         XCTAssertEqual(
             HandrailSection.allCases.map(\.title),
             ["Dashboard", "Chats", "Attention", "Activity", "Alerts", "Settings"]
-        )
-    }
-
-    func testPhoneTabContentInsetCoversTabBarHitRegion() {
-        XCTAssertGreaterThanOrEqual(
-            PhoneTabBarMetrics.contentBottomInset,
-            PhoneTabBarMetrics.accessibilityHeight
         )
     }
 }

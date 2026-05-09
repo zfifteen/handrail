@@ -122,7 +122,7 @@ struct IPadSettingsWorkspaceView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.purple)
+                .tint(.primary)
                 .hoverEffect(.highlight)
             }
         }

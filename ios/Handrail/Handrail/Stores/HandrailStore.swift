@@ -25,6 +25,7 @@ final class HandrailStore {
     var dismissedAttentionChatIds: Set<String> = []
     var isRefreshingChats = false
     var lastChatRefreshAt: Date?
+    var usesStaticPreviewData = false
 
     private let storageKey = "handrail.pairedMachine"
     private let pairingTokenAccount = "paired-machine-token"

@@ -93,7 +93,7 @@ struct IPadApprovalReviewWorkspaceView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.purple)
+                    .tint(.orange)
                     .disabled(!canDecide(approval))
                     .hoverEffect(.highlight)
                 }

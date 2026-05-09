@@ -47,17 +47,17 @@ struct ChatBlock {
         }
 
         var rendered: [ChatBlock] = []
-        var currentRound = 0
+        var turnIndex = 0
         for block in result {
             if block.role == .user {
-                currentRound += 1
-            } else if currentRound == 0 {
-                currentRound = 1
+                turnIndex += 1
+            } else if turnIndex == 0 {
+                turnIndex = 1
             }
             rendered.append(ChatBlock(
                 role: block.role,
                 body: block.body,
-                round: currentRound,
+                round: turnIndex,
                 startsRound: block.role == .user || rendered.isEmpty
             ))
         }
@@ -124,18 +124,18 @@ enum ChatRole: String, CaseIterable {
     var background: Color {
         switch self {
         case .user:
-            Color.purple.opacity(0.52)
+            Color.white.opacity(0.09)
         case .codex:
-            Color.white.opacity(0.075)
+            Color.clear
         }
     }
 
     var stroke: Color {
         switch self {
         case .user:
-            Color.purple.opacity(0.35)
+            Color.white.opacity(0.14)
         case .codex:
-            Color.white.opacity(0.08)
+            Color.clear
         }
     }
 }

@@ -68,6 +68,32 @@ final class ChatListQueryTests: XCTestCase {
         XCTAssertFalse(snapshot.allChatRows[1].showsRunningIndicator)
     }
 
+    func testDashboardMenuPinnedRowsPreserveEveryDesktopPinnedChatInOrder() {
+        let chats = (0..<8).reversed().map { index in
+            HandrailTestFixtures.chat(
+                id: "pinned-\(index)",
+                title: "Pinned \(index)",
+                status: .completed,
+                offset: TimeInterval(-index * 60),
+                isPinned: true,
+                pinnedOrder: index
+            )
+        }
+
+        let snapshot = DashboardMenuQuery.snapshot(from: chats, now: HandrailTestFixtures.baseDate)
+
+        XCTAssertEqual(snapshot.pinnedRows.map(\.id), [
+            "pinned-0",
+            "pinned-1",
+            "pinned-2",
+            "pinned-3",
+            "pinned-4",
+            "pinned-5",
+            "pinned-6",
+            "pinned-7"
+        ])
+    }
+
     func testDashboardChatContextMenuUsesDesktopWording() {
         let snapshot = DashboardMenuQuery.snapshot(
             from: [

@@ -109,7 +109,7 @@ struct IPadChatListWorkspaceView: View {
         .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(searchFocused ? Color.purple.opacity(0.7) : Color.white.opacity(0.10), lineWidth: 1)
+                .stroke(searchFocused ? Color.white.opacity(0.28) : Color.white.opacity(0.10), lineWidth: 1)
         )
     }
 
@@ -292,7 +292,7 @@ struct IPadChatListWorkspaceView: View {
     private func statusColor(_ status: ChatStatus) -> Color {
         switch status {
         case .running: .green
-        case .waitingForApproval: .purple
+        case .waitingForApproval: .orange
         case .completed: .blue
         case .failed: .red
         case .stopped: .orange

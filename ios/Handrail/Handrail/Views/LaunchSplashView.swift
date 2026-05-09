@@ -17,8 +17,8 @@ struct LaunchSplashView: View {
 
                     RadialGradient(
                         colors: [
-                            Color.purple.opacity(0.26),
-                            Color.purple.opacity(0.06),
+                            Color.blue.opacity(0.20),
+                            Color.blue.opacity(0.05),
                             Color.black.opacity(0)
                         ],
                         center: .center,
@@ -58,7 +58,7 @@ private struct CodexInspiredLaunchMark: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.purple.opacity(outerRingOpacity), lineWidth: 2)
+                .stroke(Color.blue.opacity(outerRingOpacity), lineWidth: 2)
                 .scaleEffect(0.92 + progress * 0.08)
 
             LaunchPolygon(points: greenPoints)
@@ -68,10 +68,10 @@ private struct CodexInspiredLaunchMark: View {
                 .shadow(color: .green.opacity(0.55), radius: 12)
 
             LaunchPolygon(points: purplePoints)
-                .stroke(Color.purple, style: StrokeStyle(lineWidth: 6, lineCap: .round, lineJoin: .round))
+                .stroke(Color.blue, style: StrokeStyle(lineWidth: 6, lineCap: .round, lineJoin: .round))
                 .rotationEffect(.degrees(22 + progress * 330))
                 .scaleEffect(0.7 + progress * 0.1)
-                .shadow(color: .purple.opacity(0.7), radius: 10)
+                .shadow(color: .blue.opacity(0.55), radius: 10)
 
             LaunchPolygon(points: bluePoints)
                 .stroke(Color.blue, style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
@@ -83,7 +83,7 @@ private struct CodexInspiredLaunchMark: View {
                 .fill(Color.white)
                 .frame(width: 20, height: 20)
                 .shadow(color: .white.opacity(0.95), radius: 16)
-                .shadow(color: .purple.opacity(0.9), radius: 28)
+                .shadow(color: .blue.opacity(0.7), radius: 28)
                 .scaleEffect(0.8 + centerPulse * 0.2)
         }
         .opacity(0.35 + progress * 0.65)

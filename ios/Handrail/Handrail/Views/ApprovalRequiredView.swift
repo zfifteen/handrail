@@ -60,10 +60,10 @@ struct ApprovalRequiredView: View {
                     } label: {
                         Text("Approve")
                             .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.purple)
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.orange)
+            }
                 .padding()
                 .background(Color.black)
             } else {

@@ -195,7 +195,7 @@ struct IPadNewChatPanel: View {
                 Spacer()
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.purple)
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 11)
@@ -249,7 +249,14 @@ struct IPadNewChatPanel: View {
     }
 
     private var projects: [NewChatProject] {
-        options?.projects ?? [NewChatProject(id: "no-project", name: "No project", path: nil)]
+        let noProject = NewChatProject(id: "no-project", name: "No project", path: nil)
+        guard let optionProjects = options?.projects, !optionProjects.isEmpty else {
+            return [noProject]
+        }
+        if optionProjects.contains(where: { $0.id == noProject.id || $0.path == nil }) {
+            return optionProjects
+        }
+        return [noProject] + optionProjects
     }
 
     private var selectedProject: NewChatProject? {

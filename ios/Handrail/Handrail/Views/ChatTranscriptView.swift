@@ -9,10 +9,10 @@ struct ChatTranscriptView: View {
     @Binding var expandedThinkingRounds: Set<Int>
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 18) {
             if blocks.isEmpty {
                 Text(emptyText)
-                    .font(.body)
+                    .font(.callout)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 48)
@@ -28,10 +28,7 @@ struct ChatTranscriptView: View {
                 }
             } else {
                 ForEach(Array(blocks.enumerated()), id: \.offset) { index, block in
-                    if block.startsRound {
-                        roundDivider(block.round)
-                    }
-                    if block.role == .codex && isFirstCodexBlock(index: index, round: block.round) {
+                    if block.role == .codex && shouldShowThinkingDisclosure(index: index, round: block.round) {
                         thinkingDisclosure(round: block.round, isWorking: isWorking && block.round == latestRound)
                     }
                     ChatMessageBubble(block: block, isLatest: index == blocks.count - 1)
@@ -49,11 +46,22 @@ struct ChatTranscriptView: View {
     }
 
     private func thinkingEntries(round: Int) -> [ThinkingEntry] {
+        thinkingEntriesForDisplay(round: round)
+    }
+
+    func thinkingEntriesForDisplay(round: Int) -> [ThinkingEntry] {
         thinkingEntries.filter { $0.round == round }
     }
 
     private func isFirstCodexBlock(index: Int, round: Int) -> Bool {
         !blocks.prefix(index).contains { $0.role == .codex && $0.round == round }
+    }
+
+    func shouldShowThinkingDisclosure(index: Int, round: Int) -> Bool {
+        guard isFirstCodexBlock(index: index, round: round) else {
+            return false
+        }
+        return !thinkingEntries(round: round).isEmpty || (isWorking && round == latestRound)
     }
 
     private func hasCodexBlock(round: Int) -> Bool {
@@ -62,7 +70,7 @@ struct ChatTranscriptView: View {
 
     private func thinkingDisclosure(round: Int, isWorking: Bool) -> some View {
         ThinkingDisclosure(
-            title: isWorking ? "Codex is working" : "Thinking",
+            title: "Thinking",
             isWorking: isWorking,
             entries: thinkingEntries(round: round),
             isExpanded: Binding(
@@ -92,20 +100,6 @@ struct ChatTranscriptView: View {
         }
     }
 
-    private func roundDivider(_ round: Int) -> some View {
-        HStack(spacing: 10) {
-            Rectangle()
-                .fill(Color.white.opacity(0.12))
-                .frame(height: 1)
-            Text("Round \(round)")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Rectangle()
-                .fill(Color.white.opacity(0.12))
-                .frame(height: 1)
-        }
-        .padding(.vertical, 2)
-    }
 }
 
 private struct ChatMessageBubble: View {
@@ -113,40 +107,38 @@ private struct ChatMessageBubble: View {
     let isLatest: Bool
 
     var body: some View {
-        HStack(alignment: .bottom) {
+        HStack(alignment: .top, spacing: 10) {
             if block.role == .user {
                 Spacer(minLength: 42)
-            }
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 6) {
-                    Text(block.role.title)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(block.role == .user ? .white.opacity(0.82) : .secondary)
-                    if isLatest {
-                        Text("Latest")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                    }
+                VStack(alignment: .leading, spacing: 0) {
+                    messageBody
                 }
-                if block.isRawMarkupNoise {
-                    RawOutputNotice(text: block.body)
-                } else {
-                    MarkdownBody(text: block.body)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(block.role.background, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(block.role.stroke, lineWidth: 1)
+                )
+                .frame(maxWidth: 300, alignment: .trailing)
+            } else {
+                VStack(alignment: .leading, spacing: 0) {
+                    messageBody
                 }
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(block.role.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(block.role.stroke, lineWidth: 1)
-            )
-            .frame(maxWidth: block.role == .user ? 330 : .infinity, alignment: block.role == .user ? .trailing : .leading)
-            if block.role != .user {
-                Spacer(minLength: 26)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer(minLength: 42)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: block.role == .user ? .trailing : .leading)
+    }
+
+    @ViewBuilder
+    private var messageBody: some View {
+        if block.isRawMarkupNoise {
+            RawOutputNotice(text: block.body)
+        } else {
+            MarkdownBody(text: block.body)
+        }
     }
 }
 
@@ -159,47 +151,38 @@ private struct ThinkingDisclosure: View {
     var body: some View {
         DisclosureGroup(isExpanded: $isExpanded) {
             VStack(alignment: .leading, spacing: 10) {
-                if entries.isEmpty {
-                    Text("No thinking messages yet.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                ForEach(entries) { entry in
+                    MarkdownBody(text: entry.text)
+                        .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                } else {
-                    ForEach(entries) { entry in
-                        MarkdownBody(text: entry.text)
-                            .textSelection(.enabled)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(10)
-                            .background(Color.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    }
+                        .padding(10)
+                        .background(Color.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
             }
             .padding(.top, 8)
         } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: 7) {
                 if isWorking {
                     ProgressView()
                         .controlSize(.small)
-                        .tint(.green)
+                        .tint(.secondary)
                 }
-                Image(systemName: "brain.head.profile")
-                    .font(.caption.weight(.semibold))
                 Text(title)
-                    .font(.caption.weight(.semibold))
+                    .font(.caption)
                 if !entries.isEmpty {
                     Text("\(entries.count)")
-                        .font(.caption2.weight(.bold))
-                        .padding(.horizontal, 6)
+                        .font(.caption2)
+                        .padding(.horizontal, 5)
                         .padding(.vertical, 2)
-                        .background(Color.green.opacity(0.18), in: Capsule())
+                        .background(Color.white.opacity(0.08), in: Capsule())
                 }
             }
-            .foregroundStyle(isWorking ? .green : .secondary)
+            .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(Color.green.opacity(isWorking ? 0.12 : 0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .tint(.green)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .tint(.secondary)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -248,13 +231,13 @@ private struct MarkdownBody: View {
                         .frame(height: 5)
                 } else if line.isCode {
                     Text(line.text)
-                        .font(.body.monospaced())
+                        .font(.callout.monospaced())
                         .textSelection(.enabled)
                         .padding(.vertical, 2)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
                     Text(markdown(for: line.text))
-                        .font(.body)
+                        .font(.callout)
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

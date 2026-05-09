@@ -35,7 +35,7 @@ struct StatusBadge: View {
     private var color: Color {
         switch status {
         case .running: .green
-        case .waitingForApproval: .purple
+        case .waitingForApproval: .orange
         case .completed: .blue
         case .failed: .red
         case .stopped: .orange
@@ -64,7 +64,7 @@ struct EmptyState: View {
         VStack(spacing: 14) {
             Image(systemName: systemImage)
                 .font(.system(size: 42, weight: .semibold))
-                .foregroundStyle(.purple)
+                .foregroundStyle(.secondary)
             Text(title)
                 .font(.title3.weight(.semibold))
             Text(detail)
@@ -87,7 +87,7 @@ struct SyncStatusRow: View {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(isRefreshing ? .purple : iconColor)
+                .foregroundStyle(isRefreshing ? .secondary : iconColor)
                 .accessibilityHidden(true)
             Text(statusText)
                 .font(.caption.weight(.medium))
@@ -98,7 +98,7 @@ struct SyncStatusRow: View {
             }
             .font(.caption.weight(.semibold))
             .buttonStyle(.bordered)
-            .tint(.purple)
+            .tint(.secondary)
             .accessibilityLabel(actionTitle)
         }
     }

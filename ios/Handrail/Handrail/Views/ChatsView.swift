@@ -5,8 +5,13 @@ struct ChatsView: View {
     @Environment(HandrailStore.self) private var store
     @State private var showsScanner = false
     @State private var showsStart = false
+    @State private var showsSettings = false
+    @State private var showsAlerts = false
+    @State private var showsAutomations = false
+    @State private var showsPairingSuccess = ProcessInfo.processInfo.arguments.contains("--handrail-preview-pairing-success")
     @State private var listMode: ChatListMode = .chronological
     @State private var sortMode: ChatSortMode = .updated
+    @State private var searchText = ""
     let navigateToChat: (String) -> Void
 
     init(navigateToChat: @escaping (String) -> Void = { _ in }) {
@@ -18,21 +23,21 @@ struct ChatsView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     if let machine = store.pairedMachine {
-                        machineCard(machine)
+                        Text("Codex")
+                            .font(.largeTitle.bold())
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        searchField
+
+                        if !machine.isOnline {
+                            connectionBanner(machine)
+                        }
                         SyncStatusRow(
                             isRefreshing: store.isRefreshingChats,
                             lastRefreshAt: store.lastChatRefreshAt,
                             isOnline: machine.isOnline,
                             refresh: store.refreshChats
                         )
-                        Button {
-                            showsStart = true
-                        } label: {
-                            Label("New chat", systemImage: "square.and.pencil")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.purple)
 
                         if !activeChats.isEmpty {
                             chatSection(title: "Active chats", chats: activeChats, emptyTitle: "")
@@ -40,54 +45,84 @@ struct ChatsView: View {
                         chatSection(title: "Pinned", chats: pinnedChats, emptyTitle: "No pinned chats")
                         allChatsSection
                     } else {
-                        Card {
-                            EmptyState(
-                                title: "No machine paired",
-                                detail: "Run handrail pair on your Mac, then scan the QR code here.",
-                                systemImage: "qrcode.viewfinder"
-                            )
-                            Button {
-                                showsScanner = true
-                            } label: {
-                                Label("Scan Pairing QR", systemImage: "camera.viewfinder")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.purple)
-                        }
+                        unpairedFirstLaunch
                     }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
-                .safeAreaPadding(.bottom, PhoneTabBarMetrics.contentBottomInset)
+                .safeAreaPadding(.bottom, 24)
             }
             .refreshable {
                 store.refreshChats()
             }
-            .frame(
-                width: proxy.size.width,
-                height: max(0, proxy.size.height - PhoneTabBarMetrics.contentBottomInset),
-                alignment: .top
-            )
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
             .clipped()
         }
         .background(Color.black.ignoresSafeArea())
-        .navigationTitle("Handrail")
+        .navigationTitle("Codex")
         .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
-            Button {
-                showsScanner = true
-            } label: {
-                Image(systemName: "qrcode.viewfinder")
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    showsStart = true
+                } label: {
+                    Image(systemName: "square.and.pencil")
+                }
+                .disabled(store.pairedMachine?.isOnline != true)
+                .accessibilityLabel("New chat")
+
+                Menu {
+                    Button {
+                        showsSettings = true
+                    } label: {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                    Button {
+                        showsAlerts = true
+                    } label: {
+                        Label("Alerts", systemImage: "bell")
+                    }
+                    Button {
+                        showsAutomations = true
+                    } label: {
+                        Label("Automations", systemImage: "clock")
+                    }
+                    Button {
+                        showsScanner = true
+                    } label: {
+                        Label("Scan QR", systemImage: "qrcode.viewfinder")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .accessibilityLabel("More")
             }
         }
         .navigationDestination(for: String.self) { id in
             ChatDetailView(chatId: id)
         }
+        .navigationDestination(isPresented: $showsSettings) {
+            SettingsView()
+        }
+        .navigationDestination(isPresented: $showsAlerts) {
+            NotificationsView()
+        }
+        .navigationDestination(isPresented: $showsAutomations) {
+            AutomationsView()
+        }
         .sheet(isPresented: $showsScanner) {
             QRScannerView { payload in
                 store.pair(with: payload)
                 showsScanner = false
+                DispatchQueue.main.async {
+                    showsPairingSuccess = true
+                }
+            }
+        }
+        .sheet(isPresented: $showsPairingSuccess) {
+            PairingSuccessView(machineName: store.pairedMachine?.machineName ?? "MacBook Pro") {
+                showsPairingSuccess = false
             }
         }
         .sheet(isPresented: $showsStart) {
@@ -113,7 +148,15 @@ struct ChatsView: View {
     }
 
     private var visibleChats: [CodexChat] {
-        store.chats 
+        let normalized = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !normalized.isEmpty else {
+            return store.chats
+        }
+        return store.chats.filter { chat in
+            displayTitle(for: chat).lowercased().contains(normalized) ||
+                projectName(for: chat).lowercased().contains(normalized) ||
+                chat.status.title.lowercased().contains(normalized)
+        }
     }
 
     private var activeChats: [CodexChat] {
@@ -125,7 +168,7 @@ struct ChatsView: View {
     private var allChatsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                sectionTitle("All chats")
+                sectionTitle(searchText.isEmpty ? "Recent" : "Search")
                 Spacer()
                 Menu {
                     Section("Display") {
@@ -153,7 +196,7 @@ struct ChatsView: View {
             }
 
             if allChats.isEmpty {
-                Text("No chats yet")
+                Text(searchText.isEmpty ? "No chats yet" : "No matching chats")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -178,6 +221,57 @@ struct ChatsView: View {
         }
     }
 
+    private var searchField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search chats", text: $searchText)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private var unpairedFirstLaunch: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Spacer(minLength: 80)
+
+            Text("Codex")
+                .font(.largeTitle.bold())
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Connect to Codex on your Mac")
+                    .font(.title2.weight(.semibold))
+                Text("Run handrail pair on your Mac, then scan the QR code here.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Button {
+                showsScanner = true
+            } label: {
+                Label("Scan Pairing QR", systemImage: "camera.viewfinder")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.blue)
+
+            Button {
+                showsSettings = true
+            } label: {
+                Label("Enter URL manually", systemImage: "keyboard")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+
+            Spacer(minLength: 160)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var projectGroups: [(project: String, chats: [CodexChat])] {
         let groups = Dictionary(grouping: allChats, by: projectName)
         return groups.map { project, chats in
@@ -187,22 +281,24 @@ struct ChatsView: View {
         }
     }
 
-    private func machineCard(_ machine: PairedMachine) -> some View {
-        Card {
-            HStack {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(machine.machineName)
-                        .font(.headline)
-                    Text(verbatim: machine.address)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                Label(store.connectionText, systemImage: machine.isOnline ? "wifi" : "wifi.slash")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(machine.isOnline ? .green : .secondary)
+    private func connectionBanner(_ machine: PairedMachine) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "wifi.slash")
+                .foregroundStyle(.orange)
+            Text("Disconnected")
+                .font(.subheadline.weight(.semibold))
+            Text(machine.machineName)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button("Reconnect") {
+                store.refreshChats()
             }
+            .font(.caption.weight(.semibold))
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private func sectionTitle(_ title: String) -> some View {
@@ -309,12 +405,39 @@ struct ChatsView: View {
     private func statusColor(for status: ChatStatus) -> Color {
         switch status {
         case .running: .green
-        case .waitingForApproval: .purple
+        case .waitingForApproval: .orange
         case .completed: .blue
         case .failed: .red
         case .stopped: .orange
         case .idle: .secondary
         }
+    }
+}
+
+private struct PairingSuccessView: View {
+    let machineName: String
+    let continueAction: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Spacer(minLength: 120)
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 46, weight: .semibold))
+                .foregroundStyle(.green)
+            Text("Connected")
+                .font(.largeTitle.bold())
+            Text(machineName)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Button("Continue", action: continueAction)
+                .buttonStyle(.borderedProminent)
+                .tint(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer(minLength: 180)
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(Color.black.ignoresSafeArea())
     }
 }
 
@@ -541,7 +664,7 @@ struct NewChatView: View {
                 Spacer()
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.purple)
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 11)
@@ -593,7 +716,14 @@ struct NewChatView: View {
     }
 
     private var projects: [NewChatProject] {
-        options?.projects ?? [NewChatProject(id: "no-project", name: "No project", path: nil)]
+        let noProject = NewChatProject(id: "no-project", name: "No project", path: nil)
+        guard let optionProjects = options?.projects, !optionProjects.isEmpty else {
+            return [noProject]
+        }
+        if optionProjects.contains(where: { $0.id == noProject.id || $0.path == nil }) {
+            return optionProjects
+        }
+        return [noProject] + optionProjects
     }
 
     private var selectedProject: NewChatProject? {

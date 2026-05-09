@@ -52,4 +52,58 @@ final class TranscriptParsingTests: XCTestCase {
         )
         XCTAssertEqual(ChatBlock.failureSummary(from: "first\r\nsecond\r\n"), "second")
     }
+
+    func testThinkingEntriesUseVisibleTranscriptRound() {
+        let blocks = ChatBlock.parse("""
+        User:
+        Run OODA
+        Codex:
+        Observe: The final answer remains visible.
+        """)
+        let entries = [
+            ThinkingEntry(
+                id: "thinking-1",
+                round: 1,
+                text: "Tool call: exec_command",
+                at: nil
+            )
+        ]
+        let view = ChatTranscriptView(
+            blocks: blocks,
+            thinkingEntries: entries,
+            isWorking: false,
+            error: nil,
+            emptyText: "",
+            expandedThinkingRounds: .constant([])
+        )
+
+        XCTAssertEqual(blocks.map(\.round), [1, 1])
+        XCTAssertEqual(view.thinkingEntriesForDisplay(round: 1).map(\.text), ["Tool call: exec_command"])
+    }
+
+    func testThinkingDisclosureIsHiddenForRoundsWithoutEntries() {
+        let blocks = ChatBlock.parse("""
+        User:
+        Earlier request
+        Codex:
+        Earlier answer
+        User:
+        Current request
+        Codex:
+        Current answer
+        """)
+        let view = ChatTranscriptView(
+            blocks: blocks,
+            thinkingEntries: [
+                ThinkingEntry(id: "thinking-2", round: 2, text: "Tool call: exec_command", at: nil)
+            ],
+            isWorking: false,
+            error: nil,
+            emptyText: "",
+            expandedThinkingRounds: .constant([])
+        )
+
+        XCTAssertFalse(view.shouldShowThinkingDisclosure(index: 1, round: 1))
+        XCTAssertTrue(view.shouldShowThinkingDisclosure(index: 3, round: 2))
+    }
 }

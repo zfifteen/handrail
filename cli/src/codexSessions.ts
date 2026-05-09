@@ -8,8 +8,6 @@ import { discoverDesktopProjects } from "./newChatOptions.js";
 
 const MAX_CODEX_SESSIONS = 50;
 const MAX_TRANSCRIPT_LINES = 40;
-const MAX_TRANSCRIPT_CHARS = 12_000;
-const MAX_TRANSCRIPT_ENTRY_CHARS = 2_500;
 const MAX_THINKING_ENTRIES = 40;
 const MAX_THINKING_CHARS = 12_000;
 const MAX_THINKING_ENTRY_CHARS = 2_500;
@@ -55,7 +53,20 @@ interface CodexSessionLine {
     type?: string;
     role?: string;
     thread_name?: string;
+    phase?: string;
+    message?: string;
     text?: string;
+    name?: string;
+    arguments?: string;
+    input?: string;
+    output?: unknown;
+    stdout?: string;
+    stderr?: string;
+    aggregated_output?: string;
+    exit_code?: number;
+    success?: boolean;
+    command?: string[];
+    call_id?: string;
     content?: Array<{ type?: string; text?: string }>;
   };
 }
@@ -452,31 +463,19 @@ export function extractTranscript(lines: string[]): string[] {
     if (payload.role !== "user" && payload.role !== "assistant") {
       continue;
     }
-
-    const text = messageText(payload);
-    if (!text || isSessionContext(text)) {
+    if (payload.role === "assistant" && payload.phase === "commentary") {
       continue;
     }
 
-    const visibleText =
-      text.length > MAX_TRANSCRIPT_ENTRY_CHARS
-        ? `${text.slice(0, MAX_TRANSCRIPT_ENTRY_CHARS)}\n[truncated]`
-        : text;
-    entries.push(formatCodexTranscriptEntry(payload.role, visibleText));
-  }
-
-  const transcript: string[] = [];
-  let usedChars = 0;
-  for (let index = entries.length - 1; index >= 0; index -= 1) {
-    const entry = entries[index];
-    if (usedChars + entry.length > MAX_TRANSCRIPT_CHARS || transcript.length >= MAX_TRANSCRIPT_LINES) {
-      break;
+    const text = messageText(payload);
+    if (!text || isHiddenContext(text)) {
+      continue;
     }
-    transcript.unshift(entry);
-    usedChars += entry.length;
+
+    entries.push(formatCodexTranscriptEntry(payload.role, text));
   }
 
-  return transcript;
+  return entries.slice(-MAX_TRANSCRIPT_LINES);
 }
 
 export function extractThinking(lines: string[]): ThinkingEntry[] {
@@ -488,18 +487,18 @@ export function extractThinking(lines: string[]): ThinkingEntry[] {
     const payload = parsed.payload;
     if (parsed.type === "response_item" && payload?.type === "message" && payload.role === "user") {
       const text = messageText(payload);
-      if (text && !isSessionContext(text)) {
+      if (text && !isHiddenContext(text)) {
         round += 1;
       }
       return;
     }
 
-    if (parsed.type !== "event_msg" || payload?.type !== "agent_reasoning") {
+    const text = thinkingText(parsed)?.trim();
+    if (!text) {
       return;
     }
 
-    const text = payload.text?.trim();
-    if (!text) {
+    if (parsed.type === "event_msg" && payload?.type === "agent_message" && payload.phase !== "commentary") {
       return;
     }
 
@@ -536,6 +535,90 @@ function messageText(payload: NonNullable<CodexSessionLine["payload"]>): string 
     .join("\n\n");
 }
 
+function thinkingText(parsed: CodexSessionLine): string | null {
+  const payload = parsed.payload;
+  if (parsed.type === "event_msg") {
+    if (payload?.type === "agent_reasoning") {
+      return payload.text ?? null;
+    }
+    if (payload?.type === "agent_message" && payload.phase === "commentary") {
+      return payload.message ?? null;
+    }
+    if (payload?.type === "exec_command_end") {
+      return commandEndText(payload);
+    }
+    if (payload?.type === "patch_apply_end") {
+      return patchEndText(payload);
+    }
+    return null;
+  }
+
+  if (parsed.type !== "response_item") {
+    return null;
+  }
+  if (payload?.type === "function_call") {
+    return toolCallText(payload.name ?? "tool", payload.arguments);
+  }
+  if (payload?.type === "custom_tool_call") {
+    return toolCallText(payload.name ?? "tool", payload.input);
+  }
+  if (payload?.type === "function_call_output" || payload?.type === "custom_tool_call_output") {
+    return toolOutputText(payload.output);
+  }
+  return null;
+}
+
+function toolCallText(name: string, input: string | undefined): string {
+  const trimmed = input?.trim();
+  if (!trimmed) {
+    return `Tool call: ${name}`;
+  }
+  return [`Tool call: ${name}`, "```text", trimmed, "```"].join("\n");
+}
+
+function toolOutputText(output: unknown): string | null {
+  const trimmed = outputText(output);
+  if (!trimmed) {
+    return null;
+  }
+  return ["Tool result", "```text", trimmed, "```"].join("\n");
+}
+
+function outputText(output: unknown): string {
+  if (typeof output === "string") {
+    return output.trim();
+  }
+  if (Array.isArray(output)) {
+    return output
+      .map((item) => {
+        if (!item || typeof item !== "object") {
+          return "";
+        }
+        const text = (item as { text?: unknown }).text;
+        return typeof text === "string" ? text.trim() : "";
+      })
+      .filter(Boolean)
+      .join("\n\n");
+  }
+  return "";
+}
+
+function commandEndText(payload: NonNullable<CodexSessionLine["payload"]>): string | null {
+  const command = payload.command?.join(" ");
+  const parts = [
+    command ? `Command completed: ${command}` : "Command completed",
+    typeof payload.exit_code === "number" ? `Exit code: ${payload.exit_code}` : null,
+    (payload.aggregated_output ?? payload.stdout ?? payload.stderr)?.trim()
+  ].filter((part): part is string => Boolean(part));
+  return parts.length > 1 ? parts.join("\n") : null;
+}
+
+function patchEndText(payload: NonNullable<CodexSessionLine["payload"]>): string | null {
+  const status = payload.success === false ? "Patch failed" : "Patch applied";
+  const output = (payload.aggregated_output ?? payload.stdout ?? payload.stderr)?.trim();
+  return output ? `${status}\n${output}` : status;
+}
+
 function parseLine<T>(line: string): T {
   try {
     return JSON.parse(line) as T;
@@ -544,8 +627,12 @@ function parseLine<T>(line: string): T {
   }
 }
 
-function isSessionContext(text: string): boolean {
-  return text.startsWith("# AGENTS.md instructions") || text.startsWith("<environment_context>");
+function isHiddenContext(text: string): boolean {
+  const trimmed = text.trimStart();
+  return trimmed.startsWith("# AGENTS.md instructions")
+    || trimmed.startsWith("<environment_context>")
+    || trimmed.startsWith("<skill>")
+    || trimmed.startsWith("<subagent_notification>");
 }
 
 export function formatCodexTranscriptEntry(role: string, text: string): string {

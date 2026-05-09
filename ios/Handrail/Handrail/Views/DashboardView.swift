@@ -148,20 +148,20 @@ struct DashboardView: View {
                                     .frame(maxWidth: .infinity)
                             }
                             .buttonStyle(.borderedProminent)
-                            .tint(.purple)
+                            .tint(.primary)
                         }
                     }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
-                .safeAreaPadding(.bottom, PhoneTabBarMetrics.contentBottomInset)
+                .safeAreaPadding(.bottom, 24)
             }
             .refreshable {
                 store.refreshChats()
             }
             .frame(
                 width: proxy.size.width,
-                height: max(0, proxy.size.height - PhoneTabBarMetrics.contentBottomInset),
+                height: proxy.size.height,
                 alignment: .top
             )
             .clipped()
@@ -302,7 +302,7 @@ struct DashboardView: View {
             if dashboardSnapshot.pinnedRows.isEmpty {
                 quietRow("No pinned chats")
             } else {
-                ForEach(dashboardSnapshot.pinnedRows.prefix(5)) { row in
+                ForEach(dashboardSnapshot.pinnedRows) { row in
                     dashboardRow(row)
                 }
             }

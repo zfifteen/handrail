@@ -140,56 +140,15 @@ struct PhoneRootRoute: Equatable {
 
 struct PhoneRootView: View {
     @Binding var route: PhoneRootRoute?
-    @State private var selectedTab: HandrailTab = .dashboard
-    @State private var dashboardPath = NavigationPath()
-    @State private var chatsPath = NavigationPath()
+    @State private var path = NavigationPath()
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            NavigationStack(path: $dashboardPath) {
-                DashboardView { chatId in
-                    dashboardPath.append(chatId)
-                }
+        NavigationStack(path: $path) {
+            ChatsView { chatId in
+                path.append(chatId)
             }
-            .tabItem { Label("Dashboard", systemImage: "gauge.with.dots.needle.67percent") }
-            .tag(HandrailTab.dashboard)
-
-            NavigationStack(path: $chatsPath) {
-                ChatsView { chatId in
-                    chatsPath.append(chatId)
-                }
-            }
-            .tabItem { Label("Chats", systemImage: "rectangle.stack") }
-            .tag(HandrailTab.chats)
-
-            NavigationStack {
-                AttentionView()
-            }
-            .tabItem { Label("Attention", systemImage: "exclamationmark.triangle") }
-            .tag(HandrailTab.attention)
-
-            NavigationStack {
-                ActivityView()
-            }
-            .tabItem { Label("Activity", systemImage: "waveform.path.ecg") }
-            .tag(HandrailTab.activity)
-
-            NavigationStack {
-                NotificationsView()
-            }
-            .tabItem { Label("Alerts", systemImage: "bell") }
-            .tag(HandrailTab.alerts)
-
-            NavigationStack {
-                SettingsView()
-            }
-            .tabItem { Label("Settings", systemImage: "gearshape") }
-            .tag(HandrailTab.settings)
         }
-        .tint(.purple)
-        .overlay(alignment: .bottom) {
-            PhoneTabAccessibilityBar(selectedTab: $selectedTab)
-        }
+        .tint(.primary)
         .onChange(of: route) { _, route in
             guard let route else { return }
             handle(route)
@@ -197,100 +156,7 @@ struct PhoneRootView: View {
     }
 
     private func handle(_ route: PhoneRootRoute) {
-        switch route.kind {
-        case .startedChat:
-            switch selectedTab {
-            case .chats:
-                chatsPath.append(route.chatId)
-            default:
-                selectedTab = .dashboard
-                dashboardPath.append(route.chatId)
-            }
-        case .notificationChat:
-            selectedTab = .dashboard
-            dashboardPath.append(route.chatId)
-        }
-    }
-}
-
-enum HandrailTab {
-    case dashboard
-    case chats
-    case attention
-    case activity
-    case alerts
-    case settings
-}
-
-enum PhoneTabBarMetrics {
-    static let accessibilityHeight: CGFloat = 83
-    static let contentBottomInset: CGFloat = 96
-}
-
-enum PhoneTabAccessibilityItem: String, CaseIterable, Identifiable, Equatable {
-    case dashboard = "Dashboard"
-    case chats = "Chats"
-    case attention = "Attention"
-    case activity = "Activity"
-    case more = "More"
-
-    var id: String { rawValue }
-
-    var targetTab: HandrailTab {
-        switch self {
-        case .dashboard: .dashboard
-        case .chats: .chats
-        case .attention: .attention
-        case .activity: .activity
-        case .more: .alerts
-        }
-    }
-
-    func isSelected(_ selectedTab: HandrailTab) -> Bool {
-        switch self {
-        case .dashboard:
-            selectedTab == .dashboard
-        case .chats:
-            selectedTab == .chats
-        case .attention:
-            selectedTab == .attention
-        case .activity:
-            selectedTab == .activity
-        case .more:
-            selectedTab == .alerts || selectedTab == .settings
-        }
-    }
-}
-
-private struct PhoneTabAccessibilityBar: View {
-    @Binding var selectedTab: HandrailTab
-
-    var body: some View {
-        GeometryReader { proxy in
-            HStack(spacing: 0) {
-                ForEach(PhoneTabAccessibilityItem.allCases) { item in
-                    Button {
-                        selectedTab = item.targetTab
-                    } label: {
-                        Color.clear
-                            .frame(
-                                maxWidth: .infinity,
-                                minHeight: PhoneTabBarMetrics.accessibilityHeight,
-                                maxHeight: PhoneTabBarMetrics.accessibilityHeight
-                            )
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(item.rawValue)
-                    .accessibilityAddTraits(.isButton)
-                    .accessibilityAddTraits(item.isSelected(selectedTab) ? .isSelected : [])
-                }
-            }
-            .frame(height: PhoneTabBarMetrics.accessibilityHeight)
-            .offset(y: proxy.safeAreaInsets.bottom)
-            .accessibilityElement(children: .contain)
-        }
-        .frame(height: PhoneTabBarMetrics.accessibilityHeight)
+        path.append(route.chatId)
     }
 }
 

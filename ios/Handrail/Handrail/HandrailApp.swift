@@ -31,7 +31,7 @@ final class HandrailAppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct HandrailApp: App {
     @UIApplicationDelegateAdaptor(HandrailAppDelegate.self) private var appDelegate
-    @State private var store = HandrailStore()
+    @State private var store = Self.makeStore()
     @State private var iPadSelection = IPadWorkspaceSelection()
     @State private var showsIPadNewChat = false
     @State private var focusesIPadChatSearch = false
@@ -85,5 +85,27 @@ struct HandrailApp: App {
         #else
         true
         #endif
+    }
+
+    @MainActor
+    private static func makeStore() -> HandrailStore {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--handrail-preview-empty") {
+            return PreviewData.emptyStore
+        }
+        if ProcessInfo.processInfo.arguments.contains("--handrail-preview-empty-list") {
+            return PreviewData.emptyListStore
+        }
+        if ProcessInfo.processInfo.arguments.contains("--handrail-preview-offline") {
+            return PreviewData.offlineStore
+        }
+        if ProcessInfo.processInfo.arguments.contains("--handrail-preview-pairing-success") {
+            return PreviewData.pairingSuccessStore
+        }
+        if ProcessInfo.processInfo.arguments.contains("--handrail-preview-data") {
+            return PreviewData.store
+        }
+        #endif
+        return HandrailStore()
     }
 }

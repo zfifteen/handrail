@@ -309,7 +309,7 @@ struct IPadDashboardWorkspaceView: View {
     }
 
     private func activeColor(for chat: CodexChat) -> Color {
-        chat.status == .waitingForApproval ? .purple : .green
+        chat.status == .waitingForApproval ? .orange : .green
     }
 
     private func outcomeIcon(for chat: CodexChat) -> String {

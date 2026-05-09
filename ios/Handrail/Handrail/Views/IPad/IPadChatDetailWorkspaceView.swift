@@ -128,7 +128,7 @@ struct IPadChatDetailWorkspaceView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .buttonBorderShape(.circle)
-                    .tint(.purple)
+                    .tint(.secondary)
                     .hoverEffect(.highlight)
                     .padding(.trailing, 22)
                     .padding(.bottom, 14)
@@ -142,7 +142,7 @@ struct IPadChatDetailWorkspaceView: View {
     private var composerSurface: some View {
         if let chat = selectedChat {
             if canSendInput(chat) {
-                composer(placeholder: "Send input") { text in
+                composer(placeholder: "Ask Codex") { text in
                     store.sendInput(chatId: chat.id, text: text)
                 }
             } else if canStartFollowUp(chat) {
@@ -206,7 +206,7 @@ struct IPadChatDetailWorkspaceView: View {
                             Label("Continue", systemImage: "text.bubble")
                         }
                         .buttonStyle(.bordered)
-                        .tint(.purple)
+                        .tint(.orange)
                         .hoverEffect(.highlight)
                     }
                 }
@@ -310,7 +310,7 @@ struct IPadChatDetailWorkspaceView: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.purple)
+                    .tint(.secondary)
                     .disabled(!canDecide)
                     .hoverEffect(.highlight)
                 }
@@ -333,7 +333,7 @@ struct IPadChatDetailWorkspaceView: View {
                 Image(systemName: "paperplane.fill")
             }
             .buttonStyle(.borderedProminent)
-            .tint(.purple)
+            .tint(.primary)
             .keyboardShortcut(.return, modifiers: .command)
             .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .hoverEffect(.highlight)
@@ -359,7 +359,7 @@ struct IPadChatDetailWorkspaceView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.purple)
+            .tint(.primary)
             .keyboardShortcut(.return, modifiers: .command)
             .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || pendingContinuePrompt != nil)
             .hoverEffect(.highlight)

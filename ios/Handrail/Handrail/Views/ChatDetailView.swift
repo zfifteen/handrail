@@ -6,7 +6,12 @@ struct ChatDetailView: View {
     @State private var input = ""
     @State private var showJumpToLatest = false
     @State private var pendingContinuePrompt: String?
+    @State private var pendingSendInput: String?
     @State private var expandedThinkingRounds: Set<Int> = []
+    @State private var showsStopConfirmation = false
+    @State private var approvalResultText: String?
+    @State private var deniedApproval: ApprovalRequest?
+    @State private var denialReason = ""
     @FocusState private var isComposerFocused: Bool
 
     var body: some View {
@@ -14,12 +19,21 @@ struct ChatDetailView: View {
             chatSurface
             if canControlChat {
                 if canSendInput {
-                    composer(placeholder: "Send input") { text in
-                        store.sendInput(chatId: chatId, text: text)
+                    sendingInputStatus
+                    composer(placeholder: "Ask Codex") { text in
+                        let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                        pendingSendInput = prompt
+                        if !store.usesStaticPreviewData {
+                            store.sendInput(chatId: chatId, text: prompt)
+                        }
                     }
                 }
             } else if canStartFollowUp {
-                followUpComposer
+                composer(placeholder: "Ask Codex") { text in
+                    let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                    pendingContinuePrompt = prompt
+                    store.continueChat(chatId: chatId, prompt: prompt)
+                }
             } else if store.chat(id: chatId) != nil {
                 readOnlyNotice(store.pairedMachine?.isOnline == true ? "This Codex chat cannot receive input right now." : "Connect to your Mac to keep chatting.")
             }
@@ -30,7 +44,7 @@ struct ChatDetailView: View {
         .onAppear {
             store.clearChatError(chatId: chatId)
             store.enterChat(chatId: chatId)
-            if store.pairedMachine?.isOnline == true {
+            if store.pairedMachine?.isOnline == true && !store.usesStaticPreviewData {
                 store.refreshChatDetail(chatId: chatId)
             }
         }
@@ -52,9 +66,46 @@ struct ChatDetailView: View {
                 }
                 if canControlChat {
                     Button(role: .destructive) {
-                        store.stop(chatId: chatId)
+                        showsStopConfirmation = true
                     } label: {
                         Image(systemName: "stop.fill")
+                    }
+                    .accessibilityLabel("Stop")
+                }
+            }
+        }
+        .confirmationDialog("Stop Codex?", isPresented: $showsStopConfirmation, titleVisibility: .visible) {
+            Button("Stop", role: .destructive) {
+                store.stop(chatId: chatId)
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .sheet(item: $deniedApproval) { approval in
+            NavigationStack {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("Reason")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    TextField("Reason", text: $denialReason, axis: .vertical)
+                        .lineLimit(3...6)
+                        .textFieldStyle(.roundedBorder)
+                    Spacer()
+                }
+                .padding()
+                .background(Color.black.ignoresSafeArea())
+                .navigationTitle("Deny")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            deniedApproval = nil
+                            denialReason = ""
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Send denial") {
+                            deny(approval, reason: denialReason.trimmingCharacters(in: .whitespacesAndNewlines))
+                        }
                     }
                 }
             }
@@ -87,6 +138,7 @@ struct ChatDetailView: View {
                     scrollToLatest(proxy, animated: false)
                 }
                 .onChange(of: transcriptText) { _, _ in
+                    clearCompletedSendInputIfNeeded()
                     clearCompletedContinuePromptIfNeeded()
                     scrollToLatest(proxy, animated: true)
                 }
@@ -95,6 +147,7 @@ struct ChatDetailView: View {
                 }
                 .onChange(of: chatError) { _, error in
                     if error != nil {
+                        pendingSendInput = nil
                         pendingContinuePrompt = nil
                     }
                 }
@@ -116,7 +169,7 @@ struct ChatDetailView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .buttonBorderShape(.circle)
-                    .tint(.purple)
+                    .tint(.secondary)
                     .padding(.trailing, 18)
                     .padding(.bottom, 12)
                     .accessibilityLabel("Jump to latest message")
@@ -149,14 +202,7 @@ struct ChatDetailView: View {
 
     private func chatHeader(_ chat: CodexChat) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center, spacing: 8) {
-                StatusBadge(status: chat.status)
-                if chat.status != .running && chat.status != .waitingForApproval {
-                    Text("Ready for follow-up")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                }
-            }
+            StatusBadge(status: chat.status)
             Text(chat.repo)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -171,7 +217,7 @@ struct ChatDetailView: View {
             if !files.isEmpty {
                 Card {
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Files to change", systemImage: "doc.text")
+                        Label("Files", systemImage: "doc.text")
                             .font(.headline)
                         ForEach(files, id: \.self) { file in
                             Text(file)
@@ -215,6 +261,12 @@ struct ChatDetailView: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
 
+                if let approvalResultText {
+                    Label(approvalResultText, systemImage: approvalResultText == "Approved" ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(approvalResultText == "Approved" ? .green : .red)
+                }
+
                 if !approval.files.isEmpty {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Changed files")
@@ -243,7 +295,8 @@ struct ChatDetailView: View {
 
                 HStack(spacing: 10) {
                     Button(role: .destructive) {
-                        store.deny(approval, reason: "Denied from Handrail.")
+                        deniedApproval = approval
+                        denialReason = ""
                     } label: {
                         Text("Deny")
                             .frame(maxWidth: .infinity)
@@ -251,16 +304,30 @@ struct ChatDetailView: View {
                     .buttonStyle(.bordered)
 
                     Button {
-                        store.approve(approval)
+                        approve(approval)
                     } label: {
                         Text("Approve")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.purple)
+                    .tint(.orange)
                 }
             }
         }
+    }
+
+    private func approve(_ approval: ApprovalRequest) {
+        approvalResultText = "Approved"
+        guard !store.usesStaticPreviewData else { return }
+        store.approve(approval)
+    }
+
+    private func deny(_ approval: ApprovalRequest, reason: String) {
+        approvalResultText = "Denied"
+        deniedApproval = nil
+        denialReason = ""
+        guard !store.usesStaticPreviewData else { return }
+        store.deny(approval, reason: reason.isEmpty ? "Denied from Handrail." : reason)
     }
 
     private func attentionDetail(for chat: CodexChat) -> String {
@@ -299,34 +366,32 @@ struct ChatDetailView: View {
                 Image(systemName: "paperplane.fill")
             }
             .buttonStyle(.borderedProminent)
-            .tint(.purple)
-            .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .tint(.primary)
+            .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || pendingSendInput != nil)
         }
         .padding()
         .background(Color.black)
     }
 
-    private var followUpComposer: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            TextField("Ask for follow-up changes", text: $input, axis: .vertical)
-                .lineLimit(2...5)
-                .textFieldStyle(.roundedBorder)
-                .focused($isComposerFocused)
-            Button {
-                let prompt = input.trimmingCharacters(in: .whitespacesAndNewlines)
-                pendingContinuePrompt = prompt
-                store.continueChat(chatId: chatId, prompt: prompt)
-                dismissComposerKeyboard()
-            } label: {
-                Label(pendingContinuePrompt == nil ? "Send" : "Sending to Codex", systemImage: "paperplane.fill")
-                    .frame(maxWidth: .infinity)
+    @ViewBuilder
+    private var sendingInputStatus: some View {
+        if pendingSendInput != nil {
+            HStack(spacing: 10) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("Sending...")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Stop", role: .destructive) {
+                    showsStopConfirmation = true
+                }
+                .font(.caption.weight(.semibold))
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.purple)
-            .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || pendingContinuePrompt != nil)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color.black)
         }
-        .padding()
-        .background(Color.black)
     }
 
     private func readOnlyNotice(_ text: String) -> some View {
@@ -406,6 +471,13 @@ struct ChatDetailView: View {
         }
     }
 
+    private func clearCompletedSendInputIfNeeded() {
+        guard let pendingSendInput else { return }
+        if transcriptText.contains(pendingSendInput) {
+            self.pendingSendInput = nil
+        }
+    }
+
     private func dismissComposerKeyboard() {
         isComposerFocused = false
     }
@@ -414,6 +486,7 @@ struct ChatDetailView: View {
     private func refreshVisibleChatUntilCancelled() async {
         while !Task.isCancelled {
             try? await Task.sleep(nanoseconds: 2_000_000_000)
+            guard !store.usesStaticPreviewData else { continue }
             if store.pairedMachine?.isOnline == true && store.isViewingChat(chatId: chatId) {
                 store.refreshChatDetail(chatId: chatId)
             }
