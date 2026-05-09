@@ -141,14 +141,21 @@ struct PhoneRootRoute: Equatable {
 struct PhoneRootView: View {
     @Binding var route: PhoneRootRoute?
     @State private var path = NavigationPath()
+    @State private var currentChatId: String?
 
     var body: some View {
         NavigationStack(path: $path) {
             ChatsView { chatId in
+                currentChatId = chatId
                 path.append(chatId)
             }
         }
         .tint(.primary)
+        .onChange(of: path.count) { _, count in
+            if count == 0 {
+                currentChatId = nil
+            }
+        }
         .onChange(of: route) { _, route in
             guard let route else { return }
             handle(route)
@@ -156,7 +163,18 @@ struct PhoneRootView: View {
     }
 
     private func handle(_ route: PhoneRootRoute) {
+        guard PhoneRouteNavigationDecision.shouldRoute(currentChatId: currentChatId, routeChatId: route.chatId) else {
+            return
+        }
+        path = NavigationPath()
         path.append(route.chatId)
+        currentChatId = route.chatId
+    }
+}
+
+enum PhoneRouteNavigationDecision {
+    static func shouldRoute(currentChatId: String?, routeChatId: String) -> Bool {
+        currentChatId != routeChatId
     }
 }
 

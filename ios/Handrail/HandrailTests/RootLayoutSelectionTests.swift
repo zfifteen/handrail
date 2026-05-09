@@ -98,3 +98,14 @@ final class NewChatBranchSelectionTests: XCTestCase {
         XCTAssertFalse(NewChatBranchSelection.canSelectBranch(projectPath: ""))
     }
 }
+
+final class PhoneRouteNavigationDecisionTests: XCTestCase {
+    func testRepeatedNotificationForCurrentChatDoesNotRouteAgain() {
+        XCTAssertFalse(PhoneRouteNavigationDecision.shouldRoute(currentChatId: "chat-a", routeChatId: "chat-a"))
+    }
+
+    func testDifferentNotificationChatRoutes() {
+        XCTAssertTrue(PhoneRouteNavigationDecision.shouldRoute(currentChatId: "chat-a", routeChatId: "chat-b"))
+        XCTAssertTrue(PhoneRouteNavigationDecision.shouldRoute(currentChatId: nil, routeChatId: "chat-a"))
+    }
+}
