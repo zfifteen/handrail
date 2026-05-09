@@ -153,3 +153,13 @@ final class NotificationIdentifierTests: XCTestCase {
         )
     }
 }
+
+final class HandrailLocalNotificationPolicyTests: XCTestCase {
+    func testSchedulesLocalNotificationForUnseenChat() {
+        XCTAssertTrue(HandrailLocalNotificationPolicy.shouldSchedule(isViewingChat: false))
+    }
+
+    func testSuppressesLocalNotificationForCurrentlyViewedChat() {
+        XCTAssertFalse(HandrailLocalNotificationPolicy.shouldSchedule(isViewingChat: true))
+    }
+}

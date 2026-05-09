@@ -214,14 +214,19 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
 
     @MainActor
     private func schedule(_ content: UNMutableNotificationContent, identifier: String) {
-        guard UIApplication.shared.applicationState == .active else { return }
         let chatId = content.userInfo["chatId"] as? String
         if let chatId,
-           store?.isViewingChat(chatId: chatId) == true {
+           !HandrailLocalNotificationPolicy.shouldSchedule(isViewingChat: store?.isViewingChat(chatId: chatId) == true) {
             return
         }
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
+    }
+}
+
+enum HandrailLocalNotificationPolicy {
+    static func shouldSchedule(isViewingChat: Bool) -> Bool {
+        !isViewingChat
     }
 }
 
