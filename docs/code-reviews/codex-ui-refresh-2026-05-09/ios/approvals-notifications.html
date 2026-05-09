@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iOS Approvals and Notifications</title>
+<link rel="stylesheet" href="../assets/review.css">
+</head>
+<body>
+<nav class="topnav"><a href="../index.html">Overview</a><a href="../findings/index.html">Findings</a><a href="../ios/index.html">iOS</a><a href="../cli/index.html">CLI</a><a href="../evidence/index.html">Evidence</a><a href="../tests/index.html">Tests</a><a href="../appendix/file-coverage.html">Appendix</a></nav>
+<header class="hero">
+  <div><p class="eyebrow">Handrail code review</p><h1>iOS Approvals and Notifications</h1></div>
+  <div class="status status-open">Review status: findings open</div>
+</header>
+<main>
+<section class="legend"><span class="pill p0">P0 Critical</span><span class="pill p1">P1 High</span><span class="pill p2">P2 Medium</span><span class="pill p3">P3 Low</span><span class="pill info">Known blocker</span></section>
+<article class="finding p1" id="HR-CR-20260509-002">
+    <div class="finding-head"><span class="pill p1">P1</span><h3>HR-CR-20260509-002: Approval identity is not consistently scoped by chat on iOS</h3><span class="area">iOS</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail/Models/HandrailModels.swift#L165">ios/Handrail/Handrail/Models/HandrailModels.swift:165</a> <a class="source" href="../../../../ios/Handrail/Handrail/Stores/HandrailStore.swift#L300">ios/Handrail/Handrail/Stores/HandrailStore.swift:300</a> <a class="source" href="../../../../ios/Handrail/Handrail/Stores/HandrailStore.swift#L311">ios/Handrail/Handrail/Stores/HandrailStore.swift:311</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/IPad/IPadApprovalReviewWorkspaceView.swift#L162">ios/Handrail/Handrail/Views/IPad/IPadApprovalReviewWorkspaceView.swift:162</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>ApprovalRequest.id is approvalId alone and notification approval/deny cleanup clears latestApproval by matching approvalId without also matching chatId.</td></tr>
+      <tr><th>Observable consequence</th><td>If Codex Desktop reuses request identifiers across chats, an action on one chat can clear or render the pending approval for another chat. This violates the branch goal of chat-scoped approval routing.</td></tr>
+      <tr><th>Minimal remediation</th><td>Use a composite approval identity everywhere on iOS, for example &quot;chatId
+approvalId&quot;, and require both chatId and approvalId when clearing latestApproval or resolving selected approvals.</td></tr>
+      <tr><th>Verification</th><td>Add iOS tests with two ApprovalRequest values sharing approvalId and different chatId, then assert notification approval/deny and selection logic affect only the matching chat.</td></tr>
+    </tbody></table>
+  </article><article class="finding p1" id="HR-CR-20260509-003">
+    <div class="finding-head"><span class="pill p1">P1</span><h3>HR-CR-20260509-003: Local notifications are suppressed when the app is backgrounded</h3><span class="area">iOS</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift#L215">ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift:215</a> <a class="source" href="../../../../ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift#L217">ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift:217</a> <a class="source" href="../../../../ios/Handrail/Handrail/Stores/HandrailStore.swift#L391">ios/Handrail/Handrail/Stores/HandrailStore.swift:391</a> <a class="source" href="../../../../ios/Handrail/Handrail/Stores/HandrailStore.swift#L425">ios/Handrail/Handrail/Stores/HandrailStore.swift:425</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>schedule returns unless UIApplication.shared.applicationState is .active. That condition prevents local notification requests from being added while the app is inactive or backgrounded.</td></tr>
+      <tr><th>Observable consequence</th><td>The user is least likely to receive local approval, input-required, failed, or completed notifications when they most need them: while Handrail is not foregrounded.</td></tr>
+      <tr><th>Minimal remediation</th><td>Invert the decision model: suppress in-app banners only for the currently viewed chat, but allow UNUserNotificationCenter scheduling when the app is backgrounded. Keep remote-push policy separate from local notification scheduling.</td></tr>
+      <tr><th>Verification</th><td>Add a notification coordinator test seam or integration harness that simulates background state and verifies a notification request is still enqueued for an unseen chat.</td></tr>
+    </tbody></table>
+  </article><h2>Approval Identity</h2><svg class="diagram" viewBox="0 0 980 150" role="img" aria-label="flow diagram">
+  <g><rect x="20" y="45" width="150" height="54" rx="10"></rect><text x="95" y="77" text-anchor="middle">chatId</text></g><path d="M170 72 L200 72"/><path d="M194 65 L200 72 L194 79"/><g><rect x="208" y="45" width="150" height="54" rx="10"></rect><text x="283" y="77" text-anchor="middle">approvalId</text></g><path d="M358 72 L388 72"/><path d="M382 65 L388 72 L382 79"/><g><rect x="396" y="45" width="150" height="54" rx="10"></rect><text x="471" y="77" text-anchor="middle">composite id</text></g><path d="M546 72 L576 72"/><path d="M570 65 L576 72 L570 79"/><g><rect x="584" y="45" width="150" height="54" rx="10"></rect><text x="659" y="77" text-anchor="middle">decision</text></g><path d="M734 72 L764 72"/><path d="M758 65 L764 72 L758 79"/><g><rect x="772" y="45" width="150" height="54" rx="10"></rect><text x="847" y="77" text-anchor="middle">clear matching approval</text></g>
+  </svg>
+</main>
+<footer>Generated 2026-05-09 for branch <code>codex/ui-refresh</code>. Scope: all tracked files, with <code>main...HEAD</code> as branch-change lens.</footer>
+</body>
+</html>

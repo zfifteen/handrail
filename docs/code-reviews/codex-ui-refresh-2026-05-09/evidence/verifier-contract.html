@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verifier Contract</title>
+<link rel="stylesheet" href="../assets/review.css">
+</head>
+<body>
+<nav class="topnav"><a href="../index.html">Overview</a><a href="../findings/index.html">Findings</a><a href="../ios/index.html">iOS</a><a href="../cli/index.html">CLI</a><a href="../evidence/index.html">Evidence</a><a href="../tests/index.html">Tests</a><a href="../appendix/file-coverage.html">Appendix</a></nav>
+<header class="hero">
+  <div><p class="eyebrow">Handrail code review</p><h1>Verifier Contract</h1></div>
+  <div class="status status-open">Review status: findings open</div>
+</header>
+<main>
+<section class="legend"><span class="pill p0">P0 Critical</span><span class="pill p1">P1 High</span><span class="pill p2">P2 Medium</span><span class="pill p3">P3 Low</span><span class="pill info">Known blocker</span></section>
+<article class="finding p2" id="HR-CR-20260509-007">
+    <div class="finding-head"><span class="pill p2">P2</span><h3>HR-CR-20260509-007: Evidence verifier depends on machine-local absolute XcodeBuildMCP log paths</h3><span class="area">Evidence</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../docs/design/phase-1-codex-clone-mockups/verify-evidence.sh#L16">docs/design/phase-1-codex-clone-mockups/verify-evidence.sh:16</a> <a class="source" href="../../../../docs/design/phase-1-codex-clone-mockups/verify-evidence.sh#L17">docs/design/phase-1-codex-clone-mockups/verify-evidence.sh:17</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>verify-evidence.sh points to absolute logs under /Users/velocityworks/Library/Developer/XcodeBuildMCP instead of committed or repo-relative evidence logs.</td></tr>
+      <tr><th>Observable consequence</th><td>A reviewer or CI job can fail the evidence gate because the author machine log path is absent, even when the committed implementation and screenshots are unchanged.</td></tr>
+      <tr><th>Minimal remediation</th><td>Record the relevant build/test logs under test-artifacts or docs/design and have verify-evidence.sh read repo-relative paths.</td></tr>
+      <tr><th>Verification</th><td>Run the verifier from a clean clone or CI checkout and assert it reaches only the known desktop-reference blockers.</td></tr>
+    </tbody></table>
+  </article><h2>Current Gate State</h2><table class="data"><thead><tr><th>Check</th><th>Command</th><th>Result</th><th>Evidence</th></tr></thead><tbody><tr><td>CLI tests</td><td><code>cd cli &amp;&amp; npm test</code></td><td><span class="pill pass">PASS</span></td><td>52 tests passed, 0 failed.</td></tr><tr><td>iOS simulator tests</td><td><code>xcodebuild test -project ios/Handrail/Handrail.xcodeproj -scheme Handrail -destination &#39;platform=iOS Simulator,name=iPhone 17&#39;</code></td><td><span class="pill pass">PASS</span></td><td>TEST SUCCEEDED on iPhone 17 simulator.</td></tr><tr><td>Desktop reference check</td><td><code>docs/design/phase-1-codex-clone-mockups/check-desktop-references.sh</code></td><td><span class="pill info">EXPECTED BLOCKED</span></td><td>Exited 1 because all eleven required desktop reference PNGs are absent.</td></tr><tr><td>Evidence verifier</td><td><code>docs/design/phase-1-codex-clone-mockups/verify-evidence.sh</code></td><td><span class="pill info">EXPECTED BLOCKED</span></td><td>Exited 1 on missing desktop references, missing comparison review, clone-matrix PASS gaps, and manifest Captured gaps.</td></tr></tbody></table>
+</main>
+<footer>Generated 2026-05-09 for branch <code>codex/ui-refresh</code>. Scope: all tracked files, with <code>main...HEAD</code> as branch-change lens.</footer>
+</body>
+</html>

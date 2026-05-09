@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Findings Index</title>
+<link rel="stylesheet" href="../assets/review.css">
+</head>
+<body>
+<nav class="topnav"><a href="../index.html">Overview</a><a href="../findings/index.html">Findings</a><a href="../ios/index.html">iOS</a><a href="../cli/index.html">CLI</a><a href="../evidence/index.html">Evidence</a><a href="../tests/index.html">Tests</a><a href="../appendix/file-coverage.html">Appendix</a></nav>
+<header class="hero">
+  <div><p class="eyebrow">Handrail code review</p><h1>Findings Index</h1></div>
+  <div class="status status-open">Review status: findings open</div>
+</header>
+<main>
+<section class="legend"><span class="pill p0">P0 Critical</span><span class="pill p1">P1 High</span><span class="pill p2">P2 Medium</span><span class="pill p3">P3 Low</span><span class="pill info">Known blocker</span></section>
+<h2>All Findings</h2><article class="finding p1" id="HR-CR-20260509-001">
+    <div class="finding-head"><span class="pill p1">P1</span><h3>HR-CR-20260509-001: iPhone follow-up composer permits duplicate submissions while one is pending</h3><span class="area">iOS</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L31">ios/Handrail/Handrail/Views/ChatDetailView.swift:31</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L355">ios/Handrail/Handrail/Views/ChatDetailView.swift:355</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L370">ios/Handrail/Handrail/Views/ChatDetailView.swift:370</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L466">ios/Handrail/Handrail/Views/ChatDetailView.swift:466</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>The phone follow-up path sets pendingContinuePrompt, but the shared composer disables only when pendingSendInput is non-nil. A completed chat can therefore send the same follow-up repeatedly before the transcript echoes the prompt.</td></tr>
+      <tr><th>Observable consequence</th><td>Codex Desktop can receive duplicate follow-up turns, causing repeated work, confusing transcript state, and extra approval or stop events tied to the same user intent.</td></tr>
+      <tr><th>Minimal remediation</th><td>Disable the shared composer on the relevant pending state, or pass an explicit isPending value into composer so follow-up uses pendingContinuePrompt and direct-input uses pendingSendInput.</td></tr>
+      <tr><th>Verification</th><td>Add a Swift unit or view-model test that sends a follow-up, asserts the send control disables while pendingContinuePrompt is set, and re-enables after the transcript contains the prompt or an error arrives.</td></tr>
+    </tbody></table>
+  </article>
+<article class="finding p1" id="HR-CR-20260509-002">
+    <div class="finding-head"><span class="pill p1">P1</span><h3>HR-CR-20260509-002: Approval identity is not consistently scoped by chat on iOS</h3><span class="area">iOS</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail/Models/HandrailModels.swift#L165">ios/Handrail/Handrail/Models/HandrailModels.swift:165</a> <a class="source" href="../../../../ios/Handrail/Handrail/Stores/HandrailStore.swift#L300">ios/Handrail/Handrail/Stores/HandrailStore.swift:300</a> <a class="source" href="../../../../ios/Handrail/Handrail/Stores/HandrailStore.swift#L311">ios/Handrail/Handrail/Stores/HandrailStore.swift:311</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/IPad/IPadApprovalReviewWorkspaceView.swift#L162">ios/Handrail/Handrail/Views/IPad/IPadApprovalReviewWorkspaceView.swift:162</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>ApprovalRequest.id is approvalId alone and notification approval/deny cleanup clears latestApproval by matching approvalId without also matching chatId.</td></tr>
+      <tr><th>Observable consequence</th><td>If Codex Desktop reuses request identifiers across chats, an action on one chat can clear or render the pending approval for another chat. This violates the branch goal of chat-scoped approval routing.</td></tr>
+      <tr><th>Minimal remediation</th><td>Use a composite approval identity everywhere on iOS, for example &quot;chatId
+approvalId&quot;, and require both chatId and approvalId when clearing latestApproval or resolving selected approvals.</td></tr>
+      <tr><th>Verification</th><td>Add iOS tests with two ApprovalRequest values sharing approvalId and different chatId, then assert notification approval/deny and selection logic affect only the matching chat.</td></tr>
+    </tbody></table>
+  </article>
+<article class="finding p1" id="HR-CR-20260509-003">
+    <div class="finding-head"><span class="pill p1">P1</span><h3>HR-CR-20260509-003: Local notifications are suppressed when the app is backgrounded</h3><span class="area">iOS</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift#L215">ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift:215</a> <a class="source" href="../../../../ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift#L217">ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift:217</a> <a class="source" href="../../../../ios/Handrail/Handrail/Stores/HandrailStore.swift#L391">ios/Handrail/Handrail/Stores/HandrailStore.swift:391</a> <a class="source" href="../../../../ios/Handrail/Handrail/Stores/HandrailStore.swift#L425">ios/Handrail/Handrail/Stores/HandrailStore.swift:425</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>schedule returns unless UIApplication.shared.applicationState is .active. That condition prevents local notification requests from being added while the app is inactive or backgrounded.</td></tr>
+      <tr><th>Observable consequence</th><td>The user is least likely to receive local approval, input-required, failed, or completed notifications when they most need them: while Handrail is not foregrounded.</td></tr>
+      <tr><th>Minimal remediation</th><td>Invert the decision model: suppress in-app banners only for the currently viewed chat, but allow UNUserNotificationCenter scheduling when the app is backgrounded. Keep remote-push policy separate from local notification scheduling.</td></tr>
+      <tr><th>Verification</th><td>Add a notification coordinator test seam or integration harness that simulates background state and verifies a notification request is still enqueued for an unseen chat.</td></tr>
+    </tbody></table>
+  </article>
+<article class="finding p1" id="HR-CR-20260509-004">
+    <div class="finding-head"><span class="pill p1">P1</span><h3>HR-CR-20260509-004: New approval panels can inherit stale Approved or Denied state from a previous approval</h3><span class="area">iOS</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L12">ios/Handrail/Handrail/Views/ChatDetailView.swift:12</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L253">ios/Handrail/Handrail/Views/ChatDetailView.swift:253</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L264">ios/Handrail/Handrail/Views/ChatDetailView.swift:264</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L319">ios/Handrail/Handrail/Views/ChatDetailView.swift:319</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>approvalResultText is a view-wide string, not keyed to the current approval. Once set to Approved or Denied, the next approval rendered by the same ChatDetailView can display that old result before the user acts.</td></tr>
+      <tr><th>Observable consequence</th><td>A fresh approval can appear already approved or denied, which is a high-risk supervisory error for a local remote-control app.</td></tr>
+      <tr><th>Minimal remediation</th><td>Store the result with the composite approval identity and display it only when the visible approval matches. Clear the local result when latestApproval changes to a different chatId/approvalId.</td></tr>
+      <tr><th>Verification</th><td>Add a test or preview-state check that renders approval A, approves it, then renders approval B in the same chat view and asserts no prior result label is visible.</td></tr>
+    </tbody></table>
+  </article>
+<article class="finding p2" id="HR-CR-20260509-005">
+    <div class="finding-head"><span class="pill p2">P2</span><h3>HR-CR-20260509-005: Missing Codex logs database can break the entire chat list</h3><span class="area">CLI</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../cli/src/codexSessions.ts#L74">cli/src/codexSessions.ts:74</a> <a class="source" href="../../../../cli/src/codexSessions.ts#L121">cli/src/codexSessions.ts:121</a> <a class="source" href="../../../../cli/src/codexSessions.ts#L126">cli/src/codexSessions.ts:126</a> <a class="source" href="../../../../cli/src/codexSessions.ts#L150">cli/src/codexSessions.ts:150</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>listCodexChats always calls readDesktopThreadStatuses, and readDesktopThreadStatuses awaits access to ~/.codex/logs_2.sqlite without the ENOENT guard used for state_5.sqlite.</td></tr>
+      <tr><th>Observable consequence</th><td>A user with thread state but no logs DB, a migrated Codex install, or a temporarily unavailable logs file gets no chat list instead of visible chats with idle/unknown statuses.</td></tr>
+      <tr><th>Minimal remediation</th><td>Catch missing logs_2.sqlite and return an empty status map. Keep malformed SQLite/JSON errors explicit so corruption still fails loudly.</td></tr>
+      <tr><th>Verification</th><td>Add a CLI test where readDesktopThreads has rows but logs_2.sqlite is absent, expecting list output with status idle rather than an exception.</td></tr>
+    </tbody></table>
+  </article>
+<article class="finding p2" id="HR-CR-20260509-006">
+    <div class="finding-head"><span class="pill p2">P2</span><h3>HR-CR-20260509-006: Branch selection is disabled for non-default projects in the iPhone New Chat flow</h3><span class="area">iOS</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatsView.swift#L605">ios/Handrail/Handrail/Views/ChatsView.swift:605</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatsView.swift#L749">ios/Handrail/Handrail/Views/ChatsView.swift:749</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/ChatsView.swift#L770">ios/Handrail/Handrail/Views/ChatsView.swift:770</a> <a class="source" href="../../../../cli/src/newChatOptions.ts#L58">cli/src/newChatOptions.ts:58</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>canSelectBranch requires the selected project to equal options.defaultProjectId, even when the selected project has a path. For any other project, the branch field is hidden and payload.branch is forced to an empty string.</td></tr>
+      <tr><th>Observable consequence</th><td>Starting a chat in a non-default project silently uses whatever branch is already checked out there. The user cannot choose an existing branch for that project from iPhone.</td></tr>
+      <tr><th>Minimal remediation</th><td>Permit branch selection for any selected project with a path, or explicitly label branch choice as default-project-only and refresh branch options when the selected project changes.</td></tr>
+      <tr><th>Verification</th><td>Add a NewChatView logic test with two projects where the second project has a path and assert branch selection remains available or the UI explicitly reports why it is unavailable.</td></tr>
+    </tbody></table>
+  </article>
+<article class="finding p2" id="HR-CR-20260509-007">
+    <div class="finding-head"><span class="pill p2">P2</span><h3>HR-CR-20260509-007: Evidence verifier depends on machine-local absolute XcodeBuildMCP log paths</h3><span class="area">Evidence</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../docs/design/phase-1-codex-clone-mockups/verify-evidence.sh#L16">docs/design/phase-1-codex-clone-mockups/verify-evidence.sh:16</a> <a class="source" href="../../../../docs/design/phase-1-codex-clone-mockups/verify-evidence.sh#L17">docs/design/phase-1-codex-clone-mockups/verify-evidence.sh:17</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>verify-evidence.sh points to absolute logs under /Users/velocityworks/Library/Developer/XcodeBuildMCP instead of committed or repo-relative evidence logs.</td></tr>
+      <tr><th>Observable consequence</th><td>A reviewer or CI job can fail the evidence gate because the author machine log path is absent, even when the committed implementation and screenshots are unchanged.</td></tr>
+      <tr><th>Minimal remediation</th><td>Record the relevant build/test logs under test-artifacts or docs/design and have verify-evidence.sh read repo-relative paths.</td></tr>
+      <tr><th>Verification</th><td>Run the verifier from a clean clone or CI checkout and assert it reaches only the known desktop-reference blockers.</td></tr>
+    </tbody></table>
+  </article>
+<article class="finding p3" id="HR-CR-20260509-008">
+    <div class="finding-head"><span class="pill p3">P3</span><h3>HR-CR-20260509-008: Phone notification routes append duplicate chat-detail destinations</h3><span class="area">iOS</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail/Views/RootView.swift#L42">ios/Handrail/Handrail/Views/RootView.swift:42</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/RootView.swift#L99">ios/Handrail/Handrail/Views/RootView.swift:99</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/RootView.swift#L152">ios/Handrail/Handrail/Views/RootView.swift:152</a> <a class="source" href="../../../../ios/Handrail/Handrail/Views/RootView.swift#L158">ios/Handrail/Handrail/Views/RootView.swift:158</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>Every phone route event appends chatId to NavigationPath without checking whether that chat is already the top destination.</td></tr>
+      <tr><th>Observable consequence</th><td>Repeated taps on a notification for the same chat can build a stack of identical ChatDetailView instances. Back navigation then appears to revisit the same screen repeatedly.</td></tr>
+      <tr><th>Minimal remediation</th><td>Track the current phone chat route or reset/replace the path before appending notification-driven chat destinations.</td></tr>
+      <tr><th>Verification</th><td>Add a RootView route test that sends the same PhoneRootRoute twice and asserts only one detail destination is present.</td></tr>
+    </tbody></table>
+  </article>
+<article class="finding p3" id="HR-CR-20260509-009">
+    <div class="finding-head"><span class="pill p3">P3</span><h3>HR-CR-20260509-009: Tracked Xcode user state makes review noise and machine-local UI state part of source history</h3><span class="area">Product Invariant</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail.xcodeproj/project.xcworkspace/xcuserdata/velocityworks.xcuserdatad/UserInterfaceState.xcuserstate#L1">ios/Handrail/Handrail.xcodeproj/project.xcworkspace/xcuserdata/velocityworks.xcuserdatad/UserInterfaceState.xcuserstate:1</a> <a class="source" href="../../../../.gitignore#L7">.gitignore:7</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>The repository tracks UserInterfaceState.xcuserstate even though .gitignore excludes *.xcuserdata/. This file is machine-local Xcode UI state, not product logic or evidence.</td></tr>
+      <tr><th>Observable consequence</th><td>Future unrelated Xcode window/layout changes can appear as source changes and distract code review from logical behavior.</td></tr>
+      <tr><th>Minimal remediation</th><td>Remove the tracked xcuserstate file in a separate cleanup commit and rely on the existing ignore rule to keep it out.</td></tr>
+      <tr><th>Verification</th><td>Run git status after opening the project in Xcode and confirm no xcuserdata changes appear.</td></tr>
+    </tbody></table>
+  </article>
+</main>
+<footer>Generated 2026-05-09 for branch <code>codex/ui-refresh</code>. Scope: all tracked files, with <code>main...HEAD</code> as branch-change lens.</footer>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docs and Product Invariants</title>
+<link rel="stylesheet" href="../assets/review.css">
+</head>
+<body>
+<nav class="topnav"><a href="../index.html">Overview</a><a href="../findings/index.html">Findings</a><a href="../ios/index.html">iOS</a><a href="../cli/index.html">CLI</a><a href="../evidence/index.html">Evidence</a><a href="../tests/index.html">Tests</a><a href="../appendix/file-coverage.html">Appendix</a></nav>
+<header class="hero">
+  <div><p class="eyebrow">Handrail code review</p><h1>Docs and Product Invariants</h1></div>
+  <div class="status status-open">Review status: findings open</div>
+</header>
+<main>
+<section class="legend"><span class="pill p0">P0 Critical</span><span class="pill p1">P1 High</span><span class="pill p2">P2 Medium</span><span class="pill p3">P3 Low</span><span class="pill info">Known blocker</span></section>
+<article class="finding p3" id="HR-CR-20260509-009">
+    <div class="finding-head"><span class="pill p3">P3</span><h3>HR-CR-20260509-009: Tracked Xcode user state makes review noise and machine-local UI state part of source history</h3><span class="area">Product Invariant</span><span class="state">Open</span></div>
+    <div class="refs"><a class="source" href="../../../../ios/Handrail/Handrail.xcodeproj/project.xcworkspace/xcuserdata/velocityworks.xcuserdatad/UserInterfaceState.xcuserstate#L1">ios/Handrail/Handrail.xcodeproj/project.xcworkspace/xcuserdata/velocityworks.xcuserdatad/UserInterfaceState.xcuserstate:1</a> <a class="source" href="../../../../.gitignore#L7">.gitignore:7</a></div>
+    <table class="finding-table"><tbody>
+      <tr><th>Logical failure</th><td>The repository tracks UserInterfaceState.xcuserstate even though .gitignore excludes *.xcuserdata/. This file is machine-local Xcode UI state, not product logic or evidence.</td></tr>
+      <tr><th>Observable consequence</th><td>Future unrelated Xcode window/layout changes can appear as source changes and distract code review from logical behavior.</td></tr>
+      <tr><th>Minimal remediation</th><td>Remove the tracked xcuserstate file in a separate cleanup commit and rely on the existing ignore rule to keep it out.</td></tr>
+      <tr><th>Verification</th><td>Run git status after opening the project in Xcode and confirm no xcuserdata changes appear.</td></tr>
+    </tbody></table>
+  </article><div class="callout"><b>Invariant result:</b> The branch preserves Handrail as a local-first Codex Desktop remote. No cloud relay, account, payment, generic terminal, SSH, non-Codex agent, multi-agent, or direct file-editing implementation was found.</div>
+</main>
+<footer>Generated 2026-05-09 for branch <code>codex/ui-refresh</code>. Scope: all tracked files, with <code>main...HEAD</code> as branch-change lens.</footer>
+</body>
+</html>

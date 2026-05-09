@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coverage Gaps</title>
+<link rel="stylesheet" href="../assets/review.css">
+</head>
+<body>
+<nav class="topnav"><a href="../index.html">Overview</a><a href="../findings/index.html">Findings</a><a href="../ios/index.html">iOS</a><a href="../cli/index.html">CLI</a><a href="../evidence/index.html">Evidence</a><a href="../tests/index.html">Tests</a><a href="../appendix/file-coverage.html">Appendix</a></nav>
+<header class="hero">
+  <div><p class="eyebrow">Handrail code review</p><h1>Coverage Gaps</h1></div>
+  <div class="status status-open">Review status: findings open</div>
+</header>
+<main>
+<section class="legend"><span class="pill p0">P0 Critical</span><span class="pill p1">P1 High</span><span class="pill p2">P2 Medium</span><span class="pill p3">P3 Low</span><span class="pill info">Known blocker</span></section>
+<table class="data"><thead><tr><th>Gap</th><th>Recommended test</th></tr></thead><tbody><tr><td><a href="../findings/index.html#HR-CR-20260509-001">HR-CR-20260509-001</a> iPhone follow-up composer permits duplicate submissions while one is pending</td><td>Add a Swift unit or view-model test that sends a follow-up, asserts the send control disables while pendingContinuePrompt is set, and re-enables after the transcript contains the prompt or an error arrives.</td></tr><tr><td><a href="../findings/index.html#HR-CR-20260509-002">HR-CR-20260509-002</a> Approval identity is not consistently scoped by chat on iOS</td><td>Add iOS tests with two ApprovalRequest values sharing approvalId and different chatId, then assert notification approval/deny and selection logic affect only the matching chat.</td></tr><tr><td><a href="../findings/index.html#HR-CR-20260509-003">HR-CR-20260509-003</a> Local notifications are suppressed when the app is backgrounded</td><td>Add a notification coordinator test seam or integration harness that simulates background state and verifies a notification request is still enqueued for an unseen chat.</td></tr><tr><td><a href="../findings/index.html#HR-CR-20260509-004">HR-CR-20260509-004</a> New approval panels can inherit stale Approved or Denied state from a previous approval</td><td>Add a test or preview-state check that renders approval A, approves it, then renders approval B in the same chat view and asserts no prior result label is visible.</td></tr><tr><td><a href="../findings/index.html#HR-CR-20260509-005">HR-CR-20260509-005</a> Missing Codex logs database can break the entire chat list</td><td>Add a CLI test where readDesktopThreads has rows but logs_2.sqlite is absent, expecting list output with status idle rather than an exception.</td></tr><tr><td><a href="../findings/index.html#HR-CR-20260509-006">HR-CR-20260509-006</a> Branch selection is disabled for non-default projects in the iPhone New Chat flow</td><td>Add a NewChatView logic test with two projects where the second project has a path and assert branch selection remains available or the UI explicitly reports why it is unavailable.</td></tr><tr><td><a href="../findings/index.html#HR-CR-20260509-007">HR-CR-20260509-007</a> Evidence verifier depends on machine-local absolute XcodeBuildMCP log paths</td><td>Run the verifier from a clean clone or CI checkout and assert it reaches only the known desktop-reference blockers.</td></tr><tr><td><a href="../findings/index.html#HR-CR-20260509-008">HR-CR-20260509-008</a> Phone notification routes append duplicate chat-detail destinations</td><td>Add a RootView route test that sends the same PhoneRootRoute twice and asserts only one detail destination is present.</td></tr><tr><td><a href="../findings/index.html#HR-CR-20260509-009">HR-CR-20260509-009</a> Tracked Xcode user state makes review noise and machine-local UI state part of source history</td><td>Run git status after opening the project in Xcode and confirm no xcuserdata changes appear.</td></tr></tbody></table>
+</main>
+<footer>Generated 2026-05-09 for branch <code>codex/ui-refresh</code>. Scope: all tracked files, with <code>main...HEAD</code> as branch-change lens.</footer>
+</body>
+</html>

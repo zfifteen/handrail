@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Executed Checks</title>
+<link rel="stylesheet" href="../assets/review.css">
+</head>
+<body>
+<nav class="topnav"><a href="../index.html">Overview</a><a href="../findings/index.html">Findings</a><a href="../ios/index.html">iOS</a><a href="../cli/index.html">CLI</a><a href="../evidence/index.html">Evidence</a><a href="../tests/index.html">Tests</a><a href="../appendix/file-coverage.html">Appendix</a></nav>
+<header class="hero">
+  <div><p class="eyebrow">Handrail code review</p><h1>Executed Checks</h1></div>
+  <div class="status status-ok">Review status: checks executed</div>
+</header>
+<main>
+<section class="legend"><span class="pill p0">P0 Critical</span><span class="pill p1">P1 High</span><span class="pill p2">P2 Medium</span><span class="pill p3">P3 Low</span><span class="pill info">Known blocker</span></section>
+<table class="data"><thead><tr><th>Check</th><th>Command</th><th>Result</th><th>Evidence</th></tr></thead><tbody><tr><td>CLI tests</td><td><code>cd cli &amp;&amp; npm test</code></td><td><span class="pill pass">PASS</span></td><td>52 tests passed, 0 failed.</td></tr><tr><td>iOS simulator tests</td><td><code>xcodebuild test -project ios/Handrail/Handrail.xcodeproj -scheme Handrail -destination &#39;platform=iOS Simulator,name=iPhone 17&#39;</code></td><td><span class="pill pass">PASS</span></td><td>TEST SUCCEEDED on iPhone 17 simulator.</td></tr><tr><td>Desktop reference check</td><td><code>docs/design/phase-1-codex-clone-mockups/check-desktop-references.sh</code></td><td><span class="pill info">EXPECTED BLOCKED</span></td><td>Exited 1 because all eleven required desktop reference PNGs are absent.</td></tr><tr><td>Evidence verifier</td><td><code>docs/design/phase-1-codex-clone-mockups/verify-evidence.sh</code></td><td><span class="pill info">EXPECTED BLOCKED</span></td><td>Exited 1 on missing desktop references, missing comparison review, clone-matrix PASS gaps, and manifest Captured gaps.</td></tr></tbody></table>
+</main>
+<footer>Generated 2026-05-09 for branch <code>codex/ui-refresh</code>. Scope: all tracked files, with <code>main...HEAD</code> as branch-change lens.</footer>
+</body>
+</html>

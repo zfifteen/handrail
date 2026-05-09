@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Executive Dashboard</title>
+<link rel="stylesheet" href="assets/review.css">
+</head>
+<body>
+<nav class="topnav"><a href="index.html">Overview</a><a href="findings/index.html">Findings</a><a href="ios/index.html">iOS</a><a href="cli/index.html">CLI</a><a href="evidence/index.html">Evidence</a><a href="tests/index.html">Tests</a><a href="appendix/file-coverage.html">Appendix</a></nav>
+<header class="hero">
+  <div><p class="eyebrow">Handrail code review</p><h1>Executive Dashboard</h1></div>
+  <div class="status status-open">Review status: findings open</div>
+</header>
+<main>
+<section class="legend"><span class="pill p0">P0 Critical</span><span class="pill p1">P1 High</span><span class="pill p2">P2 Medium</span><span class="pill p3">P3 Low</span><span class="pill info">Known blocker</span></section>
+<section class="grid">
+  <div class="card"><div class="metric">9</div><div>Total findings</div></div>
+  <div class="card"><div class="metric">4</div><div>P1 high-risk logical findings</div></div>
+  <div class="card"><div class="metric">827</div><div>Tracked files inventoried</div></div>
+  <div class="card"><div class="metric">110</div><div>Changed files in main...HEAD</div></div>
+</section>
+<h2>Executive Heatmap</h2><div class="heatmap"><div class="heat-cell level-4"><b>iOS</b><span>6 findings</span></div><div class="heat-cell level-1"><b>CLI</b><span>1 findings</span></div><div class="heat-cell level-1"><b>Evidence</b><span>1 findings</span></div><div class="heat-cell level-0"><b>Docs</b><span>0 findings</span></div><div class="heat-cell level-0"><b>Tests</b><span>0 findings</span></div><div class="heat-cell level-1"><b>Product Invariant</b><span>1 findings</span></div></div>
+<h2>Branch Change Treemap</h2><div class="treemap"><div class="tile" style="width:6%"><b>cli</b><br>2</div><div class="tile" style="width:17.272727272727273%"><b>docs</b><br>19</div><div class="tile" style="width:20%"><b>ios</b><br>22</div><div class="tile" style="width:60.909090909090914%"><b>test-artifacts</b><br>67</div></div>
+<h2>Top Logical Risks</h2><table class="data"><thead><tr><th>ID</th><th>Severity</th><th>Area</th><th>Finding</th><th>Primary reference</th></tr></thead><tbody><tr><td><a href="findings/index.html#HR-CR-20260509-001">HR-CR-20260509-001</a></td><td><span class="pill p1">P1</span></td><td>iOS</td><td>iPhone follow-up composer permits duplicate submissions while one is pending</td><td><a class="source" href="../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L31">ios/Handrail/Handrail/Views/ChatDetailView.swift:31</a></td></tr><tr><td><a href="findings/index.html#HR-CR-20260509-002">HR-CR-20260509-002</a></td><td><span class="pill p1">P1</span></td><td>iOS</td><td>Approval identity is not consistently scoped by chat on iOS</td><td><a class="source" href="../../../ios/Handrail/Handrail/Models/HandrailModels.swift#L165">ios/Handrail/Handrail/Models/HandrailModels.swift:165</a></td></tr><tr><td><a href="findings/index.html#HR-CR-20260509-003">HR-CR-20260509-003</a></td><td><span class="pill p1">P1</span></td><td>iOS</td><td>Local notifications are suppressed when the app is backgrounded</td><td><a class="source" href="../../../ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift#L215">ios/Handrail/Handrail/Utilities/NotificationCoordinator.swift:215</a></td></tr><tr><td><a href="findings/index.html#HR-CR-20260509-004">HR-CR-20260509-004</a></td><td><span class="pill p1">P1</span></td><td>iOS</td><td>New approval panels can inherit stale Approved or Denied state from a previous approval</td><td><a class="source" href="../../../ios/Handrail/Handrail/Views/ChatDetailView.swift#L12">ios/Handrail/Handrail/Views/ChatDetailView.swift:12</a></td></tr></tbody></table>
+<h2>Validation Snapshot</h2><table class="data"><thead><tr><th>Check</th><th>Command</th><th>Result</th><th>Evidence</th></tr></thead><tbody><tr><td>CLI tests</td><td><code>cd cli &amp;&amp; npm test</code></td><td><span class="pill pass">PASS</span></td><td>52 tests passed, 0 failed.</td></tr><tr><td>iOS simulator tests</td><td><code>xcodebuild test -project ios/Handrail/Handrail.xcodeproj -scheme Handrail -destination &#39;platform=iOS Simulator,name=iPhone 17&#39;</code></td><td><span class="pill pass">PASS</span></td><td>TEST SUCCEEDED on iPhone 17 simulator.</td></tr><tr><td>Desktop reference check</td><td><code>docs/design/phase-1-codex-clone-mockups/check-desktop-references.sh</code></td><td><span class="pill info">EXPECTED BLOCKED</span></td><td>Exited 1 because all eleven required desktop reference PNGs are absent.</td></tr><tr><td>Evidence verifier</td><td><code>docs/design/phase-1-codex-clone-mockups/verify-evidence.sh</code></td><td><span class="pill info">EXPECTED BLOCKED</span></td><td>Exited 1 on missing desktop references, missing comparison review, clone-matrix PASS gaps, and manifest Captured gaps.</td></tr></tbody></table>
+<div class="callout"><b>Product invariant check:</b> No product-expansion drift was found in the reviewed changes. The draft PR is correctly still blocked on desktop-reference evidence before final handoff.</div>
+</main>
+<footer>Generated 2026-05-09 for branch <code>codex/ui-refresh</code>. Scope: all tracked files, with <code>main...HEAD</code> as branch-change lens.</footer>
+</body>
+</html>
