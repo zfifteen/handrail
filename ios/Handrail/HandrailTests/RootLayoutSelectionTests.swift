@@ -36,7 +36,7 @@ final class RootLayoutSelectionTests: XCTestCase {
         var selection = IPadWorkspaceSelection(
             selectedSection: .attention,
             selectedChatId: "approval-chat",
-            selectedApprovalId: "approval-fixture"
+            selectedApprovalId: "approval-chat\napproval-fixture"
         )
 
         selection.selectChat(id: "completed-chat")
@@ -50,11 +50,11 @@ final class RootLayoutSelectionTests: XCTestCase {
     func testSelectingApprovalRoutesToAttentionAndKeepsChatContext() {
         var selection = IPadWorkspaceSelection(selectedSection: .dashboard)
 
-        selection.selectApproval(id: "approval-fixture", chatId: "approval-chat")
+        selection.selectApproval(id: "approval-chat\napproval-fixture", chatId: "approval-chat")
 
         XCTAssertEqual(selection.selectedSection, .attention)
         XCTAssertEqual(selection.selectedChatId, "approval-chat")
-        XCTAssertEqual(selection.selectedApprovalId, "approval-fixture")
+        XCTAssertEqual(selection.selectedApprovalId, "approval-chat\napproval-fixture")
         XCTAssertTrue(selection.hasDetailSelection)
     }
 

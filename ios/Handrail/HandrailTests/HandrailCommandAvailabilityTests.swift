@@ -16,7 +16,7 @@ final class HandrailCommandAvailabilityTests: XCTestCase {
 
     func testSelectedApprovalCommandAvailability() {
         let selected = availability(
-            selectedApprovalId: HandrailTestFixtures.approval.approvalId,
+            selectedApprovalId: HandrailTestFixtures.approval.id,
             latestApproval: HandrailTestFixtures.approval
         )
         XCTAssertTrue(selected.canApproveSelectedRequest)
@@ -51,7 +51,7 @@ final class HandrailCommandAvailabilityTests: XCTestCase {
         let commands = HandrailCommandAvailability.resolve(
             pairedMachine: HandrailTestFixtures.pairedOfflineMachine,
             selectedChat: HandrailTestFixtures.runningChat,
-            selectedApprovalId: HandrailTestFixtures.approval.approvalId,
+            selectedApprovalId: HandrailTestFixtures.approval.id,
             latestApproval: HandrailTestFixtures.approval
         )
 
@@ -94,7 +94,7 @@ final class HandrailCommandAvailabilityTests: XCTestCase {
         )
 
         XCTAssertEqual(target.selectedChat?.id, HandrailTestFixtures.waitingForApprovalChat.id)
-        XCTAssertEqual(target.selectedApprovalId, HandrailTestFixtures.approval.approvalId)
+        XCTAssertEqual(target.selectedApprovalId, HandrailTestFixtures.approval.id)
         XCTAssertTrue(target.availability.canApproveSelectedRequest)
         XCTAssertTrue(target.availability.canDenySelectedRequest)
     }
@@ -107,12 +107,12 @@ final class HandrailCommandAvailabilityTests: XCTestCase {
             selection: IPadWorkspaceSelection(
                 selectedSection: .attention,
                 selectedChatId: HandrailTestFixtures.completedChat.id,
-                selectedApprovalId: HandrailTestFixtures.approval.approvalId
+                selectedApprovalId: HandrailTestFixtures.approval.id
             )
         )
 
         XCTAssertEqual(target.selectedChat?.id, HandrailTestFixtures.completedChat.id)
-        XCTAssertEqual(target.selectedApprovalId, HandrailTestFixtures.approval.approvalId)
+        XCTAssertEqual(target.selectedApprovalId, HandrailTestFixtures.approval.id)
         XCTAssertTrue(target.availability.canApproveSelectedRequest)
         XCTAssertTrue(target.availability.canDenySelectedRequest)
     }
@@ -135,6 +135,14 @@ final class HandrailCommandAvailabilityTests: XCTestCase {
 }
 
 final class NotificationIdentifierTests: XCTestCase {
+    func testApprovalRequestIdentityIncludesChatIdAndApprovalId() {
+        let left = ApprovalRequest(chatId: "chat-a", approvalId: "server-request-1", title: "Approval Required", summary: "A", files: [], diff: "")
+        let right = ApprovalRequest(chatId: "chat-b", approvalId: "server-request-1", title: "Approval Required", summary: "B", files: [], diff: "")
+
+        XCTAssertNotEqual(left.id, right.id)
+        XCTAssertEqual(left.id, "chat-a\nserver-request-1")
+    }
+
     func testApprovalNotificationIdentifierUsesChatIdAndApprovalId() {
         XCTAssertEqual(
             approvalNotificationIdentifier(

@@ -103,7 +103,7 @@ struct HandrailCommandAvailability: Hashable {
     ) -> HandrailCommandAvailability {
         let isOnline = pairedMachine?.isOnline == true
         let matchingApprovalIsSelected = selectedApprovalId != nil
-            && selectedApprovalId == latestApproval?.approvalId
+            && selectedApprovalId == latestApproval?.id
 
         return HandrailCommandAvailability(
             canStartNewChat: isOnline,
@@ -134,7 +134,7 @@ struct HandrailCommandTarget: Hashable {
             chats.first { $0.id == chatId }
         }
         let selectedApprovalId = selection.selectedApprovalId
-            ?? (latestApproval?.chatId == selectedChat?.id ? latestApproval?.approvalId : nil)
+            ?? (latestApproval?.chatId == selectedChat?.id ? latestApproval?.id : nil)
         let availability = HandrailCommandAvailability.resolve(
             pairedMachine: pairedMachine,
             selectedChat: selectedChat,

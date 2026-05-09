@@ -399,7 +399,7 @@ struct IPadChatDetailWorkspaceView: View {
         HandrailCommandAvailability.resolve(
             pairedMachine: store.pairedMachine,
             selectedChat: selectedChat,
-            selectedApprovalId: store.latestApproval?.chatId == selectedChat?.id ? store.latestApproval?.approvalId : selection.selectedApprovalId,
+            selectedApprovalId: store.latestApproval?.chatId == selectedChat?.id ? store.latestApproval?.id : selection.selectedApprovalId,
             latestApproval: store.latestApproval
         )
     }

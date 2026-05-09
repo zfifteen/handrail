@@ -122,7 +122,7 @@ struct HandrailCommands: Commands {
     }
 
     private var selectedApproval: ApprovalRequest? {
-        guard target.selectedApprovalId == store.latestApproval?.approvalId else { return nil }
+        guard target.selectedApprovalId == store.latestApproval?.id else { return nil }
         return store.latestApproval
     }
 }

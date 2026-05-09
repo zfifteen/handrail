@@ -161,7 +161,7 @@ struct IPadApprovalReviewWorkspaceView: View {
     private var approval: ApprovalRequest? {
         guard let latestApproval = store.latestApproval else { return nil }
         if let selectedApprovalId = selection.selectedApprovalId {
-            guard selectedApprovalId == latestApproval.approvalId else { return nil }
+            guard selectedApprovalId == latestApproval.id else { return nil }
         }
         return latestApproval
     }
@@ -170,7 +170,7 @@ struct IPadApprovalReviewWorkspaceView: View {
         HandrailCommandAvailability.resolve(
             pairedMachine: store.pairedMachine,
             selectedChat: store.chat(id: approval.chatId),
-            selectedApprovalId: approval.approvalId,
+            selectedApprovalId: approval.id,
             latestApproval: approval
         ).canApproveSelectedRequest
     }

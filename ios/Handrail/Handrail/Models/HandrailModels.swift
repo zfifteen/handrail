@@ -163,7 +163,7 @@ struct ChatEvent: Codable, Hashable {
 }
 
 struct ApprovalRequest: Codable, Identifiable, Hashable {
-    var id: String { approvalId }
+    var id: String { "\(chatId)\n\(approvalId)" }
     let chatId: String
     let approvalId: String
     let title: String

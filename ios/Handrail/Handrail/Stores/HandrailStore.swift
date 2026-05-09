@@ -303,7 +303,7 @@ final class HandrailStore {
             return
         }
         client.send(.approve(chatId: chatId, approvalId: approvalId))
-        if latestApproval?.approvalId == approvalId {
+        if latestApproval?.chatId == chatId && latestApproval?.approvalId == approvalId {
             latestApproval = nil
         }
     }
@@ -314,7 +314,7 @@ final class HandrailStore {
             return
         }
         client.send(.deny(chatId: chatId, approvalId: approvalId, reason: "Denied from Handrail notification."))
-        if latestApproval?.approvalId == approvalId {
+        if latestApproval?.chatId == chatId && latestApproval?.approvalId == approvalId {
             latestApproval = nil
         }
     }

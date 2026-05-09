@@ -122,6 +122,28 @@ final class TransientErrorStateTests: XCTestCase {
         XCTAssertTrue(store.notifications.isEmpty)
         XCTAssertEqual(store.latestApproval?.approvalId, HandrailTestFixtures.approval.approvalId)
     }
+
+    func testNotificationApproveKeepsSameApprovalIdFromDifferentChat() {
+        let store = HandrailStore(enableNetworking: false, loadStoredPairing: false)
+        store.pairedMachine = HandrailTestFixtures.pairedOnlineMachine
+        store.latestApproval = ApprovalRequest(chatId: "chat-b", approvalId: "shared-approval", title: "Approval Required", summary: "Different chat", files: [], diff: "")
+
+        store.approveFromNotification(chatId: "chat-a", approvalId: "shared-approval")
+
+        XCTAssertEqual(store.latestApproval?.chatId, "chat-b")
+        XCTAssertEqual(store.latestApproval?.approvalId, "shared-approval")
+    }
+
+    func testNotificationDenyKeepsSameApprovalIdFromDifferentChat() {
+        let store = HandrailStore(enableNetworking: false, loadStoredPairing: false)
+        store.pairedMachine = HandrailTestFixtures.pairedOnlineMachine
+        store.latestApproval = ApprovalRequest(chatId: "chat-b", approvalId: "shared-approval", title: "Approval Required", summary: "Different chat", files: [], diff: "")
+
+        store.denyFromNotification(chatId: "chat-a", approvalId: "shared-approval")
+
+        XCTAssertEqual(store.latestApproval?.chatId, "chat-b")
+        XCTAssertEqual(store.latestApproval?.approvalId, "shared-approval")
+    }
 }
 
 private final class StoreTestWebSocketTask: HandrailWebSocketTask {
