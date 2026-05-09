@@ -75,6 +75,11 @@ final class ChatDetailComposerStateTests: XCTestCase {
     func testEmptyComposerInputDisablesSendControl() {
         XCTAssertTrue(ChatDetailComposerState.isSendDisabled(input: "  \n", isPending: false))
     }
+
+    func testEnabledSendButtonUsesContrastingIconAndBackground() {
+        XCTAssertEqual(ChatDetailSendButtonStyle.iconColor(isDisabled: false), .black)
+        XCTAssertEqual(ChatDetailSendButtonStyle.backgroundColor(isDisabled: false), .white)
+    }
 }
 
 final class ChatDetailApprovalResultTests: XCTestCase {

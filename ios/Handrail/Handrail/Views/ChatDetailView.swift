@@ -369,9 +369,12 @@ struct ChatDetailView: View {
                 dismissComposerKeyboard()
             } label: {
                 Image(systemName: "paperplane.fill")
+                    .font(.body.weight(.semibold))
+                    .frame(width: 52, height: 44)
+                    .foregroundStyle(ChatDetailSendButtonStyle.iconColor(isDisabled: ChatDetailComposerState.isSendDisabled(input: input, isPending: isPending)))
+                    .background(ChatDetailSendButtonStyle.backgroundColor(isDisabled: ChatDetailComposerState.isSendDisabled(input: input, isPending: isPending)), in: Capsule())
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.primary)
+            .buttonStyle(.plain)
             .disabled(ChatDetailComposerState.isSendDisabled(input: input, isPending: isPending))
         }
         .padding()
@@ -518,5 +521,15 @@ struct ChatDetailApprovalResult: Equatable {
 
     func text(for approval: ApprovalRequest) -> String? {
         approval.id == approvalId ? text : nil
+    }
+}
+
+enum ChatDetailSendButtonStyle {
+    static func iconColor(isDisabled: Bool) -> Color {
+        isDisabled ? .white.opacity(0.42) : .black
+    }
+
+    static func backgroundColor(isDisabled: Bool) -> Color {
+        isDisabled ? .white.opacity(0.12) : .white
     }
 }

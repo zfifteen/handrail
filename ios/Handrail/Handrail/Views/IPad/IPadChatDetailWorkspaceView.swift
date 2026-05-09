@@ -331,9 +331,12 @@ struct IPadChatDetailWorkspaceView: View {
                 isComposerFocused = false
             } label: {
                 Image(systemName: "paperplane.fill")
+                    .font(.body.weight(.semibold))
+                    .frame(width: 52, height: 44)
+                    .foregroundStyle(ChatDetailSendButtonStyle.iconColor(isDisabled: input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty))
+                    .background(ChatDetailSendButtonStyle.backgroundColor(isDisabled: input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty), in: Capsule())
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.primary)
+            .buttonStyle(.plain)
             .keyboardShortcut(.return, modifiers: .command)
             .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             .hoverEffect(.highlight)
