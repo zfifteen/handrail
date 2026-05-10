@@ -521,7 +521,6 @@
 			baseConfigurationReference = 100000000000000000000203 /* HandrailVersion.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Handrail/Handrail.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 535MQ7U2FY;
 				GENERATE_INFOPLIST_FILE = NO;
