@@ -30,6 +30,7 @@
 		100000000000000000000115 /* LaunchSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000016 /* LaunchSplashView.swift */; };
 		100000000000000000000116 /* ChatTranscriptParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000017 /* ChatTranscriptParser.swift */; };
 		100000000000000000000117 /* ChatTranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000018 /* ChatTranscriptView.swift */; };
+		100000000000000000000118 /* AppBuildMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000019 /* AppBuildMetadata.swift */; };
 		200000000000000000000101 /* IPadWorkspaceModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* IPadWorkspaceModels.swift */; };
 		200000000000000000000102 /* IPadWorkspaceRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* IPadWorkspaceRootView.swift */; };
 		200000000000000000000103 /* IPadSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* IPadSidebarView.swift */; };
@@ -53,6 +54,7 @@
 		200000000000000000000208 /* TransientErrorStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000028 /* TransientErrorStateTests.swift */; };
 		200000000000000000000209 /* PairingPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000029 /* PairingPersistenceTests.swift */; };
 		200000000000000000000210 /* PairedMachineFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000002A /* PairedMachineFormattingTests.swift */; };
+		200000000000000000000211 /* AppBuildMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000002B /* AppBuildMetadataTests.swift */; };
 		200000000000000000000302 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 200000000000000000000303 /* XCTest.framework */; };
 /* End PBXBuildFile section */
 
@@ -91,7 +93,10 @@
 		100000000000000000000016 /* LaunchSplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/LaunchSplashView.swift; sourceTree = "<group>"; };
 		100000000000000000000017 /* ChatTranscriptParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/ChatTranscriptParser.swift; sourceTree = "<group>"; };
 		100000000000000000000018 /* ChatTranscriptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Views/ChatTranscriptView.swift; sourceTree = "<group>"; };
+		100000000000000000000019 /* AppBuildMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handrail/Utilities/AppBuildMetadata.swift; sourceTree = "<group>"; };
+		10000000000000000000001A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Handrail/Info.plist; sourceTree = "<group>"; };
 		100000000000000000000201 /* Handrail.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Handrail.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000203 /* HandrailVersion.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = HandrailVersion.xcconfig; sourceTree = "<group>"; };
 		200000000000000000000001 /* IPadWorkspaceModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadWorkspaceModels.swift; sourceTree = "<group>"; };
 		200000000000000000000002 /* IPadWorkspaceRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadWorkspaceRootView.swift; sourceTree = "<group>"; };
 		200000000000000000000003 /* IPadSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadSidebarView.swift; sourceTree = "<group>"; };
@@ -115,6 +120,7 @@
 		200000000000000000000028 /* TransientErrorStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransientErrorStateTests.swift; sourceTree = "<group>"; };
 		200000000000000000000029 /* PairingPersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingPersistenceTests.swift; sourceTree = "<group>"; };
 		20000000000000000000002A /* PairedMachineFormattingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairedMachineFormattingTests.swift; sourceTree = "<group>"; };
+		20000000000000000000002B /* AppBuildMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBuildMetadataTests.swift; sourceTree = "<group>"; };
 		200000000000000000000301 /* HandrailTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HandrailTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		200000000000000000000303 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -141,14 +147,17 @@
 		100000000000000000000401 = {
 			isa = PBXGroup;
 			children = (
+				100000000000000000000403 /* Config */,
 				100000000000000000000001 /* HandrailApp.swift */,
 				100000000000000000000002 /* HandrailModels.swift */,
 				100000000000000000000003 /* HandrailMessages.swift */,
 				100000000000000000000004 /* HandrailWebSocketClient.swift */,
 				100000000000000000000005 /* HandrailStore.swift */,
 				100000000000000000000006 /* Formatters.swift */,
+				100000000000000000000019 /* AppBuildMetadata.swift */,
 				100000000000000000000013 /* NotificationCoordinator.swift */,
 				100000000000000000000014 /* KeychainStore.swift */,
+				10000000000000000000001A /* Info.plist */,
 				100000000000000000000015 /* Handrail.entitlements */,
 				100000000000000000000007 /* RootView.swift */,
 				100000000000000000000016 /* LaunchSplashView.swift */,
@@ -169,6 +178,14 @@
 				200000000000000000000702 /* HandrailTests */,
 				100000000000000000000402 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		100000000000000000000403 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000203 /* HandrailVersion.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 		100000000000000000000402 /* Products */ = {
@@ -213,6 +230,7 @@
 				200000000000000000000028 /* TransientErrorStateTests.swift */,
 				200000000000000000000029 /* PairingPersistenceTests.swift */,
 				20000000000000000000002A /* PairedMachineFormattingTests.swift */,
+				20000000000000000000002B /* AppBuildMetadataTests.swift */,
 			);
 			path = HandrailTests;
 			sourceTree = "<group>";
@@ -319,6 +337,7 @@
 				100000000000000000000115 /* LaunchSplashView.swift in Sources */,
 				100000000000000000000116 /* ChatTranscriptParser.swift in Sources */,
 				100000000000000000000117 /* ChatTranscriptView.swift in Sources */,
+				100000000000000000000118 /* AppBuildMetadata.swift in Sources */,
 				200000000000000000000101 /* IPadWorkspaceModels.swift in Sources */,
 				200000000000000000000102 /* IPadWorkspaceRootView.swift in Sources */,
 				200000000000000000000103 /* IPadSidebarView.swift in Sources */,
@@ -349,6 +368,7 @@
 				200000000000000000000208 /* TransientErrorStateTests.swift in Sources */,
 				200000000000000000000209 /* PairingPersistenceTests.swift in Sources */,
 				200000000000000000000210 /* PairedMachineFormattingTests.swift in Sources */,
+				200000000000000000000211 /* AppBuildMetadataTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,23 +498,14 @@
 		};
 		100000000000000000000903 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 100000000000000000000203 /* HandrailVersion.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 535MQ7U2FY;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Handrail;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Handrail scans the pairing QR code printed by the desktop CLI.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Handrail connects to the desktop CLI on your local network.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Handrail/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.velocityworks.Handrail;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -507,24 +518,15 @@
 		};
 		100000000000000000000904 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 100000000000000000000203 /* HandrailVersion.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Handrail/Handrail.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 535MQ7U2FY;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Handrail;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Handrail scans the pairing QR code printed by the desktop CLI.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Handrail connects to the desktop CLI on your local network.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Handrail/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.velocityworks.Handrail;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -537,14 +539,13 @@
 		};
 		200000000000000000000901 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 100000000000000000000203 /* HandrailVersion.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 535MQ7U2FY;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.velocityworks.HandrailTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -557,14 +558,13 @@
 		};
 		200000000000000000000902 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 100000000000000000000203 /* HandrailVersion.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 535MQ7U2FY;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.velocityworks.HandrailTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

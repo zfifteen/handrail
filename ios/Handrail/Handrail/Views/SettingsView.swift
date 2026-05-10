@@ -5,6 +5,8 @@ struct SettingsView: View {
     @State private var showsScanner = false
 
     var body: some View {
+        let metadata = AppBuildMetadata.current
+
         ScrollView {
             VStack(spacing: 14) {
                 Card {
@@ -88,7 +90,9 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Label("About", systemImage: "info.circle")
                             .font(.headline)
-                        Text("Version 0.1.0")
+                        Text(metadata.versionText)
+                            .foregroundStyle(.secondary)
+                        Text(metadata.lastUpdatedText)
                             .foregroundStyle(.secondary)
                         Text("Works with OpenAI Codex Desktop. Not affiliated with OpenAI.")
                             .font(.footnote)

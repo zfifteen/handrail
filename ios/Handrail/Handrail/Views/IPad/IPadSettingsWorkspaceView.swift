@@ -129,11 +129,15 @@ struct IPadSettingsWorkspaceView: View {
     }
 
     private var aboutSection: some View {
-        Card {
+        let metadata = AppBuildMetadata.current
+
+        return Card {
             VStack(alignment: .leading, spacing: 8) {
                 Label("About", systemImage: "info.circle")
                     .font(.headline)
-                Text("Version 0.1.0")
+                Text(metadata.versionText)
+                    .foregroundStyle(.secondary)
+                Text(metadata.lastUpdatedText)
                     .foregroundStyle(.secondary)
                 Text("Works with OpenAI Codex Desktop. Not affiliated with OpenAI.")
                     .font(.footnote)
