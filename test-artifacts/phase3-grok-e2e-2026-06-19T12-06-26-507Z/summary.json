@@ -1,0 +1,45 @@
+{
+  "ranAt": "2026-06-19T12:06:26.513Z",
+  "server": "ws://127.0.0.1:8788",
+  "branch": "revive/grok-build",
+  "checks": {
+    "handshake": {
+      "ok": true,
+      "machineName": "MacBookPro.lan",
+      "defaultModel": "grok-build",
+      "chatCount": 50,
+      "automationCount": 0
+    },
+    "chatList": {
+      "ok": true,
+      "total": 50,
+      "grokIdCount": 50,
+      "orderMatches": true,
+      "sampleChatId": "grok:019edfaa-8d31-7e72-b9b6-74a85305a1fb",
+      "idleChatId": "grok:019edfc5-d912-7e71-bdda-7b9df31a4ffa"
+    },
+    "chatDetail": {
+      "ok": true,
+      "chatId": "grok:019edfaa-8d31-7e72-b9b6-74a85305a1fb",
+      "transcriptLines": 334,
+      "hasGrokBlocks": true
+    },
+    "continueChat": {
+      "ok": true,
+      "chatId": "grok:019edfc5-d912-7e71-bdda-7b9df31a4ffa",
+      "status": "running"
+    },
+    "startChat": {
+      "ok": true,
+      "chatId": "grok:019edfc6-91df-7292-aa7b-580455b2631a",
+      "workdir": "/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/handrail-phase3-start-svSE1M",
+      "title": "handrail-phase3-start-svSE1M"
+    },
+    "stopChat": {
+      "ok": true,
+      "chatId": "grok:019edfc6-91df-7292-aa7b-580455b2631a",
+      "message": "Chat stop requested."
+    }
+  },
+  "allPassed": true
+}

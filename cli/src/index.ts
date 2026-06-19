@@ -40,7 +40,7 @@ program.command("serve")
   });
 
 program.command("chats")
-  .description("List known Codex Desktop chats.")
+  .description("List known Grok Build chats.")
   .action(async () => {
     const chats = await fetchLocalChats();
     for (const chat of chats) {
@@ -49,8 +49,8 @@ program.command("chats")
   });
 
 program.command("stop")
-  .argument("<chat-id>", "Codex chat id")
-  .description("Stop a running Codex chat.")
+  .argument("<chat-id>", "Grok chat id")
+  .description("Stop a running Grok Build chat.")
   .action(async (chatId: string) => {
     await sendLocalServerMessage({ type: "stop_chat", chatId }, "command_result");
   });

@@ -1,0 +1,13 @@
+{
+  "id": "grok:019edfc6-91df-7292-aa7b-580455b2631a",
+  "repo": "/var/folders/k_/spz3zlj566sc4qh29g0tk6jh0000gn/T/handrail-phase3-start-svSE1M",
+  "title": "handrail-phase3-start-svSE1M",
+  "projectName": "handrail-phase3-start-svSE1M",
+  "status": "running",
+  "startedAt": "2026-06-19T12:06:33.187423Z",
+  "updatedAt": "2026-06-19T12:06:33.227Z",
+  "acceptsInput": false,
+  "transcript": [
+    "User:\nHandrail Phase 3 start probe. Reply exactly HANDRAIL_PHASE3_START_OK.\n\n"
+  ]
+}

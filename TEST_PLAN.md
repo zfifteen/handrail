@@ -1,14 +1,25 @@
 # Handrail MVP Test Plan
 
+## Grok Build revival (2026-06-19)
+
+Automated validation on branch `revive/grok-build`:
+
+```sh
+cd cli && npm test && npm run spike
+cd .. && node tools/qa/grok_e2e_probe.mjs   # requires handrail serve
+```
+
+See [docs/PHASE3_FINDINGS.md](docs/PHASE3_FINDINGS.md) for latest results.
+
 ## Scope
 
 This plan covers the MVP path a user exercises on a Mac plus iPhone:
 
 - Pair iPhone to the local Handrail server.
-- Show Codex chat history from the same source used by Codex desktop.
-- Show and continue Codex chats from iOS.
+- Show Grok Build chat history from `~/.grok/sessions`.
+- Show and continue Grok chats from iOS.
 - Stream transcript or failure output into Chat Detail.
-- Request stop for a running Codex chat and surface errors.
+- Request stop for a running Grok chat and surface errors.
 - Keep Chats, Activity, Notifications, Approval, and Settings usable when empty, offline, or read-only.
 
 ## Desktop CLI Checks
@@ -16,27 +27,27 @@ This plan covers the MVP path a user exercises on a Mac plus iPhone:
 1. `npm test` in `cli/`
    - TypeScript compiles.
    - Approval detection works.
-   - Agent launch passes the initial prompt as a command argument.
-   - Codex JSON events format into readable transcript lines.
+   - Grok ACP client handles `fs/*` and permission requests.
+   - `updates.jsonl` parses into `User:` / `Grok:` transcript lines.
 
 2. WebSocket handshake
-   - Connect to `ws://127.0.0.1:8788`.
+   - Connect to `ws://127.0.0.1:<port>` (see `~/.handrail/state.json`, default `8787`).
    - Send `{ "type": "hello", "token": state.pairingToken }`.
-   - Expect `machine_status` then `chat_list`.
+   - Expect `machine_status`, `new_chat_options`, `chat_list`, `automation_list`.
 
 3. Chat list source
-   - Verify first chats come from Codex Desktop chat metadata and persisted Codex transcript files.
+   - Verify chats use `grok:<session-id>` ids from Grok session summaries.
    - Verify list is ordered by `updated_at`.
-   - Verify stale or unrelated files are not shown as chats.
+   - Verify automations list is empty in v1.
 
 4. New chat smoke
-   - Send `start_chat` over WebSocket with prompt and options.
-   - Expect either `chat_started` for a Codex Desktop chat or a visible deterministic error.
+   - Send `start_chat` over WebSocket with prompt and options (`model: grok-build`).
+   - Expect `chat_started` for a visible Grok session or a deterministic error.
    - No start may create a Handrail-owned record.
 
 5. Stop chat smoke
-   - Send `stop_chat` for a running Codex chat.
-   - Expect `chat_stopped` or a visible deterministic error and a refreshed `chat_list`.
+   - Send `stop_chat` for a running Grok chat.
+   - Expect `command_result` ok or a visible deterministic error and a refreshed `chat_list`.
 
 ## iOS Checks
 
@@ -50,7 +61,7 @@ This plan covers the MVP path a user exercises on a Mac plus iPhone:
 
 3. Chats tab
    - Paired machine shows Online when server is available.
-   - Session names match Codex desktop names.
+   - Session names match Grok Build session titles.
    - All Chats is ordered by last update.
    - Pinned is above All Chats.
    - Recent/Project filter is reachable.
@@ -60,13 +71,13 @@ This plan covers the MVP path a user exercises on a Mac plus iPhone:
    - Start is disabled when Mac is offline.
    - Start is disabled when title, repo, or prompt is empty.
    - Invalid/offline start shows an error instead of silently dismissing.
-   - Valid start creates or opens a Codex chat that navigates to useful status and transcript/failure output.
+   - Valid start creates or opens a Grok chat that navigates to useful status and transcript/failure output.
 
 5. Chat Detail
-   - Running chat says Codex is starting until output arrives.
+   - Running chat says Grok is starting until output arrives.
    - Failed/stopped/completed chats show status-specific empty text.
    - Failure text appears in transcript when no output was produced.
-   - Imported Codex chats are marked read-only and do not show stop/input controls.
+   - Imported Grok chats are marked read-only and do not show stop/input controls.
 
 6. Pairing
    - A valid Handrail QR pairs and connects.
@@ -80,7 +91,7 @@ This plan covers the MVP path a user exercises on a Mac plus iPhone:
 
 - Local server port: `8788`.
 - Physical iPhone bundle id: `com.velocityworks.Handrail`.
-- Handrail should control Codex Desktop through the Desktop app's local IPC socket.
+- Handrail controls Grok Build through ACP stdio; session files live under `~/.grok/sessions`.
 
 ## 2026-04-25 Usability Pass
 

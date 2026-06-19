@@ -1,6 +1,6 @@
 # Handrail Revival — Grok Build Migration
 
-**Status:** Phase 2 complete (2026-06-19). Proceed to Phase 3.
+**Status:** Phase 3 complete (2026-06-19). CLI/protocol validated; physical iOS install blocked on host tunnel.
 
 This document is the session handoff for reviving Handrail as a **local-first iPhone/iPad supervisor for Grok Build** on the user's Mac. Read this first in any new agent session before editing code.
 
@@ -79,9 +79,14 @@ See [PHASE0_FINDINGS.md](./PHASE0_FINDINGS.md) for evidence and caveats.
 - [x] WebSocket protocol v1 unchanged.
 - [ ] **Blocked on host:** simulator/device `xcodebuild` (iOS 26.5 SDK / CoreSimulator mismatch on Mac).
 
-### Phase 3 — End-to-end validation
+### Phase 3 — End-to-end validation (DONE)
 
-Reuse `TEST_PLAN.md` scenarios with Grok sessions. iPad + physical device install via `handrail-update-devices` skill.
+- [x] CLI tests 57/57; spikes 4/4.
+- [x] Live WebSocket E2E probe (`tools/qa/grok_e2e_probe.mjs`) — handshake, list, detail, continue, start, stop.
+- [x] Evidence: [PHASE3_FINDINGS.md](./PHASE3_FINDINGS.md), `docs/artifacts/phase3-grok-e2e-2026-06-19.json`.
+- [ ] **Blocked:** physical iPhone/iPad install (`tunnelState is unavailable` via devicectl).
+- [ ] **Blocked:** simulator build (iOS 26.5 SDK / CoreSimulator mismatch).
+- [ ] Manual iOS smoke per `TEST_PLAN.md` after device install succeeds.
 
 ### Phase 4 — Polish (optional)
 
@@ -115,6 +120,7 @@ npm run spike:transcript
 npm run spike:approval
 npm run spike:resume
 npm test               # Grok adapter tests + legacy Codex module tests
+node tools/qa/grok_e2e_probe.mjs   # Phase 3 live WebSocket validation (server must be running)
 ```
 
 ## References

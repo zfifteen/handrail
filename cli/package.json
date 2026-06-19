@@ -13,7 +13,8 @@
     "spike:list": "tsx spike/01-list-sessions.ts",
     "spike:transcript": "tsx spike/02-parse-transcript.ts",
     "spike:approval": "tsx spike/03-acp-approval.ts",
-    "spike:resume": "tsx spike/04-resume-session.ts"
+    "spike:resume": "tsx spike/04-resume-session.ts",
+    "e2e": "node ../tools/qa/grok_e2e_probe.mjs"
   },
   "dependencies": {
     "commander": "^12.1.0",
