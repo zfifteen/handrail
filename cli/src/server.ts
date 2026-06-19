@@ -9,6 +9,20 @@ import { getNewChatOptions } from "./newChatOptions.js";
 import { NotificationDispatcher, type PersistState } from "./notifications.js";
 import { deleteDesktopAutomation, listDesktopAutomations, pauseDesktopAutomation, runDesktopAutomationNow } from "./automations.js";
 
+const emptyAutomations = async () => [] as AutomationRecord[];
+
+const unsupportedAutomationActions: AutomationActions = {
+  async runNow() {
+    throw new Error("Automations are not supported with Grok Build yet.");
+  },
+  async pause() {
+    throw new Error("Automations are not supported with Grok Build yet.");
+  },
+  async delete() {
+    throw new Error("Automations are not supported with Grok Build yet.");
+  }
+};
+
 interface AuthedSocket extends WebSocket {
   isAuthed?: boolean;
 }
@@ -94,12 +108,8 @@ export async function createHandrailServer(options: {
   const httpServer = createServer();
   const wss = new WebSocketServer({ server: httpServer });
   const getOptions = options.getOptions ?? getNewChatOptions;
-  const getAutomations = options.getAutomations ?? listDesktopAutomations;
-  const automationActions = options.automationActions ?? {
-    runNow: runDesktopAutomationNow,
-    pause: pauseDesktopAutomation,
-    delete: deleteDesktopAutomation
-  };
+  const getAutomations = options.getAutomations ?? emptyAutomations;
+  const automationActions = options.automationActions ?? unsupportedAutomationActions;
 
   const broadcast = (message: ServerMessage) => {
     const encoded = JSON.stringify(message);

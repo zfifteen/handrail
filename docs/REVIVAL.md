@@ -1,6 +1,6 @@
 # Handrail Revival — Grok Build Migration
 
-**Status:** Phase 0 complete (2026-06-19). Proceed to Phase 1.
+**Status:** Phase 1 complete (2026-06-19). Proceed to Phase 2.
 
 This document is the session handoff for reviving Handrail as a **local-first iPhone/iPad supervisor for Grok Build** on the user's Mac. Read this first in any new agent session before editing code.
 
@@ -57,16 +57,18 @@ Prove Grok adapter feasibility before touching iOS.
 
 See [PHASE0_FINDINGS.md](./PHASE0_FINDINGS.md) for evidence and caveats.
 
-### Phase 1 — CLI adapter swap (NEXT)
+### Phase 1 — CLI adapter swap (DONE)
 
-1. Promote spike libs into `cli/src/` (`grokSessions`, `grokBuildAcp`, transcript parser).
-2. Wire `ChatManager` deps to Grok adapters (pattern already exists for Codex).
-3. Implement ACP client request handlers: `fs/*`, `session/request_permission`, `terminal/*` (bash approvals).
-4. File watcher on `updates.jsonl` + poll `active_sessions.json`.
-5. Port tests: fixture `updates.jsonl` files under `cli/test/fixtures/grok/`.
-6. Use `grok agent --no-leader stdio` by default; attach via `--leader` when PID exists in `active_sessions.json`.
+- [x] Promoted spike libs into `cli/src/` (`grokSessions`, `grokBuildAcp`, `grokTranscript`, `grokPaths`).
+- [x] Wired `ChatManager` deps to Grok adapters; chat IDs use `grok:<session-id>`.
+- [x] ACP client handles `fs/*` and `session/request_permission` (deferred response until user approves).
+- [x] Server polls `active_sessions.json` every 5s via existing notification observer.
+- [x] Tests ported: `cli/test/grokSessions.test.ts` + `cli/test/fixtures/grok/sample-updates.jsonl`.
+- [x] `grok --no-leader stdio` for new sessions; `--leader` attach when PID exists in `active_sessions.json`.
+- [ ] **Deferred:** `terminal/*` ACP handlers (bash approval round-trip still broken).
+- [ ] **Deferred:** dedicated file watcher on `updates.jsonl` (5s poll sufficient for v1).
 
-**Phase 1 acceptance:** `handrail serve` + simulator/manual WebSocket client can list Grok sessions, load detail, start/continue a session.
+**Phase 1 acceptance:** `handrail serve` + WebSocket client can list Grok sessions, load detail, start/continue a session.
 
 ### Phase 2 — iOS rebrand + parser
 
@@ -110,7 +112,7 @@ npm run spike:list
 npm run spike:transcript
 npm run spike:approval
 npm run spike:resume
-npm test               # existing Codex-era tests (still Codex until Phase 1)
+npm test               # Grok adapter tests + legacy Codex module tests
 ```
 
 ## References

@@ -3,16 +3,19 @@ import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { promisify } from "node:util";
+import { grokBinary } from "./grokPaths.js";
+import { listGrokChats } from "./grokSessions.js";
 import type { NewChatAccessPreset, NewChatOptions, NewChatProject, NewChatReasoning } from "./types.js";
 
 const execFileAsync = promisify(execFile);
 const noProjectId = "no-project";
-const defaultProjectRoot = join(homedir(), "Documents", "Codex");
+const defaultProjectRoot = join(homedir(), "IdeaProjects");
 
 export async function getNewChatOptions(projectPath?: string): Promise<NewChatOptions> {
-  const config = await readText(join(homedir(), ".codex", "config.toml"));
-  const projects = await discoverDesktopProjects();
-  const defaultProjectId = projectPath && projects.some((project) => project.path === projectPath) ? projectPath : projects[0]?.id ?? noProjectId;
+  const projects = await discoverGrokProjects();
+  const defaultProjectId = projectPath && projects.some((project) => project.path === projectPath)
+    ? projectPath
+    : projects.find((project) => project.path)?.id ?? noProjectId;
   const selectedProject = projects.find((project) => project.id === defaultProjectId);
   const branchRoot = selectedProject?.path ?? projectPath;
 
@@ -23,30 +26,25 @@ export async function getNewChatOptions(projectPath?: string): Promise<NewChatOp
     defaultBranch: branchRoot ? await currentBranch(branchRoot) : "",
     workModes: ["local", "worktree"],
     accessPresets: ["full_access", "on_request", "read_only"],
-    defaultAccessPreset: defaultAccessPreset(config),
-    models: ["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex", "gpt-5.2"],
-    defaultModel: readTomlString(config, "model") ?? "gpt-5.5",
+    defaultAccessPreset: "on_request",
+    models: await listGrokModels(),
+    defaultModel: "grok-build",
     reasoningEfforts: ["low", "medium", "high", "xhigh"],
-    defaultReasoningEffort: defaultReasoning(config)
+    defaultReasoningEffort: "high"
   };
 }
 
-export async function discoverDesktopProjects(): Promise<NewChatProject[]> {
-  const config = await readText(join(homedir(), ".codex", "config.toml"));
-  const globalState = await readJson(join(homedir(), ".codex", ".codex-global-state.json"));
-  return discoverProjects(config, globalState);
+export async function discoverGrokProjects(): Promise<NewChatProject[]> {
+  const chats = await listGrokChats();
+  const paths = chats.map((chat) => chat.repo).filter((repo) => repo.length > 0);
+  return discoverProjectsFromPaths([defaultProjectRoot, ...paths]);
 }
 
-export function discoverProjects(config: string, globalState: unknown): NewChatProject[] {
-  const paths = [
-    ...readGlobalStringArray(globalState, "project-order"),
-    ...readGlobalStringArray(globalState, "electron-saved-workspace-roots"),
-    ...readConfigProjects(config)
-  ];
+export function discoverProjectsFromPaths(paths: string[]): NewChatProject[] {
   const seen = new Set<string>();
   const projects: NewChatProject[] = [{ id: noProjectId, name: "No project", path: null }];
   for (const path of paths) {
-    if (seen.has(path)) {
+    if (!path || seen.has(path)) {
       continue;
     }
     seen.add(path);
@@ -55,7 +53,12 @@ export function discoverProjects(config: string, globalState: unknown): NewChatP
   return projects;
 }
 
-export async function prepareChatWorkspace(options: { projectPath?: string | null; branch: string; newBranch?: string; workMode: "local" | "worktree" }): Promise<string> {
+export async function prepareChatWorkspace(options: {
+  projectPath?: string | null;
+  branch: string;
+  newBranch?: string;
+  workMode: "local" | "worktree";
+}): Promise<string> {
   const root = options.projectPath || defaultProjectRoot;
   const selectedBranch = options.branch.trim();
   const newBranch = options.newBranch?.trim();
@@ -76,32 +79,16 @@ export async function prepareChatWorkspace(options: { projectPath?: string | nul
   return worktreePath;
 }
 
-export function codexAccessArgs(preset: NewChatAccessPreset): string[] {
-  switch (preset) {
-    case "full_access":
-      return ["-s", "danger-full-access", "-c", "approval_policy=\"never\""];
-    case "read_only":
-      return ["-s", "read-only", "-c", "approval_policy=\"on-request\""];
-    case "on_request":
-      return ["-s", "workspace-write", "-c", "approval_policy=\"on-request\""];
+async function listGrokModels(): Promise<string[]> {
+  try {
+    const { stdout } = await execFileAsync(grokBinary(), ["models"]);
+    const models = [...stdout.matchAll(/^\s*\*?\s*(\S+)/gm)]
+      .map((match) => match[1])
+      .filter((model) => model !== "Available" && model !== "Default");
+    return models.length > 0 ? models : ["grok-build"];
+  } catch {
+    return ["grok-build"];
   }
-}
-
-function defaultAccessPreset(config: string): NewChatAccessPreset {
-  const sandbox = readTomlString(config, "sandbox") ?? readTomlString(config, "sandbox_mode");
-  const approval = readTomlString(config, "ask_for_approval") ?? readTomlString(config, "approval_policy");
-  if (sandbox === "danger-full-access" && approval === "never") {
-    return "full_access";
-  }
-  if (sandbox === "read-only") {
-    return "read_only";
-  }
-  return "on_request";
-}
-
-function defaultReasoning(config: string): NewChatReasoning {
-  const value = readTomlString(config, "model_reasoning_effort");
-  return value === "low" || value === "medium" || value === "high" || value === "xhigh" ? value : "high";
 }
 
 async function listBranches(repo: string) {
@@ -123,39 +110,6 @@ async function currentBranch(repo: string): Promise<string> {
   } catch {
     return "";
   }
-}
-
-async function readText(path: string): Promise<string> {
-  try {
-    return await readFile(path, "utf8");
-  } catch {
-    return "";
-  }
-}
-
-async function readJson(path: string): Promise<unknown> {
-  const text = await readText(path);
-  if (!text) {
-    return {};
-  }
-  return JSON.parse(text);
-}
-
-function readGlobalStringArray(value: unknown, key: string): string[] {
-  if (!value || typeof value !== "object") {
-    return [];
-  }
-  const array = (value as Record<string, unknown>)[key];
-  return Array.isArray(array) ? array.filter((item): item is string => typeof item === "string" && item.length > 0) : [];
-}
-
-function readConfigProjects(config: string): string[] {
-  return [...config.matchAll(/^\[projects\."([^"]+)"\]/gm)].map((match) => match[1]);
-}
-
-function readTomlString(config: string, key: string): string | undefined {
-  const match = config.match(new RegExp(`^${key}\\s*=\\s*"([^"]+)"`, "m"));
-  return match?.[1];
 }
 
 function sanitizeBranchName(branch: string): string {

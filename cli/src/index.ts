@@ -10,7 +10,7 @@ const program = new Command();
 
 program
   .name("handrail")
-  .description("Local-first iOS remote control for Codex chats.")
+  .description("Local-first iOS remote control for Grok Build chats.")
   .version("0.1.0");
 
 program.command("pair")

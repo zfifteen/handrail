@@ -2,24 +2,22 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { extractStatus, parseDesktopPinnedThreadIds } from "../src/codexSessions.js";
-import { codexDesktopAppServerTurnStartParams, codexDesktopApprovalRequestFromServerRequest, codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopLiveEventFromNotification, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame, startCodexDesktopConversationOnAppServer, type DesktopApprovalRequest } from "../src/codexDesktopIpc.js";
-import { discoverProjects } from "../src/newChatOptions.js";
+import { codexDesktopAppServerTurnStartParams, codexDesktopApprovalRequestFromServerRequest, codexDesktopFollowerTurnStartParams, codexDesktopIpcRequest, codexDesktopIpcRequestVersion, codexDesktopIpcSocketPath, codexDesktopLiveEventFromNotification, codexDesktopThreadStartParams, codexDesktopThreadUrl, encodeCodexDesktopIpcFrame, startCodexDesktopConversationOnAppServer } from "../src/codexDesktopIpc.js";
+import { discoverProjectsFromPaths } from "../src/newChatOptions.js";
 import { ChatManager } from "../src/chats.js";
+import type { GrokApprovalRequest } from "../src/grokBuildAcp.js";
 
-test("discovers New Chat projects from Codex Desktop state and config", () => {
-  const projects = discoverProjects(
-    '[projects."/Users/me/config-project"]\ntrust_level = "trusted"\n',
-    {
-      "project-order": ["/Users/me/ordered"],
-      "electron-saved-workspace-roots": ["/Users/me/ordered", "/Users/me/saved"]
-    }
-  );
+test("discovers New Chat projects from Grok session paths and default root", () => {
+  const projects = discoverProjectsFromPaths([
+    "/Users/me/IdeaProjects",
+    "/Users/me/project",
+    "/Users/me/project"
+  ]);
 
   assert.deepEqual(projects, [
     { id: "no-project", name: "No project", path: null },
-    { id: "/Users/me/ordered", name: "ordered", path: "/Users/me/ordered" },
-    { id: "/Users/me/saved", name: "saved", path: "/Users/me/saved" },
-    { id: "/Users/me/config-project", name: "config-project", path: "/Users/me/config-project" }
+    { id: "/Users/me/IdeaProjects", name: "IdeaProjects", path: "/Users/me/IdeaProjects" },
+    { id: "/Users/me/project", name: "project", path: "/Users/me/project" }
   ]);
 });
 
@@ -227,11 +225,11 @@ test("encodes Codex Desktop IPC frames with little-endian length prefix", () => 
   assert.equal(frame.subarray(4).toString("utf8"), "{\"type\":\"request\",\"method\":\"initialize\"}");
 });
 
-test("chat manager refuses non-Codex chat ids", async () => {
+test("chat manager refuses non-Grok chat ids", async () => {
   const manager = new ChatManager(() => {});
   await assert.rejects(
     () => manager.stop("local-process-id"),
-    /No Codex chat with id local-process-id/
+    /No Grok chat with id local-process-id/
   );
 });
 
@@ -239,12 +237,12 @@ test("chat manager rejects unknown approval ids", async () => {
   const manager = new ChatManager(() => {});
 
   await assert.rejects(
-    () => manager.approve("codex:thread-1", "approval-1"),
-    /No pending approval approval-1 for Codex chat codex:thread-1/
+    () => manager.approve("grok:thread-1", "approval-1"),
+    /No pending approval approval-1 for Grok chat grok:thread-1/
   );
   await assert.rejects(
-    () => manager.deny("codex:thread-1", "approval-1", "No"),
-    /No pending approval approval-1 for Codex chat codex:thread-1/
+    () => manager.deny("grok:thread-1", "approval-1", "No"),
+    /No pending approval approval-1 for Grok chat grok:thread-1/
   );
 });
 
@@ -255,12 +253,12 @@ test("chat manager routes Codex Desktop approval decisions by server request id"
   let approvalDecision: string | null = null;
 
   const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
-    listCodexChats: async () => desktopChats,
-    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    listGrokChats: async () => desktopChats,
+    readGrokChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
     prepareChatWorkspace: async () => "/Users/me/project",
-    startCodexDesktopConversation: async (_input, onApprovalRequest) => {
+    startGrokConversation: async (_input, onApprovalRequest) => {
       desktopChats = [{
-        id: `codex:${threadId}`,
+        id: `grok:${threadId}`,
         repo: "/Users/me/project",
         title: "Approval route test",
         projectName: "project",
@@ -270,7 +268,7 @@ test("chat manager routes Codex Desktop approval decisions by server request id"
         transcript: []
       }];
       onApprovalRequest?.({
-        threadId,
+        sessionId: threadId,
         approvalId: "server-request-1",
         title: "Command approval required",
         summary: "npm test",
@@ -282,8 +280,8 @@ test("chat manager routes Codex Desktop approval decisions by server request id"
       });
       return threadId;
     },
-    startCodexDesktopTurn: async () => {},
-    interruptCodexDesktopTurn: async () => {}
+    continueGrokTurn: async () => {},
+    interruptGrokTurn: async () => {}
   });
 
   await manager.startChat({
@@ -301,11 +299,11 @@ test("chat manager routes Codex Desktop approval decisions by server request id"
     const approval = message as { type?: string; approvalId?: string; chatId?: string };
     return approval.type === "approval_required" &&
       approval.approvalId === "server-request-1" &&
-      approval.chatId === `codex:${threadId}`;
+      approval.chatId === `grok:${threadId}`;
   }));
   assert.equal((await manager.list())[0]?.status, "waiting_for_approval");
 
-  const approval = await manager.approve(`codex:${threadId}`, "server-request-1");
+  const approval = await manager.approve(`grok:${threadId}`, "server-request-1");
 
   assert.equal(approval.summary, "npm test");
   assert.equal(approvalDecision, "accept");
@@ -322,22 +320,22 @@ test("chat manager scopes duplicate approval ids by chat id", async () => {
     "019dc424-e857-76e0-8229-589ecf107eb5"
   ];
   const messages: unknown[] = [];
-  const approvalHandlers = new Map<string, (approval: DesktopApprovalRequest) => void>();
+  const approvalHandlers = new Map<string, (approval: GrokApprovalRequest) => void>();
   const decisions = new Map<string, string>();
   let startIndex = 0;
   let desktopChats = [] as Awaited<ReturnType<ChatManager["list"]>>;
 
   const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
-    listCodexChats: async () => desktopChats,
-    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    listGrokChats: async () => desktopChats,
+    readGrokChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
     prepareChatWorkspace: async () => "/Users/me/project",
-    startCodexDesktopConversation: async (_input, onApprovalRequest) => {
+    startGrokConversation: async (_input, onApprovalRequest) => {
       assert.ok(onApprovalRequest);
       const threadId = threadIds[startIndex];
       startIndex += 1;
       approvalHandlers.set(threadId, onApprovalRequest);
       desktopChats = [...desktopChats, {
-        id: `codex:${threadId}`,
+        id: `grok:${threadId}`,
         repo: "/Users/me/project",
         title: `Approval scope test ${startIndex}`,
         projectName: "project",
@@ -348,8 +346,8 @@ test("chat manager scopes duplicate approval ids by chat id", async () => {
       }];
       return threadId;
     },
-    startCodexDesktopTurn: async () => {},
-    interruptCodexDesktopTurn: async () => {}
+    continueGrokTurn: async () => {},
+    interruptGrokTurn: async () => {}
   });
 
   for (const threadId of threadIds) {
@@ -364,7 +362,7 @@ test("chat manager scopes duplicate approval ids by chat id", async () => {
       reasoningEffort: "high"
     });
     approvalHandlers.get(threadId)?.({
-      threadId,
+      sessionId: threadId,
       approvalId: "server-request-1",
       title: "Command approval required",
       summary: "npm test",
@@ -377,22 +375,22 @@ test("chat manager scopes duplicate approval ids by chat id", async () => {
     await new Promise((resolve) => setImmediate(resolve));
   }
 
-  await manager.approve(`codex:${threadIds[0]}`, "server-request-1");
+  await manager.approve(`grok:${threadIds[0]}`, "server-request-1");
 
   assert.equal(decisions.get(threadIds[0]), "accept");
   assert.equal(decisions.has(threadIds[1]), false);
-  assert.equal((await manager.list()).find((chat) => chat.id === `codex:${threadIds[0]}`)?.status, "running");
-  assert.equal((await manager.list()).find((chat) => chat.id === `codex:${threadIds[1]}`)?.status, "waiting_for_approval");
+  assert.equal((await manager.list()).find((chat) => chat.id === `grok:${threadIds[0]}`)?.status, "running");
+  assert.equal((await manager.list()).find((chat) => chat.id === `grok:${threadIds[1]}`)?.status, "waiting_for_approval");
 });
 
 test("chat manager broadcasts chat list when approval state changes", async () => {
   const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   const messages: unknown[] = [];
-  let approvalHandler = (_approval: DesktopApprovalRequest): void => {
+  let approvalHandler = (_approval: GrokApprovalRequest): void => {
     throw new Error("Approval handler was not installed.");
   };
   const desktopChats = [{
-    id: `codex:${threadId}`,
+    id: `grok:${threadId}`,
     repo: "/Users/me/project",
     title: "Approval broadcast test",
     projectName: "project",
@@ -403,16 +401,16 @@ test("chat manager broadcasts chat list when approval state changes", async () =
   }];
 
   const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
-    listCodexChats: async () => desktopChats,
-    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    listGrokChats: async () => desktopChats,
+    readGrokChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
     prepareChatWorkspace: async () => "/Users/me/project",
-    startCodexDesktopConversation: async (_input, onApprovalRequest) => {
+    startGrokConversation: async (_input, onApprovalRequest) => {
       assert.ok(onApprovalRequest);
       approvalHandler = onApprovalRequest;
       return threadId;
     },
-    startCodexDesktopTurn: async () => {},
-    interruptCodexDesktopTurn: async () => {}
+    continueGrokTurn: async () => {},
+    interruptGrokTurn: async () => {}
   });
 
   await manager.startChat({
@@ -428,7 +426,7 @@ test("chat manager broadcasts chat list when approval state changes", async () =
   messages.length = 0;
 
   approvalHandler({
-    threadId,
+    sessionId: threadId,
     approvalId: "server-request-1",
     title: "Command approval required",
     summary: "npm test",
@@ -441,11 +439,11 @@ test("chat manager broadcasts chat list when approval state changes", async () =
   assert.ok(messages.some((message) => {
     const chatList = message as { type?: string; chats?: Array<{ id?: string; status?: string }> };
     return chatList.type === "chat_list" &&
-      chatList.chats?.some((chat) => chat.id === `codex:${threadId}` && chat.status === "waiting_for_approval");
+      chatList.chats?.some((chat) => chat.id === `grok:${threadId}` && chat.status === "waiting_for_approval");
   }));
 });
 
-test("app-server approval requests wait for Desktop visibility before mobile broadcast", async () => {
+test("Grok approval requests wait for session visibility before mobile broadcast", async () => {
   const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   const messages: unknown[] = [];
   let resolveApprovalChatList = (): void => {};
@@ -453,11 +451,11 @@ test("app-server approval requests wait for Desktop visibility before mobile bro
     resolveApprovalChatList = resolve;
   });
   let desktopVisible = false;
-  let approvalHandler = (_approval: DesktopApprovalRequest): void => {
+  let approvalHandler = (_approval: GrokApprovalRequest): void => {
     throw new Error("Approval handler was not installed.");
   };
   const desktopChat = {
-    id: `codex:${threadId}`,
+    id: `grok:${threadId}`,
     repo: "/Users/me/project",
     title: "Approval visibility test",
     projectName: "project",
@@ -472,21 +470,21 @@ test("app-server approval requests wait for Desktop visibility before mobile bro
     messages.push(snapshot);
     if (
       snapshot.type === "chat_list" &&
-      snapshot.chats?.some((chat) => chat.id === `codex:${threadId}` && chat.status === "waiting_for_approval")
+      snapshot.chats?.some((chat) => chat.id === `grok:${threadId}` && chat.status === "waiting_for_approval")
     ) {
       resolveApprovalChatList();
     }
   }, {
-    listCodexChats: async () => desktopVisible ? [desktopChat] : [],
-    readCodexChatDetail: async (chatId) => chatId === desktopChat.id ? desktopChat : null,
+    listGrokChats: async () => desktopVisible ? [desktopChat] : [],
+    readGrokChatDetail: async (chatId) => chatId === desktopChat.id ? desktopChat : null,
     prepareChatWorkspace: async () => "/Users/me/project",
-    startCodexDesktopConversation: async (_input, onApprovalRequest) => {
+    startGrokConversation: async (_input, onApprovalRequest) => {
       assert.ok(onApprovalRequest);
       approvalHandler = onApprovalRequest;
       return threadId;
     },
-    startCodexDesktopTurn: async () => {},
-    interruptCodexDesktopTurn: async () => {}
+    continueGrokTurn: async () => {},
+    interruptGrokTurn: async () => {}
   });
 
   const started = manager.startChat({
@@ -502,7 +500,7 @@ test("app-server approval requests wait for Desktop visibility before mobile bro
   await new Promise((resolve) => setImmediate(resolve));
 
   approvalHandler({
-    threadId,
+    sessionId: threadId,
     approvalId: "server-request-1",
     title: "Command approval required",
     summary: "npm test",
@@ -522,12 +520,12 @@ test("app-server approval requests wait for Desktop visibility before mobile bro
     const approval = message as { type?: string; approvalId?: string; chatId?: string };
     return approval.type === "approval_required" &&
       approval.approvalId === "server-request-1" &&
-      approval.chatId === `codex:${threadId}`;
+      approval.chatId === `grok:${threadId}`;
   }));
   assert.ok(messages.some((message) => {
     const chatList = message as { type?: string; chats?: Array<{ id?: string; status?: string }> };
     return chatList.type === "chat_list" &&
-      chatList.chats?.some((chat) => chat.id === `codex:${threadId}` && chat.status === "waiting_for_approval");
+      chatList.chats?.some((chat) => chat.id === `grok:${threadId}` && chat.status === "waiting_for_approval");
   }));
 });
 
@@ -535,7 +533,7 @@ test("chat manager broadcasts live app-server turn events for visible Desktop ch
   const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   const messages: unknown[] = [];
   let desktopChats = [{
-    id: `codex:${threadId}`,
+    id: `grok:${threadId}`,
     repo: "/Users/me/project",
     title: "Live event route test",
     projectName: "project",
@@ -546,17 +544,17 @@ test("chat manager broadcasts live app-server turn events for visible Desktop ch
   }];
 
   const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
-    listCodexChats: async () => desktopChats,
-    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    listGrokChats: async () => desktopChats,
+    readGrokChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
     prepareChatWorkspace: async () => "/Users/me/project",
-    startCodexDesktopConversation: async (_input, _onApprovalRequest, onLiveEvent) => {
-      onLiveEvent?.({ threadId, kind: "turn_started", text: "Codex Desktop turn started." });
-      onLiveEvent?.({ threadId, kind: "output", text: "Hello from Codex." });
-      onLiveEvent?.({ threadId, kind: "turn_completed", text: "Codex Desktop turn completed." });
+    startGrokConversation: async (_input, _onApprovalRequest, onLiveEvent) => {
+      onLiveEvent?.({ sessionId: threadId, kind: "turn_started", text: "Grok Build turn started." });
+      onLiveEvent?.({ sessionId: threadId, kind: "output", text: "Hello from Grok." });
+      onLiveEvent?.({ sessionId: threadId, kind: "turn_completed", text: "Grok Build turn completed." });
       return threadId;
     },
-    startCodexDesktopTurn: async () => {},
-    interruptCodexDesktopTurn: async () => {}
+    continueGrokTurn: async () => {},
+    interruptGrokTurn: async () => {}
   });
 
   await manager.startChat({
@@ -572,7 +570,7 @@ test("chat manager broadcasts live app-server turn events for visible Desktop ch
 
   assert.ok(messages.some((message) => {
     const event = message as { type?: string; event?: { kind?: string; text?: string } };
-    return event.type === "chat_event" && event.event?.kind === "output" && event.event.text === "Hello from Codex.";
+    return event.type === "chat_event" && event.event?.kind === "output" && event.event.text === "Hello from Grok.";
   }));
   assert.ok(messages.some((message) => {
     const event = message as { type?: string; event?: { kind?: string; status?: string } };
@@ -587,15 +585,15 @@ test("new chat creation starts a Desktop-owned conversation", async () => {
   let desktopChats = [] as Awaited<ReturnType<ChatManager["list"]>>;
 
   const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
-    listCodexChats: async () => desktopChats,
-    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    listGrokChats: async () => desktopChats,
+    readGrokChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
     prepareChatWorkspace: async (options) => {
       assert.equal(options.projectPath, "/Users/me/project");
       assert.equal(options.branch, "main");
       assert.equal(options.workMode, "local");
       return "/Users/me/project";
     },
-    startCodexDesktopConversation: async (input) => {
+    startGrokConversation: async (input) => {
       assert.deepEqual(input, {
         cwd: "/Users/me/project",
         prompt: "Phone-created Desktop chat",
@@ -604,7 +602,7 @@ test("new chat creation starts a Desktop-owned conversation", async () => {
         accessPreset: "on_request"
       });
       desktopChats = [{
-        id: `codex:${threadId}`,
+        id: `grok:${threadId}`,
         repo: "/Users/me/project",
         title: "Phone-created Desktop chat",
         projectName: "project",
@@ -615,8 +613,8 @@ test("new chat creation starts a Desktop-owned conversation", async () => {
       }];
       return threadId;
     },
-    startCodexDesktopTurn: async () => {},
-    interruptCodexDesktopTurn: async () => {}
+    continueGrokTurn: async () => {},
+    interruptGrokTurn: async () => {}
   });
 
   const chat = await manager.startChat({
@@ -630,12 +628,12 @@ test("new chat creation starts a Desktop-owned conversation", async () => {
     reasoningEffort: "high"
   });
 
-  assert.equal(chat.id, `codex:${threadId}`);
+  assert.equal(chat.id, `grok:${threadId}`);
   assert.equal(chat.title, "Phone-created Desktop chat");
   assert.ok(messages.some((message) => (message as { type?: string }).type === "chat_started"));
   assert.ok(messages.some((message) => {
     const serverMessage = message as { type?: string; chats?: Array<{ id: string }> };
-    return serverMessage.type === "chat_list" && serverMessage.chats?.some((item) => item.id === `codex:${threadId}`);
+    return serverMessage.type === "chat_list" && serverMessage.chats?.some((item) => item.id === `grok:${threadId}`);
   }));
 });
 
@@ -644,13 +642,13 @@ test("new chat creation waits for Desktop visibility before broadcasting", async
   const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   let listCalls = 0;
   const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
-    listCodexChats: async () => {
+    listGrokChats: async () => {
       listCalls += 1;
       if (listCalls < 2) {
         return [];
       }
       return [{
-        id: `codex:${threadId}`,
+        id: `grok:${threadId}`,
         repo: "/Users/me/project",
         title: "Phone-created Desktop chat",
         projectName: "project",
@@ -660,11 +658,11 @@ test("new chat creation waits for Desktop visibility before broadcasting", async
         transcript: []
       }];
     },
-    readCodexChatDetail: async () => null,
+    readGrokChatDetail: async () => null,
     prepareChatWorkspace: async () => "/Users/me/project",
-    startCodexDesktopConversation: async () => threadId,
-    startCodexDesktopTurn: async () => {},
-    interruptCodexDesktopTurn: async () => {}
+    startGrokConversation: async () => threadId,
+    continueGrokTurn: async () => {},
+    interruptGrokTurn: async () => {}
   });
 
   const chat = await manager.startChat({
@@ -678,24 +676,24 @@ test("new chat creation waits for Desktop visibility before broadcasting", async
     reasoningEffort: "high"
   });
 
-  assert.equal(chat.id, `codex:${threadId}`);
+  assert.equal(chat.id, `grok:${threadId}`);
   assert.equal(chat.status, "running");
   assert.equal(listCalls, 3);
   assert.ok(messages.some((message) => {
     const serverMessage = message as { type?: string; chats?: Array<{ id: string }> };
-    return serverMessage.type === "chat_list" && serverMessage.chats?.[0]?.id === `codex:${threadId}`;
+    return serverMessage.type === "chat_list" && serverMessage.chats?.[0]?.id === `grok:${threadId}`;
   }));
 });
 
 test("new chat creation fails instead of broadcasting an orphan when Desktop does not expose the chat", async () => {
   const messages: unknown[] = [];
   const manager = new ChatManager((message) => messages.push(message), {
-    listCodexChats: async () => [],
-    readCodexChatDetail: async () => null,
+    listGrokChats: async () => [],
+    readGrokChatDetail: async () => null,
     prepareChatWorkspace: async () => "/Users/me/project",
-    startCodexDesktopConversation: async () => "019dc424-e857-76e0-8229-589ecf107eb4",
-    startCodexDesktopTurn: async () => {},
-    interruptCodexDesktopTurn: async () => {}
+    startGrokConversation: async () => "019dc424-e857-76e0-8229-589ecf107eb4",
+    continueGrokTurn: async () => {},
+    interruptGrokTurn: async () => {}
   });
 
   await assert.rejects(
@@ -709,7 +707,7 @@ test("new chat creation fails instead of broadcasting an orphan when Desktop doe
       model: "gpt-5.5",
       reasoningEffort: "high"
     }),
-    /Codex Desktop did not expose chat codex:019dc424-e857-76e0-8229-589ecf107eb4/
+    /Grok Build did not expose chat grok:019dc424-e857-76e0-8229-589ecf107eb4/
   );
   assert.equal(messages.length, 0);
 });
@@ -718,13 +716,13 @@ test("projectless new chat provides a Desktop projectless workspace", async () =
   const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   let desktopChats = [] as Awaited<ReturnType<ChatManager["list"]>>;
   const manager = new ChatManager(() => {}, {
-    listCodexChats: async () => desktopChats,
-    readCodexChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
+    listGrokChats: async () => desktopChats,
+    readGrokChatDetail: async (chatId) => desktopChats.find((chat) => chat.id === chatId) ?? null,
     prepareChatWorkspace: async (options) => {
       assert.equal(options.projectPath, null);
       return "/Users/me/Documents/Codex";
     },
-    startCodexDesktopConversation: async (input) => {
+    startGrokConversation: async (input) => {
       assert.deepEqual(input, {
         cwd: "/Users/me/Documents/Codex",
         prompt: "Projectless prompt",
@@ -733,7 +731,7 @@ test("projectless new chat provides a Desktop projectless workspace", async () =
         accessPreset: "on_request"
       });
       desktopChats = [{
-        id: `codex:${threadId}`,
+        id: `grok:${threadId}`,
         repo: "/Users/me/Documents/Codex",
         title: "Projectless prompt",
         projectName: "Codex",
@@ -744,8 +742,8 @@ test("projectless new chat provides a Desktop projectless workspace", async () =
       }];
       return threadId;
     },
-    startCodexDesktopTurn: async () => {},
-    interruptCodexDesktopTurn: async () => {}
+    continueGrokTurn: async () => {},
+    interruptGrokTurn: async () => {}
   });
 
   await manager.startChat({
@@ -764,7 +762,7 @@ test("continued Codex chats route through Codex Desktop IPC", async () => {
   const threadId = "019dc424-e857-76e0-8229-589ecf107eb4";
   const messages: unknown[] = [];
   const desktopChat = {
-    id: `codex:${threadId}`,
+    id: `grok:${threadId}`,
     repo: "/Users/me/project",
     title: "Say hello",
     projectName: "project",
@@ -778,23 +776,23 @@ test("continued Codex chats route through Codex Desktop IPC", async () => {
   };
 
   const manager = new ChatManager((message) => messages.push(JSON.parse(JSON.stringify(message))), {
-    listCodexChats: async () => [desktopChat],
-    readCodexChatDetail: async (chatId) => chatId === desktopChat.id ? desktopChat : null,
+    listGrokChats: async () => [desktopChat],
+    readGrokChatDetail: async (chatId) => chatId === desktopChat.id ? desktopChat : null,
     prepareChatWorkspace: async () => "/Users/me/project",
-    startCodexDesktopConversation: async () => {
+    startGrokConversation: async () => {
       throw new Error("New-conversation route should not be used for continued chats.");
     },
-    startCodexDesktopTurn: async (input) => {
+    continueGrokTurn: async (input) => {
       assert.deepEqual(input, {
-        threadId,
+        sessionId: threadId,
         cwd: "/Users/me/project",
         prompt: "Again"
       });
     },
-    interruptCodexDesktopTurn: async () => {}
+    interruptGrokTurn: async () => {}
   });
 
-  const chat = await manager.continue(`codex:${threadId}`, "Again");
+  const chat = await manager.continue(`grok:${threadId}`, "Again");
 
   assert.equal(chat.acceptsInput, false);
   assert.ok(chat.transcript?.some((entry) => entry.includes("Again")));

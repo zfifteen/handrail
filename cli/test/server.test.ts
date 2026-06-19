@@ -48,9 +48,9 @@ const automations: AutomationRecord[] = [{
 
 test("WebSocket server pairs, refreshes chats, stops chats, and reports command errors", async () => {
   const chat: ChatRecord = {
-    id: "codex:thread-1",
+    id: "grok:thread-1",
     repo: "/Users/me/project",
-    title: "Desktop chat",
+    title: "Grok chat",
     projectName: "project",
     status: "idle",
     startedAt: "2026-04-29T00:00:00.000Z",
@@ -82,7 +82,7 @@ test("WebSocket server pairs, refreshes chats, stops chats, and reports command 
       detail: async () => chat,
       startChat: async (_options: StartChatOptions) => chat,
       continue: async () => {
-        throw new Error("No Codex chat with id codex:missing.");
+        throw new Error("No Grok chat with id grok:missing.");
       },
       sendInput() {
         throw new Error("Direct input is disabled.");
@@ -118,7 +118,7 @@ test("WebSocket server pairs, refreshes chats, stops chats, and reports command 
 
     const initialList = await messages.next();
     assert.equal(initialList.type, "chat_list");
-    assert.deepEqual(initialList.chats.map((item) => item.title), ["Desktop chat"]);
+    assert.deepEqual(initialList.chats.map((item) => item.title), ["Grok chat"]);
 
     const initialAutomations = await messages.next();
     assert.equal(initialAutomations.type, "automation_list");
@@ -163,10 +163,10 @@ test("WebSocket server pairs, refreshes chats, stops chats, and reports command 
     assert.equal((await messages.next()).type, "automation_list");
     assert.equal(deletedAutomationId, "finish-handrail-ipad-app");
 
-    ws.send(JSON.stringify({ type: "continue_chat", chatId: "codex:missing", prompt: "Hello" }));
+    ws.send(JSON.stringify({ type: "continue_chat", chatId: "grok:missing", prompt: "Hello" }));
     assert.deepEqual(await messages.next(), {
       type: "error",
-      message: "No Codex chat with id codex:missing."
+      message: "No Grok chat with id grok:missing."
     } satisfies ServerMessage);
 
     const close = once(ws, "close");
@@ -241,9 +241,9 @@ test("WebSocket server accepts and persists push token registration", async () =
 
 test("WebSocket server broadcasts chat list when thinking appears during polling", async () => {
   let chat: ChatRecord = {
-    id: "codex:thread-1",
+    id: "grok:thread-1",
     repo: "/Users/me/project",
-    title: "Desktop chat",
+    title: "Grok chat",
     projectName: "project",
     status: "running",
     startedAt: "2026-04-29T00:00:00.000Z",
@@ -303,9 +303,9 @@ test("WebSocket server broadcasts chat list when thinking appears during polling
 
 test("WebSocket server broadcasts chat list when transcript content changes during polling", async () => {
   let chat: ChatRecord = {
-    id: "codex:thread-1",
+    id: "grok:thread-1",
     repo: "/Users/me/project",
-    title: "Desktop chat",
+    title: "Grok chat",
     projectName: "project",
     status: "running",
     startedAt: "2026-04-29T00:00:00.000Z",
@@ -347,11 +347,11 @@ test("WebSocket server broadcasts chat list when transcript content changes duri
 
     chat = {
       ...chat,
-      transcript: ["Codex:\nHello back.  \n\n"]
+      transcript: ["Grok:\nHello back.  \n\n"]
     };
 
     const updated = await messages.nextMatching(
-      (message) => message.type === "chat_list" && message.chats[0].transcript?.[0] === "Codex:\nHello back.  \n\n"
+      (message) => message.type === "chat_list" && message.chats[0].transcript?.[0] === "Grok:\nHello back.  \n\n"
     );
     assert.equal(updated.type, "chat_list");
 

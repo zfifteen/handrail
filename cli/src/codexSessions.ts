@@ -4,7 +4,6 @@ import { basename, join } from "node:path";
 import { homedir } from "node:os";
 import { promisify } from "node:util";
 import type { ChatRecord, ThinkingEntry } from "./types.js";
-import { discoverDesktopProjects } from "./newChatOptions.js";
 
 const MAX_CODEX_SESSIONS = 50;
 const MAX_TRANSCRIPT_LINES = 40;
@@ -76,11 +75,7 @@ export async function listCodexChats(): Promise<ChatRecord[]> {
   const threadStatuses = await readDesktopThreadStatuses(desktopThreads.map((thread) => thread.id));
   const pinnedThreadIds = await readDesktopPinnedThreadIds();
   const automationTargetThreadIds = await readDesktopAutomationTargetThreadIds();
-  const projectNames = new Map(
-    (await discoverDesktopProjects())
-      .filter((project) => project.path)
-      .map((project) => [project.path!, project.name])
-  );
+  const projectNames = new Map<string, string>();
   return desktopThreads.map((thread) =>
     readCodexSessionRow(thread, pinnedThreadIds, automationTargetThreadIds, projectNames, threadStatuses)
   );
@@ -94,11 +89,7 @@ export async function readCodexChatDetail(chatId: string): Promise<ChatRecord | 
   }
   const pinnedThreadIds = await readDesktopPinnedThreadIds();
   const automationTargetThreadIds = await readDesktopAutomationTargetThreadIds();
-  const projectNames = new Map(
-    (await discoverDesktopProjects())
-      .filter((project) => project.path)
-      .map((project) => [project.path!, project.name])
-  );
+  const projectNames = new Map<string, string>();
   return readCodexSessionDetail(thread, pinnedThreadIds, automationTargetThreadIds, projectNames);
 }
 

@@ -1,33 +1,41 @@
 import { setTimeout as delay } from "node:timers/promises";
 import { prepareChatWorkspace } from "./newChatOptions.js";
 import type { ApprovalRequest, ChatRecord, ChatStatus, ServerMessage, StartChatOptions } from "./types.js";
-import { formatCodexTranscriptEntry, listCodexChats, readCodexChatDetail } from "./codexSessions.js";
-import { interruptCodexDesktopTurn, startCodexDesktopConversation, startCodexDesktopTurn, type DesktopApprovalDecision, type DesktopApprovalRequest, type DesktopLiveEvent } from "./codexDesktopIpc.js";
+import { formatGrokTranscriptEntry } from "./grokTranscript.js";
+import { grokChatId, grokSessionId, listGrokChats, readGrokChatDetail } from "./grokSessions.js";
+import {
+  continueGrokTurn,
+  interruptGrokTurn,
+  startGrokConversation,
+  type GrokApprovalDecision,
+  type GrokApprovalRequest,
+  type GrokLiveEvent
+} from "./grokBuildAcp.js";
 
 type Broadcast = (message: ServerMessage) => void;
-const DESKTOP_VISIBLE_WAIT_ATTEMPTS = 24;
-const DESKTOP_VISIBLE_WAIT_MS = 250;
+const GROK_VISIBLE_WAIT_ATTEMPTS = 24;
+const GROK_VISIBLE_WAIT_MS = 250;
 
 interface ChatManagerDeps {
-  listCodexChats: typeof listCodexChats;
-  readCodexChatDetail: typeof readCodexChatDetail;
+  listGrokChats: typeof listGrokChats;
+  readGrokChatDetail: typeof readGrokChatDetail;
   prepareChatWorkspace: typeof prepareChatWorkspace;
-  startCodexDesktopConversation: typeof startCodexDesktopConversation;
-  startCodexDesktopTurn: typeof startCodexDesktopTurn;
-  interruptCodexDesktopTurn: typeof interruptCodexDesktopTurn;
+  startGrokConversation: typeof startGrokConversation;
+  continueGrokTurn: typeof continueGrokTurn;
+  interruptGrokTurn: typeof interruptGrokTurn;
 }
 
 const defaultDeps: ChatManagerDeps = {
-  listCodexChats,
-  readCodexChatDetail,
+  listGrokChats,
+  readGrokChatDetail,
   prepareChatWorkspace,
-  startCodexDesktopConversation,
-  startCodexDesktopTurn,
-  interruptCodexDesktopTurn
+  startGrokConversation,
+  continueGrokTurn,
+  interruptGrokTurn
 };
 
 export class ChatManager {
-  private pendingApprovals = new Map<string, { request: ApprovalRequest; respond(decision: DesktopApprovalDecision): Promise<void> }>();
+  private pendingApprovals = new Map<string, { request: ApprovalRequest; respond(decision: GrokApprovalDecision): Promise<void> }>();
   private liveStatuses = new Map<string, { status: ChatStatus; updatedAt: string }>();
 
   constructor(
@@ -36,15 +44,15 @@ export class ChatManager {
   ) {}
 
   async list(): Promise<ChatRecord[]> {
-    return this.applyPendingApprovals(this.applyLiveStatuses(await this.deps.listCodexChats())).sort(
+    return this.applyPendingApprovals(this.applyLiveStatuses(await this.deps.listGrokChats())).sort(
       (left, right) => this.sortTime(right) - this.sortTime(left)
     );
   }
 
   async detail(chatId: string): Promise<ChatRecord> {
-    const chat = await this.deps.readCodexChatDetail(chatId);
+    const chat = await this.deps.readGrokChatDetail(chatId);
     if (!chat) {
-      throw new Error(`No Codex chat with id ${chatId}. Refresh chats and try again.`);
+      throw new Error(`No Grok chat with id ${chatId}. Refresh chats and try again.`);
     }
     return chat;
   }
@@ -61,7 +69,7 @@ export class ChatManager {
       newBranch: options.newBranch,
       workMode: options.workMode
     });
-    const threadId = await this.deps.startCodexDesktopConversation(
+    const sessionId = await this.deps.startGrokConversation(
       {
         cwd: repo,
         prompt,
@@ -69,21 +77,21 @@ export class ChatManager {
         reasoningEffort: options.reasoningEffort,
         accessPreset: options.accessPreset
       },
-      (approval) => void this.handleDesktopApprovalRequest(approval).catch((error) => this.broadcastError(error)),
-      (event) => void this.handleDesktopLiveEvent(event).catch((error) => this.broadcastError(error))
+      (approval) => void this.handleGrokApprovalRequest(approval).catch((error) => this.broadcastError(error)),
+      (event) => void this.handleGrokLiveEvent(event).catch((error) => this.broadcastError(error))
     );
     const now = new Date().toISOString();
-    const visibleChat = await this.waitForDesktopVisibleChat(`codex:${threadId}`);
+    const visibleChat = await this.waitForVisibleChat(grokChatId(sessionId));
     const chat: ChatRecord = {
       ...visibleChat,
       status: "running",
       updatedAt: now,
-      transcript: visibleChat.transcript?.length ? visibleChat.transcript : [formatCodexTranscriptEntry("user", prompt)],
+      transcript: visibleChat.transcript?.length ? visibleChat.transcript : [formatGrokTranscriptEntry("user", prompt)],
       acceptsInput: false
     };
 
     this.broadcast({ type: "chat_started", chat });
-    this.broadcast({ type: "chat_event", chatId: chat.id, event: { kind: "chat_started", text: "Codex Desktop chat started.", status: "running", at: now } });
+    this.broadcast({ type: "chat_event", chatId: chat.id, event: { kind: "chat_started", text: "Grok Build chat started.", status: "running", at: now } });
     this.broadcast({ type: "chat_list", chats: await this.withVisibleOverlayChat(chat) });
     return chat;
   }
@@ -93,35 +101,35 @@ export class ChatManager {
     if (!trimmedPrompt) {
       throw new Error("Follow-up prompt is required.");
     }
-    const desktopChats = await this.deps.listCodexChats();
-    const desktopChat = desktopChats.find((chat) => chat.id === chatId);
-    if (!desktopChat) {
-      throw new Error(`No Codex chat with id ${chatId}. Refresh chats and try again.`);
+    const grokChats = await this.deps.listGrokChats();
+    const grokChat = grokChats.find((chat) => chat.id === chatId);
+    if (!grokChat) {
+      throw new Error(`No Grok chat with id ${chatId}. Refresh chats and try again.`);
     }
 
-    const threadId = desktopThreadId(chatId);
-    await this.deps.startCodexDesktopTurn({
-      threadId,
-      cwd: desktopChat.repo,
+    const sessionId = grokSessionId(chatId);
+    await this.deps.continueGrokTurn({
+      sessionId,
+      cwd: grokChat.repo,
       prompt: trimmedPrompt
     });
     const now = new Date().toISOString();
     const chat: ChatRecord = {
-      ...desktopChat,
+      ...grokChat,
       status: "running",
       updatedAt: now,
-      transcript: [...(desktopChat.transcript ?? []), formatCodexTranscriptEntry("user", trimmedPrompt)],
+      transcript: [...(grokChat.transcript ?? []), formatGrokTranscriptEntry("user", trimmedPrompt)],
       acceptsInput: false
     };
 
     this.broadcast({ type: "chat_started", chat });
     this.broadcast({ type: "chat_event", chatId, event: { kind: "input_sent", text: trimmedPrompt, status: "running", at: now } });
-    this.broadcast({ type: "chat_list", chats: this.overlayVisibleChat(desktopChats, chat) });
+    this.broadcast({ type: "chat_list", chats: this.overlayVisibleChat(grokChats, chat) });
     return chat;
   }
 
   sendInput(chatId: string, _text: string): void {
-    throw new Error(`Codex chat ${chatId} does not accept direct terminal input from Handrail.`);
+    throw new Error(`Grok chat ${chatId} does not accept direct terminal input from Handrail.`);
   }
 
   async approve(chatId: string, approvalId: string): Promise<ApprovalRequest> {
@@ -145,10 +153,10 @@ export class ChatManager {
   }
 
   async stop(chatId: string): Promise<void> {
-    const threadId = desktopThreadId(chatId);
-    await this.deps.interruptCodexDesktopTurn(threadId);
+    const sessionId = grokSessionId(chatId);
+    await this.deps.interruptGrokTurn(sessionId);
     const now = new Date().toISOString();
-    this.broadcast({ type: "chat_event", chatId, event: { kind: "chat_stopped", text: "Stop requested in Codex Desktop.", status: "stopped", at: now } });
+    this.broadcast({ type: "chat_event", chatId, event: { kind: "chat_stopped", text: "Stop requested in Grok Build.", status: "stopped", at: now } });
     this.broadcast({ type: "chat_list", chats: await this.list() });
   }
 
@@ -156,15 +164,15 @@ export class ChatManager {
     return new Date(chat.updatedAt ?? chat.endedAt ?? chat.startedAt).getTime();
   }
 
-  private async waitForDesktopVisibleChat(chatId: string): Promise<ChatRecord> {
-    for (let attempt = 0; attempt < DESKTOP_VISIBLE_WAIT_ATTEMPTS; attempt += 1) {
-      const chat = (await this.deps.listCodexChats()).find((item) => item.id === chatId);
+  private async waitForVisibleChat(chatId: string): Promise<ChatRecord> {
+    for (let attempt = 0; attempt < GROK_VISIBLE_WAIT_ATTEMPTS; attempt += 1) {
+      const chat = (await this.deps.listGrokChats()).find((item) => item.id === chatId);
       if (chat) {
         return chat;
       }
-      await delay(DESKTOP_VISIBLE_WAIT_MS);
+      await delay(GROK_VISIBLE_WAIT_MS);
     }
-    throw new Error(`Codex Desktop did not expose chat ${chatId}. Open Codex Desktop and refresh Handrail.`);
+    throw new Error(`Grok Build did not expose chat ${chatId}. Refresh Handrail and try again.`);
   }
 
   private async withVisibleOverlayChat(startedChat: ChatRecord): Promise<ChatRecord[]> {
@@ -174,21 +182,21 @@ export class ChatManager {
 
   private overlayVisibleChat(chats: ChatRecord[], overlay: ChatRecord): ChatRecord[] {
     if (!chats.some((chat) => chat.id === overlay.id)) {
-      throw new Error(`Codex Desktop did not expose chat ${overlay.id}. Open Codex Desktop and refresh Handrail.`);
+      throw new Error(`Grok Build did not expose chat ${overlay.id}. Refresh Handrail and try again.`);
     }
     return chats.map((chat) => chat.id === overlay.id ? { ...chat, ...overlay } : chat);
   }
 
-  private async handleDesktopApprovalRequest(approval: DesktopApprovalRequest): Promise<void> {
+  private async handleGrokApprovalRequest(approval: GrokApprovalRequest): Promise<void> {
     const request: ApprovalRequest = {
-      chatId: `codex:${approval.threadId}`,
+      chatId: grokChatId(approval.sessionId),
       approvalId: approval.approvalId,
       title: approval.title,
       summary: approval.summary,
       files: approval.files,
       diff: approval.diff
     };
-    await this.waitForDesktopVisibleChat(request.chatId);
+    await this.waitForVisibleChat(request.chatId);
     this.pendingApprovals.set(approvalKey(request.chatId, request.approvalId), { request, respond: approval.respond });
     this.broadcast({ type: "approval_required", ...request });
     this.broadcast({
@@ -199,14 +207,14 @@ export class ChatManager {
     this.broadcast({ type: "chat_list", chats: await this.list() });
   }
 
-  private async handleDesktopLiveEvent(event: DesktopLiveEvent): Promise<void> {
-    const chatId = `codex:${event.threadId}`;
+  private async handleGrokLiveEvent(event: GrokLiveEvent): Promise<void> {
+    const chatId = grokChatId(event.sessionId);
     const now = new Date().toISOString();
-    const mapped = chatEventFromDesktopLiveEvent(event);
+    const mapped = chatEventFromGrokLiveEvent(event);
     if (!mapped) {
       return;
     }
-    await this.waitForDesktopVisibleChat(chatId);
+    await this.waitForVisibleChat(chatId);
     if (mapped.status) {
       this.liveStatuses.set(chatId, { status: mapped.status, updatedAt: now });
     }
@@ -220,10 +228,10 @@ export class ChatManager {
     }
   }
 
-  private pendingApproval(chatId: string, approvalId: string): { request: ApprovalRequest; respond(decision: DesktopApprovalDecision): Promise<void> } {
+  private pendingApproval(chatId: string, approvalId: string): { request: ApprovalRequest; respond(decision: GrokApprovalDecision): Promise<void> } {
     const pending = this.pendingApprovals.get(approvalKey(chatId, approvalId));
     if (!pending || pending.request.chatId !== chatId) {
-      throw new Error(`No pending approval ${approvalId} for Codex chat ${chatId}.`);
+      throw new Error(`No pending approval ${approvalId} for Grok chat ${chatId}.`);
     }
     return pending;
   }
@@ -256,7 +264,7 @@ export class ChatManager {
   }
 }
 
-function chatEventFromDesktopLiveEvent(event: DesktopLiveEvent): { kind: string; status?: ChatStatus } | null {
+function chatEventFromGrokLiveEvent(event: GrokLiveEvent): { kind: string; status?: ChatStatus } | null {
   switch (event.kind) {
     case "turn_started":
       return { kind: "turn_started", status: "running" };
@@ -269,13 +277,6 @@ function chatEventFromDesktopLiveEvent(event: DesktopLiveEvent): { kind: string;
     case "output":
       return { kind: "output" };
   }
-}
-
-function desktopThreadId(chatId: string): string {
-  if (!chatId.startsWith("codex:")) {
-    throw new Error(`No Codex chat with id ${chatId}.`);
-  }
-  return chatId.replace(/^codex:/, "");
 }
 
 function approvalKey(chatId: string, approvalId: string): string {
