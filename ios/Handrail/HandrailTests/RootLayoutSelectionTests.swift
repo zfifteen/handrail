@@ -80,6 +80,29 @@ final class ChatDetailComposerStateTests: XCTestCase {
         XCTAssertEqual(ChatDetailSendButtonStyle.iconColor(isDisabled: false), .black)
         XCTAssertEqual(ChatDetailSendButtonStyle.backgroundColor(isDisabled: false), .white)
     }
+
+    func testIdleGrokChatShowsFollowUpComposer() {
+        XCTAssertEqual(
+            ChatDetailComposerPolicy.mode(chat: HandrailTestFixtures.idleChat, isOnline: true),
+            .followUp
+        )
+    }
+
+    func testRunningGrokChatWithoutLiveInputShowsWorkingNotice() {
+        var runningGrok = HandrailTestFixtures.runningChat
+        runningGrok.acceptsInput = false
+        XCTAssertEqual(
+            ChatDetailComposerPolicy.mode(chat: runningGrok, isOnline: true),
+            .readOnly("Grok is working. You can send a follow-up when this chat finishes.")
+        )
+    }
+
+    func testOfflineArchivedChatShowsReconnectNotice() {
+        XCTAssertEqual(
+            ChatDetailComposerPolicy.mode(chat: HandrailTestFixtures.completedChat, isOnline: false),
+            .readOnly("Connect to your Mac to keep chatting.")
+        )
+    }
 }
 
 final class ChatDetailApprovalResultTests: XCTestCase {

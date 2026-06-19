@@ -17,26 +17,7 @@ struct ChatDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             chatSurface
-            if canControlChat {
-                if canSendInput {
-                    sendingInputStatus
-                    composer(placeholder: "Ask Grok", isPending: pendingSendInput != nil) { text in
-                        let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                        pendingSendInput = prompt
-                        if !store.usesStaticPreviewData {
-                            store.sendInput(chatId: chatId, text: prompt)
-                        }
-                    }
-                }
-            } else if canStartFollowUp {
-                composer(placeholder: "Ask Grok", isPending: pendingContinuePrompt != nil) { text in
-                    let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                    pendingContinuePrompt = prompt
-                    store.continueChat(chatId: chatId, prompt: prompt)
-                }
-            } else if store.chat(id: chatId) != nil {
-                readOnlyNotice(store.pairedMachine?.isOnline == true ? "This Grok chat cannot receive input right now." : "Connect to your Mac to keep chatting.")
-            }
+            composerBar
         }
         .background(Color.black.ignoresSafeArea())
         .navigationTitle(displayTitle(store.chat(id: chatId)?.title ?? "Chat"))
@@ -183,21 +164,40 @@ struct ChatDetailView: View {
         }
     }
 
+    @ViewBuilder
+    private var composerBar: some View {
+        switch composerMode {
+        case .liveInput:
+            sendingInputStatus
+            composer(placeholder: "Ask Grok", isPending: pendingSendInput != nil) { text in
+                let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                pendingSendInput = prompt
+                if !store.usesStaticPreviewData {
+                    store.sendInput(chatId: chatId, text: prompt)
+                }
+            }
+        case .followUp:
+            composer(placeholder: "Continue this chat", isPending: pendingContinuePrompt != nil) { text in
+                let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                pendingContinuePrompt = prompt
+                store.continueChat(chatId: chatId, prompt: prompt)
+            }
+        case .readOnly(let message):
+            readOnlyNotice(message)
+        }
+    }
+
+    private var composerMode: ChatDetailComposerMode {
+        ChatDetailComposerPolicy.mode(
+            chat: store.chat(id: chatId),
+            isOnline: store.pairedMachine?.isOnline == true
+        )
+    }
+
     private var canControlChat: Bool {
         guard let chat = store.chat(id: chatId) else { return false }
         return store.pairedMachine?.isOnline == true &&
             (chat.status == .running || chat.status == .waitingForApproval)
-    }
-
-    private var canSendInput: Bool {
-        store.chat(id: chatId)?.acceptsInput == true
-    }
-
-    private var canStartFollowUp: Bool {
-        guard let chat = store.chat(id: chatId) else { return false }
-        return store.pairedMachine?.isOnline == true &&
-            chat.status != .running &&
-            chat.status != .waitingForApproval
     }
 
     private var canDismissAttention: Bool {
@@ -503,6 +503,33 @@ struct ChatDetailView: View {
 
     private func displayTitle(_ title: String) -> String {
         HandrailFormatters.strippedAssistantTitle(title)
+    }
+}
+
+enum ChatDetailComposerMode: Equatable {
+    case liveInput
+    case followUp
+    case readOnly(String)
+}
+
+enum ChatDetailComposerPolicy {
+    static func mode(chat: GrokChat?, isOnline: Bool) -> ChatDetailComposerMode {
+        guard let chat else {
+            return .readOnly("Chat not found.")
+        }
+        guard isOnline else {
+            return .readOnly("Connect to your Mac to keep chatting.")
+        }
+        if chat.status == .running && chat.acceptsInput == true {
+            return .liveInput
+        }
+        if chat.status == .waitingForApproval {
+            return .readOnly("Review the approval request before Grok can continue.")
+        }
+        if chat.status == .running {
+            return .readOnly("Grok is working. You can send a follow-up when this chat finishes.")
+        }
+        return .followUp
     }
 }
 
