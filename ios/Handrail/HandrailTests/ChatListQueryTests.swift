@@ -33,9 +33,19 @@ final class ChatListQueryTests: XCTestCase {
     }
 
     func testDashboardMenuSnapshotEntryPointIncludesDesktopShortcutOrder() {
-        let snapshot = DashboardMenuQuery.snapshot(from: HandrailTestFixtures.pinnedChats, now: HandrailTestFixtures.baseDate)
+        let snapshot = DashboardMenuQuery.snapshot(
+            from: HandrailTestFixtures.pinnedChats,
+            automations: HandrailTestFixtures.sampleAutomations,
+            now: HandrailTestFixtures.baseDate
+        )
 
         XCTAssertEqual(snapshot.shortcuts, [.newChat, .search, .plugins, .automations])
+    }
+
+    func testDashboardMenuSnapshotHidesAutomationsShortcutWhenListIsEmpty() {
+        let snapshot = DashboardMenuQuery.snapshot(from: HandrailTestFixtures.pinnedChats, now: HandrailTestFixtures.baseDate)
+
+        XCTAssertEqual(snapshot.shortcuts, [.newChat, .search, .plugins])
     }
 
     func testDashboardMenuShortcutsUseDesktopMenuLabelsAndIcons() {

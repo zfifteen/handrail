@@ -10,7 +10,7 @@ struct IPadNewChatPanel: View {
     @State private var newBranch = ""
     @State private var createsBranch = false
     @State private var accessPreset = "on_request"
-    @State private var model = "gpt-5.5"
+    @State private var model = "grok-build"
     @State private var reasoningEffort = "high"
     @State private var isStarting = false
     @FocusState private var promptFocused: Bool
@@ -293,7 +293,7 @@ struct IPadNewChatPanel: View {
     }
 
     private var models: [String] {
-        options?.models ?? ["gpt-5.5"]
+        options?.models ?? ["grok-build"]
     }
 
     private var reasoningEfforts: [String] {

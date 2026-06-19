@@ -2,22 +2,22 @@
 
 ## Revival (2026-06-19)
 
-Handrail is being revived on branch `revive/grok-build` as a **Grok Build** companion (replacing Codex Desktop). Phase 0 spikes pass. **Start here:** [docs/REVIVAL.md](docs/REVIVAL.md) and [docs/PHASE0_FINDINGS.md](docs/PHASE0_FINDINGS.md).
+Handrail is being revived on branch `revive/grok-build` as a **Grok Build** companion (replacing Codex Desktop). Phase 0–3 validation complete. **Start here:** [docs/REVIVAL.md](docs/REVIVAL.md) and [docs/PHASE3_FINDINGS.md](docs/PHASE3_FINDINGS.md).
 
 ---
 
-Handrail is a free, local-first iOS remote control for Codex chats on your own Mac.
+Handrail is a free, local-first iOS remote control for Grok Build sessions on your own Mac.
 
 It has two parts:
 
-- `handrail`, a desktop command that starts a local WebSocket server and exposes Codex Desktop chat state to iOS.
-- `Handrail`, a SwiftUI iOS app that pairs with the CLI, shows Codex chats, continues chats through the Mac, surfaces approvals, and requests stops.
+- `handrail`, a desktop command that starts a local WebSocket server and exposes Grok Build session state to iOS.
+- `Handrail`, a SwiftUI iOS app that pairs with the CLI, shows Grok chats, continues sessions through the Mac, surfaces tool approvals, and requests stops.
 
-Works with OpenAI Codex Desktop. Not affiliated with OpenAI.
+Works with the official Grok Build CLI. Not affiliated with xAI.
 
 ## What Handrail Is Not
 
-Handrail is not a cloud coding workspace, a generic SSH terminal, an account system, a paid product, or a multi-agent control plane. It does not support Claude, Gemini, OpenCode, or other agents. It does not edit files directly. Codex Desktop runs locally and Handrail supervises it.
+Handrail is not a cloud coding workspace, a generic SSH terminal, an account system, a paid product, or a multi-agent control plane. It does not support Claude, Gemini, OpenCode, or other agents. It does not edit files directly. Grok Build runs locally and Handrail supervises it.
 
 ## CLI Install
 
@@ -28,7 +28,7 @@ npm run build
 npm link
 ```
 
-Handrail controls Codex Desktop through the Desktop app's local IPC socket. It does not start a separate Codex execution process.
+Handrail controls Grok Build through the Grok CLI's ACP stdio protocol. It spawns Handrail-owned `grok agent --no-leader stdio` children for new turns when needed.
 
 ## Run the Server and Pair
 
@@ -50,7 +50,7 @@ With `handrail pair` or `handrail serve` running:
 handrail chats
 ```
 
-The iOS app reads the same Codex Desktop chat list the Mac app uses. It does not create a separate Handrail-owned chat list.
+The iOS app reads Grok sessions from `~/.grok/sessions`. Chat IDs use the `grok:<session-id>` prefix.
 
 Other CLI commands:
 
@@ -79,8 +79,8 @@ Handrail is local-first:
 - No cloud relay.
 - No account.
 - No payment code.
-- Code stays on the user’s machine.
-- CLI executes Codex locally.
+- Code stays on the user's machine.
+- CLI executes Grok locally.
 - iOS receives chat output, changed file names, and git diffs.
 - Local network access is required for the MVP.
 
@@ -88,14 +88,16 @@ The token is stored in `~/.handrail/state.json` on the Mac and in Keychain on iO
 
 ## Approval Behavior
 
-For Handrail-started Codex Desktop turns, the CLI listens for structured Codex app-server approval requests. It exposes the app-server request id to iOS as `approvalId`, emits `approval_required`, and sends approve or deny decisions back to the same local app-server request.
+For Handrail-started Grok Build turns, the CLI listens for ACP `session/request_permission` requests. It exposes the tool call id to iOS as `approvalId`, emits `approval_required`, and sends approve or deny decisions back to the same ACP request.
 
-The iOS app shows the approval summary and available file context. Approval routing must use the real Codex Desktop/app-server request id; Handrail does not infer approvals from transcript text.
+The iOS app shows the approval summary and available file context. Approval routing must use the real Grok ACP request id; Handrail does not infer approvals from transcript text.
 
 ## Limitations
 
 - Live approval-response release evidence is still required before App Store copy or screenshots claim approval workflows.
 - The WebSocket server is plain local-network `ws://`.
+- Grok automations are not supported in v1 (empty automation list).
+- Physical device install may require a working USB/Wi-Fi debugging tunnel.
 - The iOS app stores the pairing token in Keychain and paired-machine metadata in UserDefaults.
 - Handrail does not maintain an independent chat store.
 - There is no background daemon, cloud relay, account sync, or generic terminal.
@@ -105,4 +107,5 @@ The iOS app shows the approval summary and available file context. Approval rout
 ```sh
 cd cli
 npm test
+npm run e2e   # live WebSocket probe; requires handrail serve
 ```

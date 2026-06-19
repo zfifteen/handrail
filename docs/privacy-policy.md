@@ -1,6 +1,6 @@
 # Handrail Privacy Policy
 
-**Last updated:** 2026-04-30
+**Last updated:** 2026-06-19
 
 Handrail is a local-first iOS companion app for the Handrail desktop CLI. It is designed to work on your own devices and local network.
 
@@ -19,7 +19,7 @@ Handrail stores the following data on your iPhone/iPad:
 - **Paired machine metadata (UserDefaults):** non-secret details such as machine name, host, and port.
 - **Local notification history (on-device):** if you enable notifications, iOS may keep notification entries visible in the system notification center.
 
-Handrail may display content from your Mac’s Codex Desktop chats (including text that may contain personal or sensitive information) when your iPhone/iPad is paired and connected to your Mac.
+Handrail may display content from your Mac’s Grok Build sessions (including text that may contain personal or sensitive information) when your iPhone/iPad is paired and connected to your Mac.
 
 ## Data Handrail Does Not Collect
 

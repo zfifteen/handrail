@@ -6,7 +6,7 @@ import type { ApprovalRequest, AutomationRecord, ChatRecord, ClientMessage, Hand
 import { ensurePairingToken, saveState } from "./state.js";
 import { ChatManager } from "./chats.js";
 import { getNewChatOptions } from "./newChatOptions.js";
-import { NotificationDispatcher, type PersistState } from "./notifications.js";
+import { NotificationDispatcher, isApnsConfigurationError, type PersistState } from "./notifications.js";
 import { deleteDesktopAutomation, listDesktopAutomations, pauseDesktopAutomation, runDesktopAutomationNow } from "./automations.js";
 
 const emptyAutomations = async () => [] as AutomationRecord[];
@@ -131,7 +131,11 @@ export async function createHandrailServer(options: {
     const visibleChats = await chats.list();
     await notificationDispatcher.notifyVisibleChats(
       visibleChats,
-      (message) => broadcast({ type: "error", message })
+      (message) => {
+        if (!isApnsConfigurationError(message)) {
+          broadcast({ type: "error", message });
+        }
+      }
     );
     const signature = visibleChatSignature(visibleChats);
     if (signature !== lastVisibleChatSignature) {

@@ -1,6 +1,6 @@
 # Handrail Revival — Grok Build Migration
 
-**Status:** Phase 3 complete (2026-06-19). CLI/protocol validated; physical iOS install blocked on host tunnel.
+**Status:** Phase 4 complete (2026-06-19). Polish shipped; physical iOS install still blocked on host tunnel.
 
 This document is the session handoff for reviving Handrail as a **local-first iPhone/iPad supervisor for Grok Build** on the user's Mac. Read this first in any new agent session before editing code.
 
@@ -65,7 +65,7 @@ See [PHASE0_FINDINGS.md](./PHASE0_FINDINGS.md) for evidence and caveats.
 - [x] Server polls `active_sessions.json` every 5s via existing notification observer.
 - [x] Tests ported: `cli/test/grokSessions.test.ts` + `cli/test/fixtures/grok/sample-updates.jsonl`.
 - [x] `grok --no-leader stdio` for new sessions; `--leader` attach when PID exists in `active_sessions.json`.
-- [ ] **Deferred:** `terminal/*` ACP handlers (bash approval round-trip still broken).
+- [x] `terminal/*` ACP handlers (create/output/wait/kill/release).
 - [ ] **Deferred:** dedicated file watcher on `updates.jsonl` (5s poll sufficient for v1).
 
 **Phase 1 acceptance:** `handrail serve` + WebSocket client can list Grok sessions, load detail, start/continue a session.
@@ -88,9 +88,17 @@ See [PHASE0_FINDINGS.md](./PHASE0_FINDINGS.md) for evidence and caveats.
 - [ ] **Blocked:** simulator build (iOS 26.5 SDK / CoreSimulator mismatch).
 - [ ] Manual iOS smoke per `TEST_PLAN.md` after device install succeeds.
 
-### Phase 4 — Polish (optional)
+### Phase 4 — Polish (DONE)
 
-Plan-mode approval UI, subagent visibility, App Store prep.
+- [x] README + privacy policy rebranded for Grok Build.
+- [x] New Chat defaults use `grok-build`; automations shortcut hidden when list empty.
+- [x] Approval UI polish (title, kind badge, chat context).
+- [x] `terminal/*` ACP handlers for bash/command execution.
+- [x] APNs configuration errors filtered from user-facing error feed.
+- [x] Evidence: [PHASE4_FINDINGS.md](./PHASE4_FINDINGS.md).
+- [ ] **Deferred:** App Store screenshots/copy refresh in `store-assets/`.
+- [ ] **Deferred:** subagent visibility in transcript UI.
+- [ ] **Blocked:** physical device install and simulator build (same as Phase 3).
 
 ## Open decisions (need owner input)
 

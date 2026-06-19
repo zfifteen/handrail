@@ -1,4 +1,5 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { spawn, type ChildProcess, type ChildProcessWithoutNullStreams } from "node:child_process";
+
 import { readFile, writeFile } from "node:fs/promises";
 import { createInterface, type Interface } from "node:readline";
 import { readFile as readActiveFile } from "node:fs/promises";
@@ -43,6 +44,158 @@ export interface GrokLiveEvent {
 }
 
 const activeSessions = new Map<string, GrokAcpSession>();
+
+interface ManagedTerminal {
+  proc: ChildProcess;
+  output: string;
+  outputByteLimit: number;
+  exited: boolean;
+  exitCode: number | null;
+  signal: NodeJS.Signals | null;
+}
+
+class GrokTerminalManager {
+  private readonly terminals = new Map<string, ManagedTerminal>();
+  private nextId = 1;
+
+  create(params: Record<string, unknown>): { terminalId: string } {
+    const command = String(params.command ?? "");
+    const args = Array.isArray(params.args) ? params.args.map(String) : [];
+    const cwd = String(params.cwd ?? process.cwd());
+    const outputByteLimit = typeof params.outputByteLimit === "number" ? params.outputByteLimit : 1_048_576;
+    const proc = spawn(command, args, {
+      cwd,
+      env: this.buildEnv(params.env),
+      shell: false,
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+    const terminalId = `term_${this.nextId++}`;
+    const managed: ManagedTerminal = {
+      proc,
+      output: "",
+      outputByteLimit,
+      exited: false,
+      exitCode: null,
+      signal: null
+    };
+
+    const append = (chunk: string) => {
+      managed.output += chunk;
+      while (Buffer.byteLength(managed.output, "utf8") > outputByteLimit && managed.output.length > 0) {
+        managed.output = managed.output.slice(1);
+      }
+    };
+
+    proc.stdout?.on("data", (buffer) => append(buffer.toString("utf8")));
+    proc.stderr?.on("data", (buffer) => append(buffer.toString("utf8")));
+    proc.on("close", (code, signal) => {
+      managed.exited = true;
+      managed.exitCode = code;
+      managed.signal = signal;
+    });
+
+    this.terminals.set(terminalId, managed);
+    return { terminalId };
+  }
+
+  output(terminalId: string): Record<string, unknown> {
+    const terminal = this.require(terminalId);
+    const result: Record<string, unknown> = {
+      output: terminal.output,
+      truncated: Buffer.byteLength(terminal.output, "utf8") >= terminal.outputByteLimit
+    };
+    if (terminal.exited) {
+      result.exitStatus = { exitCode: terminal.exitCode, signal: terminal.signal };
+    }
+    return result;
+  }
+
+  async waitForExit(terminalId: string): Promise<Record<string, unknown>> {
+    const terminal = this.require(terminalId);
+    if (!terminal.exited) {
+      await new Promise<void>((resolve) => {
+        terminal.proc.once("close", () => resolve());
+      });
+    }
+    return { exitCode: terminal.exitCode, signal: terminal.signal };
+  }
+
+  kill(terminalId: string): void {
+    this.require(terminalId).proc.kill("SIGTERM");
+  }
+
+  release(terminalId: string): void {
+    const terminal = this.terminals.get(terminalId);
+    if (!terminal) {
+      return;
+    }
+    if (!terminal.exited) {
+      terminal.proc.kill("SIGKILL");
+    }
+    this.terminals.delete(terminalId);
+  }
+
+  private require(terminalId: string): ManagedTerminal {
+    const terminal = this.terminals.get(terminalId);
+    if (!terminal) {
+      throw new Error(`Unknown terminal: ${terminalId}`);
+    }
+    return terminal;
+  }
+
+  private buildEnv(envVars: unknown): NodeJS.ProcessEnv {
+    const base = { ...process.env };
+    if (!Array.isArray(envVars)) {
+      return base;
+    }
+    for (const entry of envVars) {
+      if (!entry || typeof entry !== "object") {
+        continue;
+      }
+      const name = String((entry as Record<string, unknown>).name ?? "");
+      const value = String((entry as Record<string, unknown>).value ?? "");
+      if (name) {
+        base[name] = value;
+      }
+    }
+    return base;
+  }
+}
+
+export function grokApprovalFromToolCall(toolCall: Record<string, unknown>): {
+  title: string;
+  summary: string;
+  files: string[];
+} {
+  const kind = String(toolCall.kind ?? "");
+  const title = String(toolCall.title ?? "Tool approval");
+  const rawInput = toolCall.rawInput ?? toolCall.input ?? toolCall.arguments;
+  let summary = title;
+  const files: string[] = [];
+
+  if (typeof rawInput === "string") {
+    summary = rawInput.trim() || title;
+  } else if (rawInput && typeof rawInput === "object") {
+    const input = rawInput as Record<string, unknown>;
+    if (typeof input.command === "string") {
+      const args = Array.isArray(input.args) ? input.args.map(String).join(" ") : "";
+      summary = args ? `${input.command} ${args}` : input.command;
+    } else if (typeof input.path === "string") {
+      summary = `Modify ${input.path}`;
+      files.push(input.path);
+    } else {
+      summary = JSON.stringify(rawInput, null, 2);
+    }
+  }
+
+  if (kind === "execute") {
+    return { title: "Command approval required", summary, files };
+  }
+  if (kind === "edit" || kind === "write") {
+    return { title: "File change approval required", summary, files };
+  }
+  return { title, summary, files };
+}
 
 export async function startGrokConversation(
   input: GrokConversationInput,
@@ -137,6 +290,7 @@ class GrokAcpSession {
   private reader: Interface | null = null;
   private nextId = 1;
   private readonly pending = new Map<number, { resolve(value: unknown): void; reject(error: Error): void }>();
+  private readonly terminals = new GrokTerminalManager();
   constructor(
     private readonly cwd: string,
     private readonly spawnArgs: string[],
@@ -302,8 +456,34 @@ class GrokAcpSession {
       return;
     }
 
-    if (method.startsWith("terminal/")) {
-      await this.respond(id, { exitStatus: { exitCode: 1, signal: null }, output: "Handrail does not execute terminal ACP methods yet." });
+    if (method === "terminal/create") {
+      await this.respond(id, this.terminals.create(params));
+      return;
+    }
+
+    if (method === "terminal/output") {
+      const terminalId = String(params.terminalId ?? "");
+      await this.respond(id, this.terminals.output(terminalId));
+      return;
+    }
+
+    if (method === "terminal/wait_for_exit") {
+      const terminalId = String(params.terminalId ?? "");
+      await this.respond(id, await this.terminals.waitForExit(terminalId));
+      return;
+    }
+
+    if (method === "terminal/kill") {
+      const terminalId = String(params.terminalId ?? "");
+      this.terminals.kill(terminalId);
+      await this.respond(id, {});
+      return;
+    }
+
+    if (method === "terminal/release") {
+      const terminalId = String(params.terminalId ?? "");
+      this.terminals.release(terminalId);
+      await this.respond(id, {});
       return;
     }
 
@@ -320,12 +500,13 @@ class GrokAcpSession {
     const allowOptionId = String(allowOption?.optionId ?? allowOption?.id ?? "allow");
     const denyOptionId = String(denyOption?.optionId ?? denyOption?.id ?? "deny");
 
+    const approval = grokApprovalFromToolCall(toolCall);
     const request: GrokApprovalRequest = {
       sessionId,
       approvalId,
-      title: String(toolCall.title ?? "Tool approval"),
-      summary: String(toolCall.title ?? toolCall.kind ?? "Grok requested tool approval."),
-      files: [],
+      title: approval.title,
+      summary: approval.summary,
+      files: approval.files,
       diff: "",
       respond: async (decision) => {
         const optionId = decision === "accept" ? allowOptionId : denyOptionId;

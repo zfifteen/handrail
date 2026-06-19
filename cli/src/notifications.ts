@@ -78,17 +78,17 @@ export class NotificationDispatcher {
 
 export function notificationEventForChat(chat: ChatRecord): NotificationEvent | null {
   if (chat.status === "completed") {
-    return eventForChat(chat, "completed", "Codex task completed", notificationChatLabel(chat));
+    return eventForChat(chat, "completed", "Grok task completed", notificationChatLabel(chat));
   }
   if (chat.status === "failed") {
-    return eventForChat(chat, "failed", "Codex task failed", notificationChatLabel(chat));
+    return eventForChat(chat, "failed", "Grok task failed", notificationChatLabel(chat));
   }
   if (chat.status === "waiting_for_approval") {
-    return eventForChat(chat, "approval_required", "Codex approval required", notificationChatLabel(chat));
+    return eventForChat(chat, "approval_required", "Grok approval required", notificationChatLabel(chat));
   }
   const inputMarker = latestInputRequiredMarker(chat.transcript);
   if (inputMarker) {
-    return eventForChat(chat, "input_required", "Codex input required", notificationChatLabel(chat), inputMarker);
+    return eventForChat(chat, "input_required", "Grok input required", notificationChatLabel(chat), inputMarker);
   }
   return null;
 }
@@ -136,12 +136,21 @@ function notificationChatLabel(chat: ChatRecord): string {
       return label;
     }
   }
-  return "Codex chat";
+  return "Grok chat";
 }
 
 function isRawCodexIdentifier(value: string): boolean {
-  const candidate = value.replace(/^codex:/i, "");
+  const candidate = value.replace(/^(codex|grok):/i, "");
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(candidate);
+}
+
+export function isApnsConfigurationError(message: string): boolean {
+  return (
+    message.startsWith("Missing HANDRAIL_APNS_") ||
+    message.includes("APNs device token is") ||
+    message.includes("APNs rejected") ||
+    message.startsWith("APNs ")
+  );
 }
 
 function latestInputRequiredMarker(transcript: string[] | undefined): string | null {

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildApnsRequest } from "../src/apns.js";
-import { NotificationDispatcher, notificationEventForChat } from "../src/notifications.js";
+import { NotificationDispatcher, isApnsConfigurationError, notificationEventForChat } from "../src/notifications.js";
 import type { ChatRecord, HandrailState, NotificationEvent } from "../src/types.js";
 
 const completedChat: ChatRecord = {
@@ -43,7 +43,7 @@ test("builds APNs alert request deterministically", () => {
     payload: {
       aps: {
         alert: {
-          title: "Codex task completed",
+          title: "Grok task completed",
           body: "Long task"
         },
         category: "HANDRAIL_CHAT",
@@ -119,6 +119,12 @@ test("notification dispatcher reports missing APNs config when push is required"
   }
 });
 
+test("isApnsConfigurationError recognizes APNs setup failures", () => {
+  assert.equal(isApnsConfigurationError("Missing HANDRAIL_APNS_TEAM_ID."), true);
+  assert.equal(isApnsConfigurationError("APNs device token is sandbox, but HANDRAIL_APNS_ENVIRONMENT is production."), true);
+  assert.equal(isApnsConfigurationError("Grok Build did not become ready."), false);
+});
+
 test("notification event detects input-required transcript marker", () => {
   const event = notificationEventForChat({
     ...completedChat,
@@ -128,7 +134,7 @@ test("notification event detects input-required transcript marker", () => {
   });
 
   assert.equal(event?.kind, "input_required");
-  assert.equal(event?.title, "Codex input required");
+  assert.equal(event?.title, "Grok input required");
   assert.match(event?.eventId ?? "", /^codex:thread-1:input_required:2026-04-29T14:08:00\.000Z:[a-f0-9]{16}$/);
 });
 

@@ -80,6 +80,25 @@ enum HandrailTestFixtures {
 
     static let emptyChats: [GrokChat] = []
 
+    static let sampleAutomations = [
+        AutomationRecord(
+            id: "fixture-automation",
+            name: "Fixture Automation",
+            kind: "cron",
+            status: .active,
+            prompt: "Run fixture automation.",
+            rrule: "FREQ=HOURLY",
+            scheduleText: "Hourly",
+            contextText: "handrail",
+            projectName: "handrail",
+            targetThreadId: nil,
+            model: "grok-build",
+            reasoningEffort: "high",
+            executionEnvironment: "local",
+            cwds: []
+        )
+    ]
+
     static func chat(
         id: String,
         title: String,

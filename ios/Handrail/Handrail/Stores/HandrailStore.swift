@@ -402,7 +402,9 @@ final class HandrailStore {
         case .error(let message):
             awaitingStartedChat = false
             isRefreshingChats = false
-            reportPendingError(message)
+            if !isApnsConfigurationError(message) {
+                reportPendingError(message)
+            }
         }
     }
 
@@ -555,6 +557,13 @@ final class HandrailStore {
     private func sendPushTokenIfConnected() {
         guard pairedMachine?.isOnline == true, let pushTokenRegistration else { return }
         client.send(.registerPushToken(pushTokenRegistration))
+    }
+
+    private func isApnsConfigurationError(_ message: String) -> Bool {
+        message.hasPrefix("Missing HANDRAIL_APNS_") ||
+        message.contains("APNs device token is") ||
+        message.contains("APNs rejected") ||
+        message.hasPrefix("APNs ")
     }
 
     private func insertNotification(title: String, detail: String, date: Date, chatId: String?) {

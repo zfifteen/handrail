@@ -51,9 +51,12 @@ struct DashboardMenuChatRow: Identifiable, Equatable {
 }
 
 enum DashboardMenuQuery {
-    static func snapshot(from chats: [GrokChat], now: Date = Date()) -> DashboardMenuSnapshot {
-        DashboardMenuSnapshot(
-            shortcuts: DashboardMenuShortcut.allCases,
+    static func snapshot(from chats: [GrokChat], automations: [AutomationRecord] = [], now: Date = Date()) -> DashboardMenuSnapshot {
+        let shortcuts = DashboardMenuShortcut.allCases.filter { shortcut in
+            shortcut != .automations || !automations.isEmpty
+        }
+        return DashboardMenuSnapshot(
+            shortcuts: shortcuts,
             pinnedRows: pinnedRows(from: chats, now: now),
             allChatRows: allChatRows(from: chats, now: now)
         )
@@ -112,7 +115,7 @@ struct DashboardView: View {
     }
 
     private var dashboardSnapshot: DashboardMenuSnapshot {
-        DashboardMenuQuery.snapshot(from: store.chats)
+        DashboardMenuQuery.snapshot(from: store.chats, automations: store.automations)
     }
 
     var body: some View {
@@ -468,8 +471,17 @@ struct AutomationsView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 34) {
-                automationSection(title: "Current", automations: currentAutomations)
-                automationSection(title: "Paused", automations: pausedAutomations)
+                if store.automations.isEmpty {
+                    EmptyState(
+                        title: "No automations",
+                        detail: "Grok Build automations are not available in this Handrail release.",
+                        systemImage: "clock"
+                    )
+                    .padding(.top, 12)
+                } else {
+                    automationSection(title: "Current", automations: currentAutomations)
+                    automationSection(title: "Paused", automations: pausedAutomations)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 24)
