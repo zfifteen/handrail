@@ -72,6 +72,25 @@ xcodebuild test \
 
 If `TransientErrorStateTests` fail with corrupt pairing metadata, reset simulator app data or use a fresh simulator before re-running.
 
+### A3b. Live server connectivity (simulator → Mac host)
+
+Requires `handrail serve` on the Mac. The simulator uses **`127.0.0.1`**, not the LAN IP.
+
+```sh
+HANDRAIL_PAIRING_TOKEN="$(python3 -c 'import json,pathlib; print(json.loads(pathlib.Path.home().joinpath(".handrail/state.json").read_text())["pairingToken"])')" \
+HANDRAIL_HOST=127.0.0.1 \
+HANDRAIL_PORT=8788 \
+xcodebuild test \
+  -project ios/Handrail/Handrail.xcodeproj \
+  -scheme Handrail \
+  -sdk iphonesimulator \
+  -destination 'platform=iOS Simulator,id=339525A5-A57A-4E57-8640-979BD3174878' \
+  -only-testing:HandrailTests/LiveServerConnectivityTests \
+  -derivedDataPath /tmp/handrail-sim-connectivity-test
+```
+
+**Pass:** `LiveServerConnectivityTests.testSimulatorConnectsToLiveHandrailServer` succeeds (Online + non-empty `grok:` chat list).
+
 ### A4. iOS unit tests — iPad Pro 13-inch (M5)
 
 ```sh
