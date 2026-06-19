@@ -28,13 +28,13 @@ struct ChatTranscriptView: View {
                 }
             } else {
                 ForEach(Array(blocks.enumerated()), id: \.offset) { index, block in
-                    if block.role == .codex && shouldShowThinkingDisclosure(index: index, round: block.round) {
+                    if block.role == .grok && shouldShowThinkingDisclosure(index: index, round: block.round) {
                         thinkingDisclosure(round: block.round, isWorking: isWorking && block.round == latestRound)
                     }
                     ChatMessageBubble(block: block, isLatest: index == blocks.count - 1)
                 }
                 errorView
-                if isWorking && !hasCodexBlock(round: latestRound) {
+                if isWorking && !hasGrokBlock(round: latestRound) {
                     thinkingDisclosure(round: latestRound, isWorking: true)
                 }
             }
@@ -53,19 +53,19 @@ struct ChatTranscriptView: View {
         thinkingEntries.filter { $0.round == round }
     }
 
-    private func isFirstCodexBlock(index: Int, round: Int) -> Bool {
-        !blocks.prefix(index).contains { $0.role == .codex && $0.round == round }
+    private func isFirstGrokBlock(index: Int, round: Int) -> Bool {
+        !blocks.prefix(index).contains { $0.role == .grok && $0.round == round }
     }
 
     func shouldShowThinkingDisclosure(index: Int, round: Int) -> Bool {
-        guard isFirstCodexBlock(index: index, round: round) else {
+        guard isFirstGrokBlock(index: index, round: round) else {
             return false
         }
         return !thinkingEntries(round: round).isEmpty || (isWorking && round == latestRound)
     }
 
-    private func hasCodexBlock(round: Int) -> Bool {
-        blocks.contains { $0.role == .codex && $0.round == round }
+    private func hasGrokBlock(round: Int) -> Bool {
+        blocks.contains { $0.role == .grok && $0.round == round }
     }
 
     private func thinkingDisclosure(round: Int, isWorking: Bool) -> some View {

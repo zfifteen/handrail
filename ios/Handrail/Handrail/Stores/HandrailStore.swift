@@ -5,7 +5,7 @@ import Observation
 @Observable
 final class HandrailStore {
     var pairedMachine: PairedMachine?
-    var chats: [CodexChat] = []
+    var chats: [GrokChat] = []
     var automations: [AutomationRecord] = []
     var transcripts: [String: [String]] = [:]
     var latestApproval: ApprovalRequest?
@@ -218,7 +218,7 @@ final class HandrailStore {
         notifications.removeAll()
     }
 
-    func chat(id: String) -> CodexChat? {
+    func chat(id: String) -> GrokChat? {
         chats.first { $0.id == id }
     }
 
@@ -227,17 +227,17 @@ final class HandrailStore {
     }
 
     func togglePin(chatId: String) {
-        reportError("Pinning is owned by Codex Desktop. Change pinned chats in Codex Desktop, then refresh Handrail.")
+        reportError("Pinning is not available in Grok Build yet.")
     }
 
     func renameChat(chatId: String, title: String) {
         let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        reportError("Renaming is owned by Codex Desktop. Rename chats in Codex Desktop, then refresh Handrail.")
+        reportError("Renaming is not available in Grok Build yet.")
     }
 
     func archiveChat(chatId: String) {
-        reportError("Archiving is owned by Codex Desktop. Archive chats in Codex Desktop, then refresh Handrail.")
+        reportError("Archiving is not available in Grok Build yet.")
     }
 
     func setChatReadState(chatId: String, isRead: Bool) {
@@ -266,7 +266,7 @@ final class HandrailStore {
         saveDismissedAttentionChats()
     }
 
-    func needsAttention(_ chat: CodexChat) -> Bool {
+    func needsAttention(_ chat: GrokChat) -> Bool {
         chat.status == .waitingForApproval || chat.status == .failed
     }
 
@@ -443,7 +443,7 @@ final class HandrailStore {
         }
     }
 
-    private func upsert(_ chat: CodexChat) {
+    private func upsert(_ chat: GrokChat) {
         if let index = chats.firstIndex(where: { $0.id == chat.id }) {
             chats[index] = chat
         } else {
@@ -493,7 +493,7 @@ final class HandrailStore {
 
     private func notificationDetail(chatId: String, eventText: String?) -> String {
         let text = eventText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        if !text.isEmpty && !isRawCodexIdentifier(text) {
+        if !text.isEmpty && !isRawGrokIdentifier(text) {
             return text
         }
         return humanChatLabel(chatId: chatId)
@@ -501,7 +501,7 @@ final class HandrailStore {
 
     private func humanChatLabel(chatId: String) -> String {
         guard let chat = chat(id: chatId) else {
-            return "Codex chat"
+            return "Grok chat"
         }
         for candidate in [
             chat.title,
@@ -509,19 +509,15 @@ final class HandrailStore {
             URL(fileURLWithPath: chat.repo).lastPathComponent
         ] {
             let trimmed = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty && !isRawCodexIdentifier(trimmed) {
+            if !trimmed.isEmpty && !isRawGrokIdentifier(trimmed) {
                 return trimmed
             }
         }
-        return "Codex chat"
+        return "Grok chat"
     }
 
-    private func isRawCodexIdentifier(_ value: String) -> Bool {
-        let candidate = value.replacingOccurrences(of: "^codex:", with: "", options: [.regularExpression, .caseInsensitive])
-        return candidate.range(
-            of: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-            options: [.regularExpression, .caseInsensitive]
-        ) != nil
+    private func isRawGrokIdentifier(_ value: String) -> Bool {
+        HandrailFormatters.isRawGrokChatIdentifier(value)
     }
 
     private func reportError(_ message: String) {
@@ -630,14 +626,14 @@ final class HandrailStore {
         UserDefaults.standard.set(Array(dismissedAttentionChatIds).sorted(), forKey: dismissedAttentionStorageKey)
     }
 
-    private func pruneDismissedAttentionChats(against chats: [CodexChat]) {
+    private func pruneDismissedAttentionChats(against chats: [GrokChat]) {
         let activeAttentionIds = Set(chats.filter(needsAttention).map(\.id))
         dismissedAttentionChatIds = dismissedAttentionChatIds.intersection(activeAttentionIds)
         saveDismissedAttentionChats()
     }
 }
 
-func mergeChatListSummaries(_ summaries: [CodexChat], into existingChats: [CodexChat]) -> [CodexChat] {
+func mergeChatListSummaries(_ summaries: [GrokChat], into existingChats: [GrokChat]) -> [GrokChat] {
     let existingById = Dictionary(uniqueKeysWithValues: existingChats.map { ($0.id, $0) })
     return summaries.map { summary in
         guard let existing = existingById[summary.id] else {

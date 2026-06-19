@@ -50,9 +50,9 @@ final class TransientErrorStateTests: XCTestCase {
 
     func testOpeningNewChatClearsOnlyNewChatError() {
         let store = HandrailStore(enableNetworking: false, loadStoredPairing: false)
-        store.newChatError = "Codex Desktop did not become ready."
+        store.newChatError = "Grok Build did not expose the chat."
         store.notifications = [
-            HandrailNotification(title: "Handrail error", detail: "Codex Desktop did not become ready.", date: HandrailTestFixtures.baseDate, chatId: nil)
+            HandrailNotification(title: "Handrail error", detail: "Grok Build did not expose the chat.", date: HandrailTestFixtures.baseDate, chatId: nil)
         ]
 
         store.clearNewChatError()

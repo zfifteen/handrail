@@ -142,7 +142,7 @@ struct IPadChatDetailWorkspaceView: View {
     private var composerSurface: some View {
         if let chat = selectedChat {
             if canSendInput(chat) {
-                composer(placeholder: "Ask Codex") { text in
+                composer(placeholder: "Ask Grok") { text in
                     store.sendInput(chatId: chat.id, text: text)
                 }
             } else if canStartFollowUp(chat) {
@@ -153,7 +153,7 @@ struct IPadChatDetailWorkspaceView: View {
         }
     }
 
-    private func header(_ chat: CodexChat) -> some View {
+    private func header(_ chat: GrokChat) -> some View {
         Card {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top, spacing: 14) {
@@ -233,7 +233,7 @@ struct IPadChatDetailWorkspaceView: View {
         }
     }
 
-    private func attentionSummary(_ chat: CodexChat) -> some View {
+    private func attentionSummary(_ chat: GrokChat) -> some View {
         Group {
             if let approval = store.latestApproval, approval.chatId == chat.id {
                 approvalPanel(approval)
@@ -346,7 +346,7 @@ struct IPadChatDetailWorkspaceView: View {
         .background(Color.black)
     }
 
-    private func followUpComposer(_ chat: CodexChat) -> some View {
+    private func followUpComposer(_ chat: GrokChat) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             TextField("Ask for follow-up changes", text: $input, axis: .vertical)
                 .lineLimit(2...5)
@@ -358,7 +358,7 @@ struct IPadChatDetailWorkspaceView: View {
                 store.continueChat(chatId: chat.id, prompt: prompt)
                 isComposerFocused = false
             } label: {
-                Label(pendingContinuePrompt == nil ? "Send" : "Sending to Codex", systemImage: "paperplane.fill")
+                Label(pendingContinuePrompt == nil ? "Send" : "Sending to Grok", systemImage: "paperplane.fill")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -388,7 +388,7 @@ struct IPadChatDetailWorkspaceView: View {
             .background(Color.black)
     }
 
-    private var selectedChat: CodexChat? {
+    private var selectedChat: GrokChat? {
         guard let selectedChatId = selection.selectedChatId else { return nil }
         return store.chat(id: selectedChatId)
     }
@@ -433,33 +433,33 @@ struct IPadChatDetailWorkspaceView: View {
         "ipad-bottom-\(selection.selectedChatId ?? "empty")"
     }
 
-    private func canSendInput(_ chat: CodexChat) -> Bool {
+    private func canSendInput(_ chat: GrokChat) -> Bool {
         store.pairedMachine?.isOnline == true && chat.status == .running && chat.acceptsInput == true
     }
 
-    private func canStartFollowUp(_ chat: CodexChat) -> Bool {
+    private func canStartFollowUp(_ chat: GrokChat) -> Bool {
         store.pairedMachine?.isOnline == true &&
             chat.status != .running &&
             chat.status != .waitingForApproval
     }
 
-    private func readOnlyText(for chat: CodexChat) -> String {
+    private func readOnlyText(for chat: GrokChat) -> String {
         if store.pairedMachine?.isOnline != true {
             return "Connect to your Mac to keep chatting."
         }
         if chat.status == .running {
-            return "This running Codex chat cannot receive input right now."
+            return "This running Grok chat cannot receive input right now."
         }
         if chat.status == .waitingForApproval {
-            return "Review the approval request before Codex can continue."
+            return "Review the approval request before Grok can continue."
         }
-        return "This Codex chat cannot receive input right now."
+        return "This Grok chat cannot receive input right now."
     }
 
-    private func emptyChatText(for chat: CodexChat) -> String {
+    private func emptyChatText(for chat: GrokChat) -> String {
         switch chat.status {
         case .running:
-            return "Codex is starting. Messages will appear here."
+            return "Grok is starting. Messages will appear here."
         case .waitingForApproval:
             return "Waiting for approval."
         case .completed:
@@ -473,9 +473,9 @@ struct IPadChatDetailWorkspaceView: View {
         }
     }
 
-    private func attentionDetail(for chat: CodexChat) -> String {
+    private func attentionDetail(for chat: GrokChat) -> String {
         if chat.status == .waitingForApproval {
-            return "Codex is waiting for a decision before it can continue."
+            return "Grok is waiting for a decision before it can continue."
         }
         let text = transcriptText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
@@ -484,7 +484,7 @@ struct IPadChatDetailWorkspaceView: View {
         return ChatBlock.failureSummary(from: text)
     }
 
-    private func sortDate(for chat: CodexChat) -> Date {
+    private func sortDate(for chat: GrokChat) -> Date {
         chat.updatedAt ?? chat.endedAt ?? chat.startedAt
     }
 

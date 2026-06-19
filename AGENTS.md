@@ -2,11 +2,11 @@
 
 ## Revival context (read first)
 
-Active migration: **Codex Desktop → Grok Build**. Canonical handoff: [docs/REVIVAL.md](docs/REVIVAL.md). Phase 0 complete; Phase 1 is CLI adapter swap in `cli/src/`. Do not rebrand iOS until CLI serves Grok sessions over WebSocket.
+Active migration: **Codex Desktop → Grok Build**. Canonical handoff: [docs/REVIVAL.md](docs/REVIVAL.md). Phase 0–2 complete: CLI serves Grok sessions; iOS rebranded for Grok Build.
 
 ## Product Invariant Gate
 
-Every change must preserve Handrail as a free, local-first iOS remote control for Codex Desktop chats on the user's Mac.
+Every change must preserve Handrail as a free, local-first iOS remote control for Grok Build chats on the user's Mac.
 
 Stop and record the product decision needed if a change implies any of these directions:
 
@@ -14,12 +14,12 @@ Stop and record the product decision needed if a change implies any of these dir
 - Account, login, sync identity, or payment state.
 - Generic terminal or SSH behavior.
 - Multi-agent control plane behavior.
-- Support for Claude, Gemini, OpenCode, or other non-Codex agents.
-- Direct file editing from iOS instead of supervising Codex Desktop.
+- Support for Claude, Gemini, OpenCode, or other non-Grok agents.
+- Direct file editing from iOS instead of supervising Grok Build.
 
 ## Durable Evidence
 
-Product claims require evidence. App Store metadata, screenshots, privacy copy, protocol behavior, simulator validation, milestones, and releases must all match the local-first Codex Desktop-only promise.
+Product claims require evidence. App Store metadata, screenshots, privacy copy, protocol behavior, simulator validation, milestones, and releases must all match the local-first Grok Build-only promise.
 
 For Handrail iPhone or iPad UI behavior, simulator validation is required before reporting completion. Build success or unit tests alone are not enough for visible UI, navigation, decoded screen data, gestures, context menus, sheets, tabs, lists, or empty states.
 

@@ -188,7 +188,7 @@ final class ChatListQueryTests: XCTestCase {
         XCTAssertEqual(rows.map(\.id), ["pinned-zero", "pinned-one", "unpinned"])
     }
 
-    func testDisplayTitleStripsCodexPrefixAndAvoidsRawIdentifiers() {
+    func testDisplayTitleStripsGrokPrefixAndAvoidsRawIdentifiers() {
         XCTAssertEqual(IPadChatListQuery.displayTitle(for: HandrailTestFixtures.prefixedChat), "Readable task")
         XCTAssertEqual(IPadChatListQuery.displayTitle(for: HandrailTestFixtures.rawIdentifierChat), "Project")
     }

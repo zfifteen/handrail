@@ -83,7 +83,7 @@ struct IPadNewChatPanel: View {
                         .padding(.horizontal, -4)
                         .padding(.vertical, -8)
                     if trimmedPrompt.isEmpty {
-                        Text("Ask Codex anything...")
+                        Text("Ask Grok anything...")
                             .font(.body)
                             .foregroundStyle(.secondary)
                             .padding(.top, 1)

@@ -59,8 +59,8 @@ struct IPadSelectedChatWindow: Identifiable, Hashable, Codable {
         IPadWorkspaceSelection(selectedSection: .chats, selectedChatId: chatId)
     }
 
-    static func title(for chat: CodexChat?) -> String {
-        guard let chat else { return "Codex chat" }
+    static func title(for chat: GrokChat?) -> String {
+        guard let chat else { return "Grok chat" }
         return IPadChatListQuery.displayTitle(for: chat)
     }
 }
@@ -96,7 +96,7 @@ struct HandrailCommandAvailability: Hashable {
 
     static func resolve(
         pairedMachine: PairedMachine?,
-        selectedChat: CodexChat?,
+        selectedChat: GrokChat?,
         selectedApprovalId: String?,
         latestApproval: ApprovalRequest?,
         supportsSelectedChatWindows: Bool = false
@@ -119,13 +119,13 @@ struct HandrailCommandAvailability: Hashable {
 }
 
 struct HandrailCommandTarget: Hashable {
-    let selectedChat: CodexChat?
+    let selectedChat: GrokChat?
     let selectedApprovalId: String?
     let availability: HandrailCommandAvailability
 
     static func resolve(
         pairedMachine: PairedMachine?,
-        chats: [CodexChat],
+        chats: [GrokChat],
         latestApproval: ApprovalRequest?,
         selection: IPadWorkspaceSelection,
         supportsSelectedChatWindows: Bool = false
@@ -151,7 +151,7 @@ struct HandrailCommandTarget: Hashable {
     }
 }
 
-private extension CodexChat {
+private extension GrokChat {
     var canStopFromIPad: Bool {
         status == .running || status == .waitingForApproval
     }

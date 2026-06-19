@@ -5,8 +5,8 @@ final class WindowSelectionStateTests: XCTestCase {
     func testSelectedChatWindowTitle() {
         XCTAssertEqual(IPadSelectedChatWindow.title(for: HandrailTestFixtures.prefixedChat), "Readable task")
         XCTAssertEqual(IPadSelectedChatWindow.title(for: HandrailTestFixtures.rawIdentifierChat), "Project")
-        XCTAssertEqual(IPadSelectedChatWindow.title(for: nil), "Codex chat")
-        XCTAssertFalse(IPadSelectedChatWindow.title(for: HandrailTestFixtures.rawIdentifierChat).lowercased().contains("codex:"))
+        XCTAssertEqual(IPadSelectedChatWindow.title(for: nil), "Grok chat")
+        XCTAssertFalse(IPadSelectedChatWindow.title(for: HandrailTestFixtures.rawIdentifierChat).lowercased().contains("grok:"))
     }
 
     func testSelectedChatWindowCreatesChatDetailSelection() {

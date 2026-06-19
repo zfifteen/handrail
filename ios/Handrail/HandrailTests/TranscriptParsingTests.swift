@@ -15,7 +15,7 @@ final class TranscriptParsingTests: XCTestCase {
 
         let blocks = ChatBlock.parse(transcript)
 
-        XCTAssertEqual(blocks.map(\.role), [.codex, .user, .codex, .user, .codex])
+        XCTAssertEqual(blocks.map(\.role), [.grok, .user, .grok, .user, .grok])
         XCTAssertEqual(blocks.map(\.round), [1, 2, 2, 3, 3])
         XCTAssertEqual(blocks.map(\.startsRound), [true, true, false, true, false])
         XCTAssertEqual(blocks.map(\.body), [
@@ -27,11 +27,25 @@ final class TranscriptParsingTests: XCTestCase {
         ])
     }
 
-    func testParserFallsBackToSingleCodexBlockForUnlabeledTranscript() {
+    func testChatBlockParserReadsGrokPrefixedTranscript() {
+        let transcript = """
+        Grok: Existing summary
+        User: First request
+        Grok:
+        First answer
+        """
+
+        let blocks = ChatBlock.parse(transcript)
+
+        XCTAssertEqual(blocks.map(\.role), [.grok, .user, .grok])
+        XCTAssertEqual(blocks.map(\.body), ["Existing summary", "First request", "First answer"])
+    }
+
+    func testParserFallsBackToSingleGrokBlockForUnlabeledTranscript() {
         let blocks = ChatBlock.parse("raw output without a role")
 
         XCTAssertEqual(blocks.count, 1)
-        XCTAssertEqual(blocks.first?.role, .codex)
+        XCTAssertEqual(blocks.first?.role, .grok)
         XCTAssertEqual(blocks.first?.round, 1)
         XCTAssertEqual(blocks.first?.body, "raw output without a role")
         XCTAssertEqual(blocks.first?.startsRound, true)
@@ -40,15 +54,15 @@ final class TranscriptParsingTests: XCTestCase {
     func testRawMarkupDetectionAndFailureSummary() {
         let rawBlock = ChatBlock.parse("<!doctype html><html></html>").first
 
-        XCTAssertEqual(rawBlock?.role, .codex)
+        XCTAssertEqual(rawBlock?.role, .grok)
         XCTAssertEqual(rawBlock?.isRawMarkupNoise, true)
         XCTAssertEqual(
             ChatBlock.failureSummary(from: "<!doctype html><html></html>"),
-            "Codex produced raw markup output. The full raw response is contained below."
+            "Grok produced raw markup output. The full raw response is contained below."
         )
         XCTAssertEqual(
             ChatBlock.failureSummary(from: "Enable JavaScript and cookies to continue"),
-            "Codex received a browser challenge page instead of readable content."
+            "Grok received a browser challenge page instead of readable content."
         )
         XCTAssertEqual(ChatBlock.failureSummary(from: "first\r\nsecond\r\n"), "second")
     }

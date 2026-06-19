@@ -100,9 +100,9 @@ enum ServerMessage: Decodable {
     case machineStatus(machineName: String, online: Bool, defaultRepo: String?)
     case newChatOptions(NewChatOptions)
     case automationList([AutomationRecord])
-    case chatList([CodexChat])
-    case chatDetail(CodexChat)
-    case chatStarted(CodexChat)
+    case chatList([GrokChat])
+    case chatDetail(GrokChat)
+    case chatStarted(GrokChat)
     case chatEvent(chatId: String, event: ChatEvent)
     case approvalRequired(ApprovalRequest)
     case commandResult(ok: Bool, message: String)
@@ -143,11 +143,11 @@ enum ServerMessage: Decodable {
         case "automation_list":
             self = .automationList(try container.decode([AutomationRecord].self, forKey: .automations))
         case "chat_list":
-            self = .chatList(try container.decode([CodexChat].self, forKey: .chats))
+            self = .chatList(try container.decode([GrokChat].self, forKey: .chats))
         case "chat_detail":
-            self = .chatDetail(try container.decode(CodexChat.self, forKey: .chat))
+            self = .chatDetail(try container.decode(GrokChat.self, forKey: .chat))
         case "chat_started":
-            self = .chatStarted(try container.decode(CodexChat.self, forKey: .chat))
+            self = .chatStarted(try container.decode(GrokChat.self, forKey: .chat))
         case "chat_event":
             self = .chatEvent(
                 chatId: try container.decode(String.self, forKey: .chatId),

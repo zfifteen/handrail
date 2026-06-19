@@ -179,7 +179,7 @@ final class HandrailNotificationCoordinator: NSObject, UNUserNotificationCenterD
                     title: "Reply",
                     options: [.authenticationRequired],
                     textInputButtonTitle: "Send",
-                    textInputPlaceholder: "Reply to Codex"
+                    textInputPlaceholder: "Reply to Grok"
                 )
             ],
             intentIdentifiers: [],

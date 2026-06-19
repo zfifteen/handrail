@@ -44,4 +44,29 @@ enum HandrailFormatters {
         }
         return "now"
     }
+
+    static let assistantTitlePrefixes = ["Grok: ", "Codex: "]
+
+    static func strippedAssistantTitle(_ title: String) -> String {
+        for prefix in assistantTitlePrefixes where title.hasPrefix(prefix) {
+            return String(title.dropFirst(prefix.count))
+        }
+        return title
+    }
+
+    static func isRawGrokChatIdentifier(_ value: String) -> Bool {
+        let lowered = value.lowercased()
+        let candidate: String
+        if lowered.hasPrefix("grok:") {
+            candidate = String(value.dropFirst("grok:".count))
+        } else if lowered.hasPrefix("codex:") {
+            candidate = String(value.dropFirst("codex:".count))
+        } else {
+            candidate = value
+        }
+        return candidate.range(
+            of: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            options: [.regularExpression, .caseInsensitive]
+        ) != nil
+    }
 }

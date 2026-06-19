@@ -158,8 +158,8 @@ struct IPadDashboardWorkspaceView: View {
     private func dashboardSection<Row: View>(
         title: String,
         emptyTitle: String,
-        chats: [CodexChat],
-        @ViewBuilder row: @escaping (CodexChat) -> Row
+        chats: [GrokChat],
+        @ViewBuilder row: @escaping (GrokChat) -> Row
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
@@ -179,7 +179,7 @@ struct IPadDashboardWorkspaceView: View {
         }
     }
 
-    private func activeRow(_ chat: CodexChat) -> some View {
+    private func activeRow(_ chat: GrokChat) -> some View {
         HStack(spacing: 10) {
             chatRowButton(chat, icon: activeIcon(for: chat), color: activeColor(for: chat))
 
@@ -202,11 +202,11 @@ struct IPadDashboardWorkspaceView: View {
         }
     }
 
-    private func chatRow(_ chat: CodexChat, icon: String, color: Color) -> some View {
+    private func chatRow(_ chat: GrokChat, icon: String, color: Color) -> some View {
         chatRowButton(chat, icon: icon, color: color)
     }
 
-    private func chatRowButton(_ chat: CodexChat, icon: String, color: Color) -> some View {
+    private func chatRowButton(_ chat: GrokChat, icon: String, color: Color) -> some View {
         Button {
             selection.selectChat(id: chat.id)
         } label: {
@@ -257,19 +257,19 @@ struct IPadDashboardWorkspaceView: View {
         return "Last sync \(HandrailFormatters.time.string(from: lastChatRefreshAt))"
     }
 
-    private var runningChats: [CodexChat] {
+    private var runningChats: [GrokChat] {
         store.chats.filter { $0.status == .running }
     }
 
-    private var failedChats: [CodexChat] {
+    private var failedChats: [GrokChat] {
         store.chats.filter { $0.status == .failed }
     }
 
-    private var activeChats: [CodexChat] {
+    private var activeChats: [GrokChat] {
         sorted(store.chats.filter { $0.status == .running || $0.status == .waitingForApproval })
     }
 
-    private var visibleAttentionChats: [CodexChat] {
+    private var visibleAttentionChats: [GrokChat] {
         sorted(store.chats.filter { store.needsAttention($0) && !store.isAttentionDismissed(chatId: $0.id) })
             .sorted { left, right in
                 if left.status != right.status {
@@ -279,44 +279,44 @@ struct IPadDashboardWorkspaceView: View {
             }
     }
 
-    private var completedToday: [CodexChat] {
+    private var completedToday: [GrokChat] {
         let startOfToday = Calendar.current.startOfDay(for: Date())
         return store.chats.filter { $0.status == .completed && sortDate(for: $0) >= startOfToday }
     }
 
-    private var recentOutcomeChats: [CodexChat] {
+    private var recentOutcomeChats: [GrokChat] {
         sorted(store.chats.filter { $0.status == .completed || $0.status == .failed })
     }
 
-    private func sorted(_ chats: [CodexChat]) -> [CodexChat] {
+    private func sorted(_ chats: [GrokChat]) -> [GrokChat] {
         chats.sorted { sortDate(for: $0) > sortDate(for: $1) }
     }
 
-    private func sortDate(for chat: CodexChat) -> Date {
+    private func sortDate(for chat: GrokChat) -> Date {
         chat.updatedAt ?? chat.endedAt ?? chat.startedAt
     }
 
-    private func attentionIcon(for chat: CodexChat) -> String {
+    private func attentionIcon(for chat: GrokChat) -> String {
         chat.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill"
     }
 
-    private func attentionColor(for chat: CodexChat) -> Color {
+    private func attentionColor(for chat: GrokChat) -> Color {
         chat.status == .failed ? .red : .orange
     }
 
-    private func activeIcon(for chat: CodexChat) -> String {
+    private func activeIcon(for chat: GrokChat) -> String {
         chat.status == .waitingForApproval ? "exclamationmark.triangle.fill" : "play.fill"
     }
 
-    private func activeColor(for chat: CodexChat) -> Color {
+    private func activeColor(for chat: GrokChat) -> Color {
         chat.status == .waitingForApproval ? .orange : .green
     }
 
-    private func outcomeIcon(for chat: CodexChat) -> String {
+    private func outcomeIcon(for chat: GrokChat) -> String {
         chat.status == .failed ? "xmark.octagon.fill" : "checkmark.circle.fill"
     }
 
-    private func outcomeColor(for chat: CodexChat) -> Color {
+    private func outcomeColor(for chat: GrokChat) -> Color {
         chat.status == .failed ? .red : .blue
     }
 }

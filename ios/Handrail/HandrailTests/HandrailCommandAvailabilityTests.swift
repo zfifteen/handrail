@@ -119,7 +119,7 @@ final class HandrailCommandAvailabilityTests: XCTestCase {
 
     private func availability(
         pairedMachine: PairedMachine? = HandrailTestFixtures.pairedOnlineMachine,
-        selectedChat: CodexChat? = nil,
+        selectedChat: GrokChat? = nil,
         selectedApprovalId: String? = nil,
         latestApproval: ApprovalRequest? = nil,
         supportsSelectedChatWindows: Bool = false
@@ -146,10 +146,10 @@ final class NotificationIdentifierTests: XCTestCase {
     func testApprovalNotificationIdentifierUsesChatIdAndApprovalId() {
         XCTAssertEqual(
             approvalNotificationIdentifier(
-                chatId: "codex:019dc424-e857-76e0-8229-589ecf107eb4",
+                chatId: "grok:019dc424-e857-76e0-8229-589ecf107eb4",
                 approvalId: "server-request-1"
             ),
-            "handrail.approval.codex:019dc424-e857-76e0-8229-589ecf107eb4.server-request-1"
+            "handrail.approval.grok:019dc424-e857-76e0-8229-589ecf107eb4.server-request-1"
         )
     }
 }

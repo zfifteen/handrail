@@ -36,7 +36,7 @@ enum DashboardMenuShortcut: String, CaseIterable, Equatable {
 }
 
 struct DashboardMenuChatRow: Identifiable, Equatable {
-    let chat: CodexChat
+    let chat: GrokChat
     let displayTitle: String
     let projectName: String
     let timeText: String
@@ -51,7 +51,7 @@ struct DashboardMenuChatRow: Identifiable, Equatable {
 }
 
 enum DashboardMenuQuery {
-    static func snapshot(from chats: [CodexChat], now: Date = Date()) -> DashboardMenuSnapshot {
+    static func snapshot(from chats: [GrokChat], now: Date = Date()) -> DashboardMenuSnapshot {
         DashboardMenuSnapshot(
             shortcuts: DashboardMenuShortcut.allCases,
             pinnedRows: pinnedRows(from: chats, now: now),
@@ -59,7 +59,7 @@ enum DashboardMenuQuery {
         )
     }
 
-    private static func pinnedRows(from chats: [CodexChat], now: Date) -> [DashboardMenuChatRow] {
+    private static func pinnedRows(from chats: [GrokChat], now: Date) -> [DashboardMenuChatRow] {
         chats
             .filter { $0.isPinned == true }
             .sorted { left, right in
@@ -73,14 +73,14 @@ enum DashboardMenuQuery {
             .map { row(for: $0, now: now, leadingSystemImage: "pin.fill") }
     }
 
-    private static func allChatRows(from chats: [CodexChat], now: Date) -> [DashboardMenuChatRow] {
+    private static func allChatRows(from chats: [GrokChat], now: Date) -> [DashboardMenuChatRow] {
         chats
             .filter { $0.isPinned != true }
             .sorted { sortDate(for: $0) > sortDate(for: $1) }
             .map { row(for: $0, now: now, leadingSystemImage: nil) }
     }
 
-    private static func row(for chat: CodexChat, now: Date, leadingSystemImage: String?) -> DashboardMenuChatRow {
+    private static func row(for chat: GrokChat, now: Date, leadingSystemImage: String?) -> DashboardMenuChatRow {
         DashboardMenuChatRow(
             chat: chat,
             displayTitle: IPadChatListQuery.displayTitle(for: chat),
@@ -93,7 +93,7 @@ enum DashboardMenuQuery {
         )
     }
 
-    private static func sortDate(for chat: CodexChat) -> Date {
+    private static func sortDate(for chat: GrokChat) -> Date {
         chat.updatedAt ?? chat.endedAt ?? chat.startedAt
     }
 }
@@ -313,7 +313,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 10) {
             sectionTitle("All chats")
             if dashboardSnapshot.allChatRows.isEmpty {
-                quietRow("No Codex chats found")
+                quietRow("No Grok chats found")
             } else {
                 ForEach(dashboardSnapshot.allChatRows.prefix(5)) { row in
                     dashboardRow(row)

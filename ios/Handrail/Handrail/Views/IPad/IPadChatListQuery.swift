@@ -1,7 +1,7 @@
 import Foundation
 
 struct IPadChatListRow: Identifiable, Hashable {
-    let chat: CodexChat
+    let chat: GrokChat
     let displayTitle: String
     let projectName: String
     let statusTitle: String
@@ -21,7 +21,7 @@ struct IPadChatListProjectGroup: Identifiable, Hashable {
 
 enum IPadChatListQuery {
     static func rows(
-        from chats: [CodexChat],
+        from chats: [GrokChat],
         searchText: String = "",
         filter: ChatListFilter = .all,
         sort: ChatListSort = .updated
@@ -36,7 +36,7 @@ enum IPadChatListQuery {
     }
 
     static func groupedRows(
-        from chats: [CodexChat],
+        from chats: [GrokChat],
         searchText: String = "",
         filter: ChatListFilter = .all,
         sort: ChatListSort = .updated
@@ -55,19 +55,17 @@ enum IPadChatListQuery {
             }
     }
 
-    static func displayTitle(for chat: CodexChat) -> String {
-        let strippedTitle = chat.title.hasPrefix("Codex: ")
-            ? String(chat.title.dropFirst("Codex: ".count))
-            : chat.title
-        let trimmedTitle = strippedTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+    static func displayTitle(for chat: GrokChat) -> String {
+        let trimmedTitle = HandrailFormatters.strippedAssistantTitle(chat.title)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !trimmedTitle.isEmpty, !isRawCodexIdentifier(trimmedTitle) else {
+        guard !trimmedTitle.isEmpty, !HandrailFormatters.isRawGrokChatIdentifier(trimmedTitle) else {
             return projectName(for: chat)
         }
         return trimmedTitle
     }
 
-    static func projectName(for chat: CodexChat) -> String {
+    static func projectName(for chat: GrokChat) -> String {
         let rawName: String
         if let projectName = chat.projectName?.trimmingCharacters(in: .whitespacesAndNewlines), !projectName.isEmpty {
             rawName = projectName
@@ -90,7 +88,7 @@ enum IPadChatListQuery {
         }.joined(separator: " ")
     }
 
-    private static func row(for chat: CodexChat, sort: ChatListSort) -> IPadChatListRow {
+    private static func row(for chat: GrokChat, sort: ChatListSort) -> IPadChatListRow {
         IPadChatListRow(
             chat: chat,
             displayTitle: displayTitle(for: chat),
@@ -102,7 +100,7 @@ enum IPadChatListQuery {
         )
     }
 
-    private static func sortDate(for chat: CodexChat, sort: ChatListSort) -> Date {
+    private static func sortDate(for chat: GrokChat, sort: ChatListSort) -> Date {
         switch sort {
         case .updated:
             chat.updatedAt ?? chat.endedAt ?? chat.startedAt
@@ -111,7 +109,7 @@ enum IPadChatListQuery {
         }
     }
 
-    private static func matches(filter: ChatListFilter, chat: CodexChat) -> Bool {
+    private static func matches(filter: ChatListFilter, chat: GrokChat) -> Bool {
         switch filter {
         case .all:
             true
@@ -156,10 +154,4 @@ enum IPadChatListQuery {
         return left.displayTitle < right.displayTitle
     }
 
-    private static func isRawCodexIdentifier(_ value: String) -> Bool {
-        if value.lowercased().hasPrefix("codex:") {
-            return true
-        }
-        return UUID(uuidString: value) != nil
-    }
 }

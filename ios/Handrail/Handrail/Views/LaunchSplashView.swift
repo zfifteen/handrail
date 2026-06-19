@@ -31,7 +31,7 @@ struct LaunchSplashView: View {
                     )
                     .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
 
-                    CodexInspiredLaunchMark(progress: progress)
+                    GrokInspiredLaunchMark(progress: progress)
                         .frame(
                             width: markSize,
                             height: markSize
@@ -52,7 +52,7 @@ struct LaunchSplashView: View {
     }
 }
 
-private struct CodexInspiredLaunchMark: View {
+private struct GrokInspiredLaunchMark: View {
     let progress: Double
 
     var body: some View {

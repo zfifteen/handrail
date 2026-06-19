@@ -46,7 +46,7 @@ struct AttentionView: View {
         }
     }
 
-    private func attentionRow(_ chat: CodexChat) -> some View {
+    private func attentionRow(_ chat: GrokChat) -> some View {
         NavigationLink(value: chat.id) {
             HStack(alignment: .center, spacing: 12) {
                 Image(systemName: icon(for: chat))
@@ -86,33 +86,30 @@ struct AttentionView: View {
         .buttonStyle(.plain)
     }
 
-    private var visibleAttentionChats: [CodexChat] {
+    private var visibleAttentionChats: [GrokChat] {
         store.chats
             .filter(store.needsAttention)
             .filter { !store.isAttentionDismissed(chatId: $0.id) }
             .sorted { sortDate(for: $0) > sortDate(for: $1) }
     }
 
-    private func displayTitle(for chat: CodexChat) -> String {
-        if chat.title.hasPrefix("Codex: ") {
-            return String(chat.title.dropFirst("Codex: ".count))
-        }
-        return chat.title
+    private func displayTitle(for chat: GrokChat) -> String {
+        HandrailFormatters.strippedAssistantTitle(chat.title)
     }
 
-    private func projectName(for chat: CodexChat) -> String {
+    private func projectName(for chat: GrokChat) -> String {
         chat.projectName ?? URL(fileURLWithPath: chat.repo).lastPathComponent
     }
 
-    private func sortDate(for chat: CodexChat) -> Date {
+    private func sortDate(for chat: GrokChat) -> Date {
         chat.updatedAt ?? chat.endedAt ?? chat.startedAt
     }
 
-    private func icon(for chat: CodexChat) -> String {
+    private func icon(for chat: GrokChat) -> String {
         chat.status == .failed ? "xmark.octagon.fill" : "exclamationmark.triangle.fill"
     }
 
-    private func color(for chat: CodexChat) -> Color {
+    private func color(for chat: GrokChat) -> Color {
         chat.status == .failed ? .red : .orange
     }
 }

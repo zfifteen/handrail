@@ -1,6 +1,6 @@
 # Handrail Revival — Grok Build Migration
 
-**Status:** Phase 1 complete (2026-06-19). Proceed to Phase 2.
+**Status:** Phase 2 complete (2026-06-19). Proceed to Phase 3.
 
 This document is the session handoff for reviving Handrail as a **local-first iPhone/iPad supervisor for Grok Build** on the user's Mac. Read this first in any new agent session before editing code.
 
@@ -70,12 +70,14 @@ See [PHASE0_FINDINGS.md](./PHASE0_FINDINGS.md) for evidence and caveats.
 
 **Phase 1 acceptance:** `handrail serve` + WebSocket client can list Grok sessions, load detail, start/continue a session.
 
-### Phase 2 — iOS rebrand + parser
+### Phase 2 — iOS rebrand + parser (DONE)
 
-- Replace Codex strings with Grok Build (~30 Swift files).
-- `ChatTranscriptParser`: `Codex:` → `Grok:`.
-- New chat options from `grok models` + sandbox presets.
-- Keep WebSocket protocol v1 unless message shapes change.
+- [x] Replaced Codex strings with Grok Build across iOS Swift sources and tests.
+- [x] `ChatTranscriptParser`: primary `Grok:` labels; legacy `Codex:` still parsed.
+- [x] `CodexChat` model renamed to `GrokChat`; chat IDs use `grok:` prefix in tests/fixtures.
+- [x] New chat preview/options use `grok-build` default model (server already sources `grok models`).
+- [x] WebSocket protocol v1 unchanged.
+- [ ] **Blocked on host:** simulator/device `xcodebuild` (iOS 26.5 SDK / CoreSimulator mismatch on Mac).
 
 ### Phase 3 — End-to-end validation
 

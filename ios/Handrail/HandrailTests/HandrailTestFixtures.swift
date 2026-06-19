@@ -43,7 +43,7 @@ enum HandrailTestFixtures {
         chat(id: "unpinned", title: "Unpinned", status: .idle, offset: -40)
     ]
     static let dashboardMenuChats = [
-        chat(id: "pinned-old", title: "Codex: Pinned Old", status: .completed, offset: -90_000, projectName: "Pinned Project", isPinned: true, pinnedOrder: 1),
+        chat(id: "pinned-old", title: "Grok: Pinned Old", status: .completed, offset: -90_000, projectName: "Pinned Project", isPinned: true, pinnedOrder: 1),
         chat(id: "pinned-running", title: "Pinned Running", status: .running, offset: -120, projectName: "Pinned Project", isPinned: true, pinnedOrder: 0),
         chat(id: "all-running", title: "All Running", status: .running, offset: -3_600, projectName: "All Project", isAutomationTarget: true),
         chat(id: "all-completed", title: "All Completed", status: .completed, offset: -7_200, projectName: "All Project")
@@ -58,8 +58,8 @@ enum HandrailTestFixtures {
         chat(id: "alpha-old", title: "Alpha Old", status: .completed, offset: -100, projectName: "Alpha"),
         chat(id: "beta-chat", title: "Beta Chat", status: .completed, offset: -50, projectName: "Beta")
     ]
-    static let prefixedChat = chat(id: "prefixed-chat", title: "Codex: Readable task", status: .completed, offset: -30)
-    static let rawIdentifierChat = chat(id: "raw-chat", title: "codex:550e8400-e29b-41d4-a716-446655440000", status: .completed, offset: -20)
+    static let prefixedChat = chat(id: "prefixed-chat", title: "Grok: Readable task", status: .completed, offset: -30)
+    static let rawIdentifierChat = chat(id: "raw-chat", title: "grok:550e8400-e29b-41d4-a716-446655440000", status: .completed, offset: -20)
 
     static let approval = ApprovalRequest(
         chatId: waitingForApprovalChat.id,
@@ -78,7 +78,7 @@ enum HandrailTestFixtures {
         "Failure:\nCommand failed with exit code 65.\n\n"
     ]
 
-    static let emptyChats: [CodexChat] = []
+    static let emptyChats: [GrokChat] = []
 
     static func chat(
         id: String,
@@ -91,8 +91,8 @@ enum HandrailTestFixtures {
         pinnedOrder: Int? = nil,
         isAutomationTarget: Bool? = nil,
         hasUnreadTurn: Bool? = nil
-    ) -> CodexChat {
-        CodexChat(
+    ) -> GrokChat {
+        GrokChat(
             id: id,
             repo: "/Users/me/project",
             title: title,

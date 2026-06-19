@@ -231,7 +231,7 @@ struct IPadChatListWorkspaceView: View {
         .buttonStyle(.plain)
         .hoverEffect(.highlight)
         .contextMenu {
-            Label(row.isPinned ? "Pinned in Codex Desktop" : "Pin in Codex Desktop", systemImage: "pin")
+            Label(row.isPinned ? "Pinned in Grok" : "Pin in Grok", systemImage: "pin")
         }
     }
 

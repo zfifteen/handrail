@@ -7,7 +7,7 @@ enum PreviewData {
         store.usesStaticPreviewData = true
         store.pairedMachine = PairedMachine(protocolVersion: 1, host: "192.168.1.20", port: 8787, token: "preview", machineName: "MacBook Pro", isOnline: true)
         store.chats = [
-            CodexChat(
+            GrokChat(
                 id: "preview-chat",
                 repo: "/Users/me/project",
                 title: "API Refactor",
@@ -26,10 +26,10 @@ enum PreviewData {
                     )
                 ]
             ),
-            CodexChat(
+            GrokChat(
                 id: "running-chat",
                 repo: "/Users/me/IdeaProjects/handrail",
-                title: "Codex: Running validation",
+                title: "Grok: Running validation",
                 projectName: "handrail",
                 status: .running,
                 startedAt: Date().addingTimeInterval(-180),
@@ -48,10 +48,10 @@ enum PreviewData {
                 ],
                 acceptsInput: true
             ),
-            CodexChat(
+            GrokChat(
                 id: "completed-chat",
                 repo: "/Users/me/IdeaProjects/handrail",
-                title: "Codex: Completed checkout",
+                title: "Grok: Completed checkout",
                 projectName: "handrail",
                 status: .completed,
                 startedAt: Date().addingTimeInterval(-720),
@@ -61,10 +61,10 @@ enum PreviewData {
                 files: ["docs/design/phase-1-codex-clone-mockups/implementation-audit-20260508.md"],
                 transcript: nil
             ),
-            CodexChat(
+            GrokChat(
                 id: "failed-chat",
                 repo: "/Users/me/IdeaProjects/handrail",
-                title: "Codex: Failed build",
+                title: "Grok: Failed build",
                 projectName: "handrail",
                 status: .failed,
                 startedAt: Date().addingTimeInterval(-960),
@@ -77,19 +77,19 @@ enum PreviewData {
         ]
         store.transcripts["preview-chat"] = [
             "User:\nRefactor the API client and add regression tests.  \n\n",
-            "Codex:\nI found the client boundary and prepared the smallest test-backed change.  \n\n"
+            "Grok:\nI found the client boundary and prepared the smallest test-backed change.  \n\n"
         ]
         store.transcripts["running-chat"] = [
             "User:\nRun the simulator validation for the new chat shell.  \n\n",
-            "Codex:\nI am building the app and checking the visible iPhone state now.  \n\n"
+            "Grok:\nI am building the app and checking the visible iPhone state now.  \n\n"
         ]
         store.transcripts["completed-chat"] = [
             "User:\nCapture the implementation audit and summarize the result.  \n\n",
-            "Codex:\nThe audit file now records the verified simulator evidence and the unresolved desktop-reference gate.  \n\n"
+            "Grok:\nThe audit file now records the verified simulator evidence and the unresolved desktop-reference gate.  \n\n"
         ]
         store.transcripts["failed-chat"] = [
             "User:\nRun the iOS build.  \n\n",
-            "Codex:\nxcodebuild exited with code 65 after compiling the Handrail target.  \n\n"
+            "Grok:\nxcodebuild exited with code 65 after compiling the Handrail target.  \n\n"
         ]
         store.chatErrors["failed-chat"] = "xcodebuild exited with code 65."
         store.latestApproval = ApprovalRequest(chatId: "preview-chat", approvalId: "approval", title: "Approval Required", summary: "2 files changed", files: ["cli/src/server.ts", "cli/src/chats.ts"], diff: "diff --git a/cli/src/server.ts b/cli/src/server.ts\n")
@@ -109,8 +109,8 @@ enum PreviewData {
             workModes: ["local", "worktree"],
             accessPresets: ["on_request", "read_only", "full_access"],
             defaultAccessPreset: "on_request",
-            models: ["gpt-5.5"],
-            defaultModel: "gpt-5.5",
+            models: ["grok-build"],
+            defaultModel: "grok-build",
             reasoningEfforts: ["medium", "high", "xhigh"],
             defaultReasoningEffort: "high"
         )

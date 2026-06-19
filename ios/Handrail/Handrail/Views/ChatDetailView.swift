@@ -20,7 +20,7 @@ struct ChatDetailView: View {
             if canControlChat {
                 if canSendInput {
                     sendingInputStatus
-                    composer(placeholder: "Ask Codex", isPending: pendingSendInput != nil) { text in
+                    composer(placeholder: "Ask Grok", isPending: pendingSendInput != nil) { text in
                         let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
                         pendingSendInput = prompt
                         if !store.usesStaticPreviewData {
@@ -29,13 +29,13 @@ struct ChatDetailView: View {
                     }
                 }
             } else if canStartFollowUp {
-                composer(placeholder: "Ask Codex", isPending: pendingContinuePrompt != nil) { text in
+                composer(placeholder: "Ask Grok", isPending: pendingContinuePrompt != nil) { text in
                     let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
                     pendingContinuePrompt = prompt
                     store.continueChat(chatId: chatId, prompt: prompt)
                 }
             } else if store.chat(id: chatId) != nil {
-                readOnlyNotice(store.pairedMachine?.isOnline == true ? "This Codex chat cannot receive input right now." : "Connect to your Mac to keep chatting.")
+                readOnlyNotice(store.pairedMachine?.isOnline == true ? "This Grok chat cannot receive input right now." : "Connect to your Mac to keep chatting.")
             }
         }
         .background(Color.black.ignoresSafeArea())
@@ -74,7 +74,7 @@ struct ChatDetailView: View {
                 }
             }
         }
-        .confirmationDialog("Stop Codex?", isPresented: $showsStopConfirmation, titleVisibility: .visible) {
+        .confirmationDialog("Stop Grok?", isPresented: $showsStopConfirmation, titleVisibility: .visible) {
             Button("Stop", role: .destructive) {
                 store.stop(chatId: chatId)
             }
@@ -205,7 +205,7 @@ struct ChatDetailView: View {
         return store.needsAttention(chat) && !store.isAttentionDismissed(chatId: chatId)
     }
 
-    private func chatHeader(_ chat: CodexChat) -> some View {
+    private func chatHeader(_ chat: GrokChat) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             StatusBadge(status: chat.status)
             Text(chat.repo)
@@ -235,7 +235,7 @@ struct ChatDetailView: View {
         }
     }
 
-    private func attentionSummary(_ chat: CodexChat) -> some View {
+    private func attentionSummary(_ chat: GrokChat) -> some View {
         Group {
             if let approval = store.latestApproval, approval.chatId == chat.id {
                 approvalPanel(approval)
@@ -335,9 +335,9 @@ struct ChatDetailView: View {
         store.deny(approval, reason: reason.isEmpty ? "Denied from Handrail." : reason)
     }
 
-    private func attentionDetail(for chat: CodexChat) -> String {
+    private func attentionDetail(for chat: GrokChat) -> String {
         if chat.status == .waitingForApproval {
-            return "Codex is waiting for a decision before it can continue."
+            return "Grok is waiting for a decision before it can continue."
         }
         let text = transcriptText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
@@ -417,7 +417,7 @@ struct ChatDetailView: View {
         }
         switch chat.status {
         case .running:
-            return "Codex is starting. Messages will appear here."
+            return "Grok is starting. Messages will appear here."
         case .waitingForApproval:
             return "Waiting for approval."
         case .completed:
@@ -502,10 +502,7 @@ struct ChatDetailView: View {
     }
 
     private func displayTitle(_ title: String) -> String {
-        if title.hasPrefix("Codex: ") {
-            return String(title.dropFirst("Codex: ".count))
-        }
-        return title
+        HandrailFormatters.strippedAssistantTitle(title)
     }
 }
 

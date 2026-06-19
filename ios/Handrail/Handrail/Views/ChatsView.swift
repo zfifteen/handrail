@@ -23,7 +23,7 @@ struct ChatsView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     if let machine = store.pairedMachine {
-                        Text("Codex")
+                        Text("Grok")
                             .font(.largeTitle.bold())
                             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -59,7 +59,7 @@ struct ChatsView: View {
             .clipped()
         }
         .background(Color.black.ignoresSafeArea())
-        .navigationTitle("Codex")
+        .navigationTitle("Grok")
         .navigationBarTitleDisplayMode(.large)
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
@@ -135,19 +135,19 @@ struct ChatsView: View {
         }
     }
 
-    private var pinnedChats: [CodexChat] {
+    private var pinnedChats: [GrokChat] {
         visibleChats
             .filter { store.isPinned(chatId: $0.id) }
             .sorted { pinnedSortKey(for: $0) < pinnedSortKey(for: $1) }
     }
 
-    private var allChats: [CodexChat] {
+    private var allChats: [GrokChat] {
         visibleChats
             .filter { !store.isPinned(chatId: $0.id) }
             .sorted { sortDate(for: $0) > sortDate(for: $1) }
     }
 
-    private var visibleChats: [CodexChat] {
+    private var visibleChats: [GrokChat] {
         let normalized = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !normalized.isEmpty else {
             return store.chats
@@ -159,7 +159,7 @@ struct ChatsView: View {
         }
     }
 
-    private var activeChats: [CodexChat] {
+    private var activeChats: [GrokChat] {
         visibleChats
             .filter { $0.status == .running || $0.status == .waitingForApproval }
             .sorted { sortDate(for: $0) > sortDate(for: $1) }
@@ -238,12 +238,12 @@ struct ChatsView: View {
         VStack(alignment: .leading, spacing: 18) {
             Spacer(minLength: 80)
 
-            Text("Codex")
+            Text("Grok")
                 .font(.largeTitle.bold())
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 10) {
-                Text("Connect to Codex on your Mac")
+                Text("Connect to Grok Build on your Mac")
                     .font(.title2.weight(.semibold))
                 Text("Run handrail pair on your Mac, then scan the QR code here.")
                     .font(.subheadline)
@@ -272,7 +272,7 @@ struct ChatsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var projectGroups: [(project: String, chats: [CodexChat])] {
+    private var projectGroups: [(project: String, chats: [GrokChat])] {
         let groups = Dictionary(grouping: allChats, by: projectName)
         return groups.map { project, chats in
             (project, chats.sorted { sortDate(for: $0) > sortDate(for: $1) })
@@ -308,7 +308,7 @@ struct ChatsView: View {
             .padding(.horizontal, 2)
     }
 
-    private func chatSection(title: String, chats: [CodexChat], emptyTitle: String) -> some View {
+    private func chatSection(title: String, chats: [GrokChat], emptyTitle: String) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionTitle(title)
 
@@ -326,17 +326,17 @@ struct ChatsView: View {
         }
     }
 
-    private func chatRow(_ chat: CodexChat) -> some View {
+    private func chatRow(_ chat: GrokChat) -> some View {
         NavigationLink(value: chat.id) {
             chatRowContent(chat)
         }
         .buttonStyle(.plain)
         .contextMenu {
-            Label(store.isPinned(chatId: chat.id) ? "Pinned in Codex Desktop" : "Pin in Codex Desktop", systemImage: "pin")
+            Label(store.isPinned(chatId: chat.id) ? "Pinned in Grok" : "Pin in Grok", systemImage: "pin")
         }
     }
 
-    private func chatRowContent(_ chat: CodexChat) -> some View {
+    private func chatRowContent(_ chat: GrokChat) -> some View {
         HStack(spacing: 10) {
             if store.isPinned(chatId: chat.id) {
                 Image(systemName: "pin")
@@ -367,18 +367,15 @@ struct ChatsView: View {
         .background(Color.white.opacity(0.001), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
-    private func displayTitle(for chat: CodexChat) -> String {
-        if chat.title.hasPrefix("Codex: ") {
-            return String(chat.title.dropFirst("Codex: ".count))
-        }
-        return chat.title
+    private func displayTitle(for chat: GrokChat) -> String {
+        HandrailFormatters.strippedAssistantTitle(chat.title)
     }
 
-    private func projectName(for chat: CodexChat) -> String {
+    private func projectName(for chat: GrokChat) -> String {
         IPadChatListQuery.projectName(for: chat)
     }
 
-    private func sortDate(for chat: CodexChat) -> Date {
+    private func sortDate(for chat: GrokChat) -> Date {
         switch sortMode {
         case .updated:
             chat.updatedAt ?? chat.endedAt ?? chat.startedAt
@@ -387,7 +384,7 @@ struct ChatsView: View {
         }
     }
 
-    private func pinnedSortKey(for chat: CodexChat) -> Int {
+    private func pinnedSortKey(for chat: GrokChat) -> Int {
         chat.pinnedOrder ?? Int.max
     }
 
@@ -557,7 +554,7 @@ struct NewChatView: View {
                     .padding(.horizontal, -4)
                     .padding(.vertical, -8)
                 if trimmedPrompt.isEmpty {
-                    Text("Ask Codex anything...")
+                    Text("Ask Grok anything...")
                         .font(.body)
                         .foregroundStyle(.secondary)
                         .padding(.top, 1)

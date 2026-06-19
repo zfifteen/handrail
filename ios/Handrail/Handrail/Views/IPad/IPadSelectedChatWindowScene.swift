@@ -16,7 +16,7 @@ struct IPadSelectedChatWindowScene: View {
         .navigationTitle(IPadSelectedChatWindow.title(for: selectedChat))
     }
 
-    private var selectedChat: CodexChat? {
+    private var selectedChat: GrokChat? {
         guard let selectedChatId = selection.selectedChatId else { return nil }
         return store.chat(id: selectedChatId)
     }

@@ -94,7 +94,7 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                         Text(metadata.lastUpdatedText)
                             .foregroundStyle(.secondary)
-                        Text("Works with OpenAI Codex Desktop. Not affiliated with OpenAI.")
+                        Text("Works with Grok Build. Not affiliated with xAI.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }

@@ -67,7 +67,7 @@ struct ApprovalRequiredView: View {
                 .padding()
                 .background(Color.black)
             } else {
-                EmptyState(title: "No approval pending", detail: "Approval requests from Codex chats appear here.", systemImage: "checkmark.shield")
+                EmptyState(title: "No approval pending", detail: "Approval requests from Grok chats appear here.", systemImage: "checkmark.shield")
                     .padding()
             }
         }

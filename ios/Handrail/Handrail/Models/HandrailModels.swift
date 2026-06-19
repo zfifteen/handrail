@@ -39,7 +39,7 @@ enum ChatStatus: String, Codable {
     }
 }
 
-struct CodexChat: Codable, Identifiable, Hashable {
+struct GrokChat: Codable, Identifiable, Hashable {
     let id: String
     let repo: String
     let title: String

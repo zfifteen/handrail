@@ -12,7 +12,7 @@ struct ChatBlock {
 
     static func parse(_ text: String) -> [ChatBlock] {
         var result: [TranscriptBlock] = []
-        var role: ChatRole = .codex
+        var role: ChatRole = .grok
         var lines: [String] = []
         var round = 0
 
@@ -43,7 +43,7 @@ struct ChatBlock {
         flush()
 
         if result.isEmpty && !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return [ChatBlock(role: .codex, body: text, round: 1, startsRound: true)]
+            return [ChatBlock(role: .grok, body: text, round: 1, startsRound: true)]
         }
 
         var rendered: [ChatBlock] = []
@@ -65,14 +65,22 @@ struct ChatBlock {
     }
 
     private static func parseRole(_ line: String) -> (role: ChatRole, body: String)? {
-        for role in ChatRole.allCases {
-            let prefix = "\(role.rawValue):"
-            if line == prefix {
-                return (role, "")
-            }
-            if line.hasPrefix("\(prefix) ") {
-                return (role, String(line.dropFirst(prefix.count + 1)))
-            }
+        if let parsed = parseLabel(line, role: .user) {
+            return parsed
+        }
+        if let parsed = parseLabel(line, role: .grok) {
+            return parsed
+        }
+        return parseLabel(line, role: .grok, label: "Codex")
+    }
+
+    private static func parseLabel(_ line: String, role: ChatRole, label: String? = nil) -> (role: ChatRole, body: String)? {
+        let prefix = "\(label ?? role.rawValue):"
+        if line == prefix {
+            return (role, "")
+        }
+        if line.hasPrefix("\(prefix) ") {
+            return (role, String(line.dropFirst(prefix.count + 1)))
         }
         return nil
     }
@@ -85,10 +93,10 @@ struct ChatBlock {
             .filter { !$0.isEmpty }
 
         if lines.contains(where: { $0.localizedCaseInsensitiveContains("Enable JavaScript and cookies to continue") }) {
-            return "Codex received a browser challenge page instead of readable content."
+            return "Grok received a browser challenge page instead of readable content."
         }
         if isRawMarkupNoise(text) {
-            return "Codex produced raw markup output. The full raw response is contained below."
+            return "Grok produced raw markup output. The full raw response is contained below."
         }
         return lines.last ?? "This chat failed."
     }
@@ -115,7 +123,7 @@ private struct TranscriptBlock {
 
 enum ChatRole: String, CaseIterable {
     case user = "User"
-    case codex = "Codex"
+    case grok = "Grok"
 
     var title: String {
         rawValue
@@ -125,7 +133,7 @@ enum ChatRole: String, CaseIterable {
         switch self {
         case .user:
             Color.white.opacity(0.09)
-        case .codex:
+        case .grok:
             Color.clear
         }
     }
@@ -134,7 +142,7 @@ enum ChatRole: String, CaseIterable {
         switch self {
         case .user:
             Color.white.opacity(0.14)
-        case .codex:
+        case .grok:
             Color.clear
         }
     }
