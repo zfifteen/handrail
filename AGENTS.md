@@ -1,5 +1,9 @@
 # Handrail Local Agent Instructions
 
+## Revival context (read first)
+
+Active migration: **Codex Desktop → Grok Build**. Canonical handoff: [docs/REVIVAL.md](docs/REVIVAL.md). Phase 0 complete; Phase 1 is CLI adapter swap in `cli/src/`. Do not rebrand iOS until CLI serves Grok sessions over WebSocket.
+
 ## Product Invariant Gate
 
 Every change must preserve Handrail as a free, local-first iOS remote control for Codex Desktop chats on the user's Mac.

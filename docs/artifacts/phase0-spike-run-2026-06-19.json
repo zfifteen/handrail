@@ -1,0 +1,14 @@
+{
+  "ranAt": "2026-06-19T11:54:57.805Z",
+  "allPassed": true,
+  "grokVersionObserved": "0.2.56",
+  "branch": "revive/grok-build",
+  "results": [
+    { "spike": "01-list-sessions.ts", "ok": true, "exitCode": 0 },
+    { "spike": "02-parse-transcript.ts", "ok": true, "exitCode": 0 },
+    { "spike": "03-acp-approval.ts", "ok": true, "exitCode": 0, "permissionSeen": false },
+    { "spike": "04-resume-session.ts", "ok": true, "exitCode": 0 }
+  ],
+  "verdict": "GO for Phase 1",
+  "followUp": "Implement terminal/* ACP handlers and re-test bash permission round-trip"
+}

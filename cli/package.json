@@ -8,7 +8,12 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "test": "npm run build && node --test dist/test/*.test.js"
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "spike": "tsx spike/run-all.ts",
+    "spike:list": "tsx spike/01-list-sessions.ts",
+    "spike:transcript": "tsx spike/02-parse-transcript.ts",
+    "spike:approval": "tsx spike/03-acp-approval.ts",
+    "spike:resume": "tsx spike/04-resume-session.ts"
   },
   "dependencies": {
     "commander": "^12.1.0",
@@ -19,6 +24,7 @@
     "@types/node": "^22.10.2",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
 }
