@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Handrail — Supervise Grok Build locally from your iPhone" src="store-assets/banner/handrail-hero-1.jpg" width="100%" />
+</p>
+
 # Handrail
 
 **Supervise Grok Build from your iPhone — locally, on your own Mac.**
