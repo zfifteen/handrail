@@ -30,6 +30,15 @@
 	<string>Handrail scans the pairing QR code printed by the desktop CLI.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Handrail connects to the desktop CLI on your local network.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_handrail._tcp</string>
+	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
