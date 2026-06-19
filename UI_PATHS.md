@@ -17,7 +17,7 @@ Captured from the iPhone simulator and cross-checked against the SwiftUI route m
   - View `Pinned`.
   - View `All chats`.
 - Pull down on the dashboard.
-  - Refresh the Codex chat list from the server.
+  - Refresh the Grok chat list from the server.
 - Tap the sync row action.
   - If online, refresh chats.
   - If offline, reconnect.
@@ -42,7 +42,7 @@ Captured from the iPhone simulator and cross-checked against the SwiftUI route m
   - View `Pinned`.
   - View `All chats`.
 - Pull down on the chats list.
-  - Refresh the Codex chat list from the server.
+  - Refresh the Grok chat list from the server.
 - Tap `New chat`.
   - Open `New chat`.
 - Tap the QR button.
@@ -53,7 +53,7 @@ Captured from the iPhone simulator and cross-checked against the SwiftUI route m
   - Open `Chat Detail`.
 - Tap the filter menu in `All chats`.
   - Switch between chronological and project grouping.
-- Long-press a Codex desktop chat row.
+- Long-press a Grok chat row.
   - View the desktop pin state.
 
 ## New Chat
@@ -89,7 +89,7 @@ Captured from the iPhone simulator and cross-checked against the SwiftUI route m
 
 - Open from Dashboard, Chats, Attention, Activity, Alerts, notification routing, or after starting a chat.
 - Read chat content.
-- View round separators when the transcript parser detects user/Codex turns.
+- View round separators when the transcript parser detects user/Grok turns.
 - Drag upward in the transcript.
   - Reveal the jump-to-latest button.
 - Tap the jump-to-latest button.
@@ -109,10 +109,10 @@ Captured from the iPhone simulator and cross-checked against the SwiftUI route m
   - Send input to the CLI.
 - If the chat is running without live input:
   - View the read-only notice.
-- If the chat is an archived Codex chat and the Mac is online:
+- If the chat is an archived Grok session and the Mac is online:
   - Type a follow-up prompt.
   - Tap `Continue Chat`.
-- If the chat is an archived Codex chat and the Mac is offline:
+- If the chat is an archived Grok session and the Mac is offline:
   - View the offline read-only notice.
 - If the chat is controllable and running or waiting for approval:
   - Tap the stop button.
@@ -183,7 +183,7 @@ Captured from the iPhone simulator and cross-checked against the SwiftUI route m
   - Open the pairing scanner.
 - View app version.
 - View compatibility copy.
-  - `Works with OpenAI Codex Desktop. Not affiliated with OpenAI.`
+  - `Works with Grok Build. Not affiliated with xAI.`
 
 ## Pairing Scanner
 

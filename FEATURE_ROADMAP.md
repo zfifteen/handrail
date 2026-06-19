@@ -1,5 +1,7 @@
 # Handrail Feature Roadmap
 
+> **Note (2026-06-19):** Handrail revived as a **Grok Build** companion on branch `revive/grok-build`. Entries before this date describe the superseded Codex Desktop era. Current architecture: [docs/REVIVAL.md](docs/REVIVAL.md).
+
 This file is updated by the recurring improvement task. Each run should choose one concrete improvement, implement it across CLI and iOS when applicable, test it, and update the status here.
 
 ## Priority Rules

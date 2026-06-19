@@ -1,8 +1,11 @@
 # Handrail Production Readiness Evaluation
+
+> **Status refresh (2026-06-19):** Handrail revived as a **Grok Build** companion on branch `revive/grok-build`. Phases 0–4 CLI/protocol validation complete. This report reflects the **Codex Desktop era** readiness state from 2026-04-30; use [REVIVAL.md](REVIVAL.md) and [PHASE4_FINDINGS.md](PHASE4_FINDINGS.md) for current status.
+
 **Prepared:** 2026-04-30  
 **Repo:** github.com/zfifteen/handrail  
 **Target:** Apple App Store — iOS (iPhone), watchOS, iPad  
-**Audience:** Codex instance for action
+**Audience:** Historical readiness snapshot (Codex Desktop era)
 
 ---
 

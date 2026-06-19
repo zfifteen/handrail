@@ -1,6 +1,6 @@
 # Phase 0 Spikes — Grok Build Adapter
 
-Prove Handrail can talk to Grok Build before replacing Codex modules in `cli/src/`.
+Prove Handrail can talk to Grok Build. Spikes passed; adapter promoted to `cli/src/` on branch `revive/grok-build`.
 
 ## Run
 

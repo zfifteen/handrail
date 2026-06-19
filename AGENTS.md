@@ -2,7 +2,7 @@
 
 ## Revival context (read first)
 
-Active migration: **Codex Desktop → Grok Build**. Canonical handoff: [docs/REVIVAL.md](docs/REVIVAL.md). Phase 0–2 complete: CLI serves Grok sessions; iOS rebranded for Grok Build.
+Active product: **Grok Build** companion (Codex Desktop era superseded). Canonical handoff: [docs/REVIVAL.md](docs/REVIVAL.md). Phases 0–4 complete on branch `revive/grok-build`.
 
 ## Product Invariant Gate
 

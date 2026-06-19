@@ -2,7 +2,7 @@
 
 ## Revival (2026-06-19)
 
-Handrail is being revived on branch `revive/grok-build` as a **Grok Build** companion (replacing Codex Desktop). Phase 0–3 validation complete. **Start here:** [docs/REVIVAL.md](docs/REVIVAL.md) and [docs/PHASE3_FINDINGS.md](docs/PHASE3_FINDINGS.md).
+Handrail is being revived on branch `revive/grok-build` as a **Grok Build** companion (replacing Codex Desktop). Phases 0–4 complete. **Start here:** [docs/REVIVAL.md](docs/REVIVAL.md) and [docs/PHASE4_FINDINGS.md](docs/PHASE4_FINDINGS.md).
 
 ---
 

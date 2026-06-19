@@ -9,7 +9,7 @@ cd cli && npm test && npm run spike
 cd .. && node tools/qa/grok_e2e_probe.mjs   # requires handrail serve
 ```
 
-See [docs/PHASE3_FINDINGS.md](docs/PHASE3_FINDINGS.md) for latest results.
+See [docs/PHASE4_FINDINGS.md](docs/PHASE4_FINDINGS.md) for latest results.
 
 ## Scope
 
@@ -102,19 +102,19 @@ Executed against the local server on port `8788`, the booted iPhone 17 simulator
 - Physical iPhone build: passed.
 - Physical iPhone install and launch: passed.
 - Paired simulator state: online against `127.0.0.1:8788`.
-- Chats tab: verified Online state, Pinned, All chats, Recent filter, Project filter, and Codex chat title display.
+- Chats tab: verified Online state, Pinned, All chats, Recent filter, Project filter, and Grok chat title display.
 - New Chat: verified prompt/options entry, Start disabled while incomplete, valid Start sends WebSocket request, and successful starts navigate directly to Chat Detail.
 - Chat Detail: verified running state, completed state, transcript stream, and completed transcript text.
 - Activity: verified chat events appear and chat-backed rows navigate to Chat Detail.
 - Notifications: verified completion notification appears and navigates to Chat Detail.
 - Approval: verified empty state.
 - Settings: verified paired machine, `handrail pair` command, compatibility copy, and scanner fallback in simulator.
-- Send input: verified an interactive chat accepts text and streams output into the transcript when Codex Desktop exposes that route.
+- Send input: verified an interactive chat accepts text and streams output into the transcript when Grok Build exposes that route.
 - Stop: verified the stop button sends `stop_chat` and displays scoped errors or Stopped.
 - Pull-to-refresh: verified the Chats tab refresh path sends a new authenticated `hello` and receives `machine_status` plus `chat_list`.
-- Continue archived chat: verified archived Codex chat details show a `Continue chat` composer when the Mac is online.
+- Continue archived chat: verified archived Grok session details show a `Continue chat` composer when the Mac is online.
 - Continue protocol: verified `continue_chat` is accepted by the server and invalid archived ids return a visible error instead of silently doing nothing.
-- Rich transcript: verified imported Codex transcript renders as role-separated rich text blocks rather than raw monospace/plain Markdown.
+- Rich transcript: verified imported Grok transcript renders as role-separated rich text blocks rather than raw monospace/plain Markdown.
 
 Screenshots:
 
@@ -125,4 +125,4 @@ Observed fixed defects:
 
 - New Chat used to dismiss back to Chats without navigation. It now waits for `chat_started` and opens the created chat.
 - Activity and Notifications used to be informational dead ends. Chat-backed rows now open the related chat.
-- Stop now routes through the Codex chat protocol instead of a Handrail-owned process record.
+- Stop now routes through the Grok chat protocol instead of a Handrail-owned process record.

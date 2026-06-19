@@ -1,5 +1,8 @@
 # Codex Desktop App Server
 
+> **Legacy — Codex Desktop era (superseded).** Handrail now targets **Grok Build** on branch `revive/grok-build`. Current architecture: [REVIVAL.md](../REVIVAL.md). Retained for historical reference.
+
+
 This document records the app-server boundary relevant to Handrail's Desktop integration.
 
 Observed Desktop build:

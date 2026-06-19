@@ -1,5 +1,8 @@
 # Codex Desktop Refresh And Snapshots
 
+> **Legacy — Codex Desktop era (superseded).** Handrail now targets **Grok Build** on branch `revive/grok-build`. Current architecture: [REVIVAL.md](../REVIVAL.md). Retained for historical reference.
+
+
 This document records the observed Desktop snapshot and resume paths that may explain how already-rendered conversation views repaint.
 
 Observed Desktop build:

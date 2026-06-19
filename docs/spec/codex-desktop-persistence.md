@@ -1,5 +1,8 @@
 # Codex Desktop Persistence
 
+> **Legacy — Codex Desktop era (superseded).** Handrail now targets **Grok Build** on branch `revive/grok-build`. Current architecture: [REVIVAL.md](../REVIVAL.md). Retained for historical reference.
+
+
 This document records how Handrail reads persisted Codex Desktop conversation state.
 
 Observed Desktop build:

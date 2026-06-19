@@ -1,5 +1,8 @@
 # Codex Desktop IPC Protocol
 
+> **Legacy — Codex Desktop era (superseded).** Handrail now targets **Grok Build** on branch `revive/grok-build`. Current architecture: [REVIVAL.md](../REVIVAL.md). Retained for historical reference.
+
+
 This document records the Codex Desktop IPC protocol as observed from Handrail, the installed Codex Desktop bundle, and live socket probes on macOS.
 For route selection, see [Codex Desktop Deeplinks](codex-desktop-deeplinks.md). For owner/follower behavior, see [Codex Desktop Conversation Ownership](codex-desktop-conversation-ownership.md).
 

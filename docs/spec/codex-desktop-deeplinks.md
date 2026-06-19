@@ -1,5 +1,8 @@
 # Codex Desktop Deeplinks
 
+> **Legacy — Codex Desktop era (superseded).** Handrail now targets **Grok Build** on branch `revive/grok-build`. Current architecture: [REVIVAL.md](../REVIVAL.md). Retained for historical reference.
+
+
 This document records the Codex Desktop deeplink routes observed in the installed macOS app bundle.
 It should be read with [Codex Desktop IPC Protocol](codex-desktop-ipc-protocol.md) and [Codex Desktop Conversation Ownership](codex-desktop-conversation-ownership.md).
 

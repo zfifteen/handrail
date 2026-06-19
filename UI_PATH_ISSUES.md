@@ -36,7 +36,7 @@ Guide document: `UI_PATHS.md`.
 ## New Chat
 
 - Issue: stale global errors leak into the `New chat` sheet.
-  - Observed: opening a clean `New chat` sheet showed the prior `Codex Desktop did not become ready...` error at the bottom.
+  - Observed: opening a clean `New chat` sheet showed the prior `Grok Build did not become ready...` error at the bottom.
   - Impact: the user sees an unrelated failure before taking any action in the new flow.
   - Evidence: `test-artifacts/ui-path-walkthrough-2026-04-28/02-new-chat-empty.png`.
 - Verified: the option menus are usable without the keyboard staying up.
@@ -49,10 +49,10 @@ Guide document: `UI_PATHS.md`.
 ## Chat Detail
 
 - Issue: stale global errors persist when reopening a chat detail.
-  - Observed: reopening `PGS Lab` immediately displayed the previous `Codex Desktop did not become ready...` error.
+  - Observed: reopening `PGS Lab` immediately displayed the previous `Grok Build did not become ready...` error.
   - Impact: the user cannot tell whether the currently viewed chat is failing now or whether the app is showing an old global error.
   - Evidence: `test-artifacts/ui-path-walkthrough-2026-04-28/08-session-detail-with-stale-error.png`.
-- Issue: desktop chat content can render as raw process/log output rather than a readable Codex chat.
+- Issue: desktop chat content can render as raw process/log output rather than a readable Grok chat.
   - Observed: `PGS Lab` showed large raw Spring Boot log lines as the main chat content.
   - Impact: the detail view still behaves like a transcript dump for some desktop chats, not like a normal LLM chat thread.
   - Evidence: `test-artifacts/ui-path-walkthrough-2026-04-28/08-session-detail-with-stale-error.png`.
@@ -83,7 +83,7 @@ Guide document: `UI_PATHS.md`.
 ## Alerts
 
 - Issue: repeated global errors accumulate as alert rows with no visible dismiss or clear path.
-  - Observed: two `Handrail error` entries with the same `Codex Desktop did not become ready...` message.
+  - Observed: two `Handrail error` entries with the same `Grok Build did not become ready...` message.
   - Impact: alerts become a stale error log instead of an actionable notification surface.
   - Evidence: `test-artifacts/ui-path-walkthrough-2026-04-28/12-alerts-errors.png`.
 

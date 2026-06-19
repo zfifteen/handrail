@@ -1,5 +1,8 @@
 # Codex Desktop Conversation Ownership
 
+> **Legacy — Codex Desktop era (superseded).** Handrail now targets **Grok Build** on branch `revive/grok-build`. Current architecture: [REVIVAL.md](../REVIVAL.md). Retained for historical reference.
+
+
 This document records how the observed Codex Desktop build routes conversation operations to the Desktop window that owns a conversation.
 
 Observed Desktop build:

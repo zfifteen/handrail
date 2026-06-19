@@ -1,56 +1,47 @@
-# Reverse-Engineered Codex Desktop Specs
+# Handrail Integration Specs
 
-This folder records Codex Desktop behavior observed for Handrail integration work.
+## Active — Grok Build (2026-06 revival)
 
-Baseline Desktop build:
+Handrail on branch `revive/grok-build` supervises **Grok Build** on the Mac. Start here:
 
-- App version: `26.422.71525`
-- Build number: `2210`
-- Bundle id: `com.openai.codex`
-- Bundle path: `/Applications/Codex.app`
+| Document | Purpose |
+|---|---|
+| [REVIVAL.md](../REVIVAL.md) | Migration handoff, phase plan, open decisions |
+| [Grok Build Adapter](grok-build-adapter.md) | ACP stdio contract, session paths, approval routing |
+| [Handrail WebSocket Protocol](handrail-websocket-protocol.md) | CLI ↔ iOS local WebSocket message contract |
+| [Handrail iOS Pairing Persistence](handrail-ios-pairing-persistence.md) | Keychain token + UserDefaults metadata |
+| [Handrail Notification Suppression](handrail-notification-suppression.md) | Active-chat notification contract |
+| [Handrail Chat UI Contract](handrail-chat-codex-desktop-clone-contract.md) | Mobile chat detail visual/behavior contract (Grok Build is now the source of truth) |
 
-These documents are not upstream API documentation. They record observed behavior from a specific installed Desktop build and may drift when Codex Desktop updates.
+Phase findings:
 
-Handrail treats these specs as living contracts. When Handrail code changes a documented protocol surface or persistence assumption, update the corresponding spec in the same change-set (or file a concrete issue describing the drift).
+- [PHASE0_FINDINGS.md](../PHASE0_FINDINGS.md) — spike go/no-go
+- [PHASE3_FINDINGS.md](../PHASE3_FINDINGS.md) — E2E WebSocket validation
+- [PHASE4_FINDINGS.md](../PHASE4_FINDINGS.md) — polish and refinement
 
-## Specs
+## Legacy — Codex Desktop era
 
-| Document | Purpose | Confidence |
-|---|---|---|
-| [Codex Desktop Deeplinks](codex-desktop-deeplinks.md) | External `codex://` routes and internal renderer routes. | High for the observed build. |
-| [Codex Desktop IPC Protocol](codex-desktop-ipc-protocol.md) | Unix socket framing, request envelopes, follower methods, and Handrail IPC contract. | High for observed request/response framing and exposed method names. |
-| [Codex Desktop Conversation Ownership](codex-desktop-conversation-ownership.md) | Owner/follower state, `targetClientId`, renderer ownership checks, and sync failure modes. | Medium-high; based on bundle code and Handrail probes. |
-| [Codex Desktop Refresh And Snapshots](codex-desktop-refresh-and-snapshots.md) | Internal snapshot and resume paths that may explain visible Desktop refresh behavior. | Medium; observed paths are concrete, external usability is unknown. |
-| [Codex Desktop App Server](codex-desktop-app-server.md) | Renderer/app-server boundary and which operations appear to mutate persisted versus live state. | Medium; Handrail uses a narrow subset. |
-| [Codex Desktop Persistence](codex-desktop-persistence.md) | SQLite thread metadata, rollout files, pinned state, and Handrail's read model. | High for Handrail's current reader. |
-| [Handrail WebSocket Protocol](handrail-websocket-protocol.md) | CLI-to-iOS and iOS-to-CLI local WebSocket message contract. | High for Handrail-owned source. |
-| [Handrail iOS Pairing Persistence](handrail-ios-pairing-persistence.md) | Local pairing metadata, Keychain token storage, migration, and corrupt-data reporting. | High for Handrail-owned source. |
-| [Handrail Notification Suppression](handrail-notification-suppression.md) | Current push/local notification flow and the expected active-chat suppression contract. | High for Handrail code paths; Desktop notification internals are out of scope. |
+The documents below record Codex Desktop behavior from the pre-revival Handrail (build `26.422.71525`). They are **historical reference only** and do not describe the active Grok Build adapter.
 
-## Integration Chain
+| Document | Purpose |
+|---|---|
+| [Codex Desktop Deeplinks](codex-desktop-deeplinks.md) | External `codex://` routes |
+| [Codex Desktop IPC Protocol](codex-desktop-ipc-protocol.md) | Unix socket framing and follower methods |
+| [Codex Desktop Conversation Ownership](codex-desktop-conversation-ownership.md) | Owner/follower state |
+| [Codex Desktop Refresh And Snapshots](codex-desktop-refresh-and-snapshots.md) | Internal snapshot paths |
+| [Codex Desktop App Server](codex-desktop-app-server.md) | Renderer/app-server boundary |
+| [Codex Desktop Persistence](codex-desktop-persistence.md) | SQLite thread metadata and rollout files |
 
-The Handrail sync problem should be studied in this order:
+Legacy design artifacts: [docs/design/phase-1-codex-clone-mockups/](../design/phase-1-codex-clone-mockups/)
+
+## Integration chain (Grok Build)
 
 ```text
-selection -> ownership -> mutation -> snapshot/refresh -> persistence -> notifications
+pairing -> WebSocket hello -> chat_list/detail -> ACP prompt -> approval (if needed) -> transcript poll
 ```
 
 The invariant is:
 
 ```text
-Visible Desktop sync depends on Desktop-owned renderer state, not only on persisted rollout state.
+Grok Build remains the authority for session execution; Handrail supervises through ACP and session files.
 ```
-
-## Status Vocabulary
-
-Observed:
-
-- Behavior found in the installed app bundle, Handrail source, live socket probes, or local Desktop state files.
-
-Inferred:
-
-- The narrow interpretation Handrail should use when integrating with the observed behavior.
-
-Unknown:
-
-- A boundary that still needs a deterministic probe before it can be treated as a contract.

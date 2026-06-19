@@ -1,5 +1,7 @@
 # Virtual Team Outputs
 
+> Reports before 2026-06-19 describe the superseded **Codex Desktop** integration. Current product: **Grok Build** — see [REVIVAL.md](../../REVIVAL.md).
+
 This directory is the stable output location for recurring Handrail virtual team reports.
 
 Expected report files:

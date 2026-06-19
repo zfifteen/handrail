@@ -2,11 +2,7 @@
 
 This document records Handrail's current notification flow and the expected active-chat suppression contract.
 
-Observed Desktop build:
-
-- App version: `26.422.71525`
-- Build number: `2210`
-- Bundle id: `com.openai.codex`
+Active product: Grok Build companion (`revive/grok-build`). Push titles use Grok branding in `cli/src/notifications.ts`.
 
 Related issue:
 

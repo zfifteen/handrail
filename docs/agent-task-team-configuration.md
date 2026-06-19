@@ -1,8 +1,10 @@
 # Agent Task Team Configuration
 
+> **Status (2026-06-19):** The scheduled Codex Desktop automation team described below is **superseded** by the Grok Build revival on branch `revive/grok-build`. Current product architecture: [REVIVAL.md](REVIVAL.md). Retained for historical operations reference.
+
 ## Overview
 
-Handrail uses a recurring Codex agent task team to keep project work moving without turning every task into a manual conversation. Each agent has a narrow job, a local operating contract, a conventional schedule, and a required place to leave evidence.
+Handrail used a recurring Codex agent task team to keep project work moving without turning every task into a manual conversation. Each agent has a narrow job, a local operating contract, a conventional schedule, and a required place to leave evidence.
 
 The core team now runs as independent scheduled automations. There is no role-to-role launch chain.
 
@@ -37,7 +39,7 @@ Roles coordinate through durable artifacts:
 - Handoff files under `$CODEX_HOME/automations/<role>/handoff.md`.
 - Slack messages in `#handrail-agents` for role-addressed operational requests.
 
-No role starts, schedules, or simulates another role. A role may write or refresh a handoff file for a later scheduled run, but it must not edit automation records or automation database rows as a handoff mechanism. Normal product validation is different: a role may fully exercise Handrail functionality when the selected issue requires it, including creating a real local Codex Desktop chat through Handrail `start_chat`.
+No role starts, schedules, or simulates another role. A role may write or refresh a handoff file for a later scheduled run, but it must not edit automation records or automation database rows as a handoff mechanism. Normal product validation is different: a role may fully exercise Handrail functionality when the selected issue requires it, including creating a real local Grok Build session through Handrail `start_chat`.
 
 The useful rhythm is:
 

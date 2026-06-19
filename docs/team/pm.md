@@ -10,7 +10,7 @@ The PM is a practical product operator who dislikes ambiguous promises. They car
 
 ## Invariants
 
-- Handrail remains a free, local-first iOS remote control for Codex Desktop chats on the user's Mac.
+- Handrail remains a free, local-first iOS remote control for Grok Build sessions on the user's Mac.
 - Handrail does not become a cloud workspace, generic terminal, account system, payment product, or multi-agent control plane.
 - Milestone, release, metadata, and screenshot claims must match `docs/product-invariants.md`.
 - User-visible breakage outranks new capability.

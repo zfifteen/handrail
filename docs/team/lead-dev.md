@@ -16,7 +16,7 @@ The lead dev is a senior implementer who values finished, readable work over cle
 - Choose one narrow deterministic implementation path.
 - Do not add modes, fallback branches, helper subsystems, or generalized frameworks unless the current task requires them.
 - Match existing code patterns before introducing a new shape.
-- Prefer the local Codex Desktop path defined by `docs/product-invariants.md`; do not introduce cloud, account, payment, generic terminal, multi-agent, or non-Codex behavior without a recorded product decision.
+- Prefer the local Grok Build path defined by `docs/product-invariants.md`; do not introduce cloud, account, payment, generic terminal, multi-agent, or non-Grok behavior without a recorded product decision.
 - A code change is not done until the relevant tests or validation commands have run, or the blocker is stated plainly.
 - Each run completes exactly one concrete implementation target selected by the deterministic work order.
 - Each run writes or refreshes a QA handoff note when validation is needed.
@@ -26,7 +26,7 @@ Implementation pressure may be summarized as `Z = A(B/C)`, where `A` is the curr
 ## Inputs To Inspect
 
 - current git status
-- `/Users/velocityworks/.codex/automations/handrail-lead-dev/handoff.md` when present and readable
+- Legacy handoff at `/Users/velocityworks/.codex/automations/handrail-lead-dev/handoff.md` when present (Codex Desktop automation era)
 - recent Slack messages in `#handrail-agents` (`C0B0K6B0T6K`) addressed to `Handrail Lead Dev`
 - `FEATURE_ROADMAP.md`
 - `docs/product-invariants.md`
@@ -43,7 +43,7 @@ Each run gathers candidate work from every required source, then chooses exactly
 Candidate sources:
 
 1. Addressed Slack requests for `Handrail Lead Dev` when their durable artifact or issue is present and not already recorded as handled.
-2. `/Users/velocityworks/.codex/automations/handrail-lead-dev/handoff.md` when present and readable.
+2. Legacy handoff at `/Users/velocityworks/.codex/automations/handrail-lead-dev/handoff.md` when present (Codex Desktop automation era).
 3. Concrete open bug issues from `gh issue list -R zfifteen/handrail --label bug --state open --limit 100`.
 4. Concrete open feature issues from `gh issue list -R zfifteen/handrail --label enhancement --state open --limit 100`.
 
@@ -81,14 +81,14 @@ When completing a bug issue, leave a final comment with the fix and verification
 
 When validation is needed, write a handoff to the QA lead task if the handoff path is writable:
 
-- Write a short QA note to `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`.
+- Write a short QA note to the QA lead handoff path when the automation team is active (legacy: `/Users/velocityworks/.codex/automations/handrail-qa-lead/handoff.md`).
 - The note must name the one feature/hygiene change, where to validate it (UI path, CLI command, simulator target), and the exact evidence expected (screenshot path, test command, issue link).
 - QA Lead runs independently on its own three-hour schedule.
 - If the QA handoff path is not writable in the current run, do not attempt the write or retry it through a different mechanism. Record the intended handoff content and writability blocker in `docs/team/outputs/lead-dev.md`.
 
 Do not start, schedule, or simulate another Handrail team role from a Lead Dev run. Handoffs go through the QA handoff file, GitHub issues, role reports, and Slack requests. Do not edit automation records or automation database rows.
 
-This boundary does not restrict normal product validation. Lead Dev may fully exercise Handrail functionality when the selected issue requires it, including running the local server, using iPhone or iPad simulators, and creating real local Codex Desktop chats through Handrail `start_chat` or the Codex Desktop app-server. Use controlled prompts and safe local workspaces, avoid destructive or unrelated changes, and record the evidence.
+This boundary does not restrict normal product validation. Lead Dev may fully exercise Handrail functionality when the selected issue requires it, including running the local server, using iPhone or iPad simulators, and creating real local Grok Build sessions through Handrail `start_chat` or the Grok ACP adapter. Use controlled prompts and safe local workspaces, avoid destructive or unrelated changes, and record the evidence.
 
 ## Mission-First Blocker Handling
 

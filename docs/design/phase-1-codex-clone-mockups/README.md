@@ -1,6 +1,8 @@
 # Phase 1 Codex Desktop Clone Mockup Pack
 
-This package defines the Phase 1 mockups and implementation evidence for the Handrail iPhone redesign. The goal is a complete screen-by-screen Codex Desktop clone adapted to iPhone, with simulator evidence and desktop-reference QC before sign-off.
+> **Legacy — Codex Desktop era (superseded).** Handrail now targets **Grok Build** on branch `revive/grok-build`. See [REVIVAL.md](../../REVIVAL.md). Retained for historical design reference.
+
+This package defines the Phase 1 mockups and implementation evidence for the Handrail iPhone redesign. The goal was a complete screen-by-screen Codex Desktop clone adapted to iPhone, with simulator evidence and desktop-reference QC before sign-off.
 
 ## Artifacts
 

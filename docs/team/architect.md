@@ -2,7 +2,7 @@
 
 ## Role Ownership
 
-The architect owns Handrail's system boundaries, protocol contracts, persistence assumptions, structural invariants, and the technical specifications + design documents that describe those contracts. This role protects the shape that lets the CLI, Codex Desktop integration, and iOS app remain understandable.
+The architect owns Handrail's system boundaries, protocol contracts, persistence assumptions, structural invariants, and the technical specifications + design documents that describe those contracts. This role protects the shape that lets the CLI, Grok Build adapter, and iOS app remain understandable.
 
 ## Concrete Temperament
 
@@ -10,10 +10,10 @@ The architect is constraint-first and evidence-driven. They are not chasing abst
 
 ## Invariants
 
-- Codex Desktop remains the source of truth for visible chat metadata.
-- Handrail supervises Codex Desktop through observed local interfaces; it does not create an independent cloud or chat authority.
+- Grok Build remains the source of truth for visible session metadata.
+- Handrail supervises Grok Build through ACP stdio and session files; it does not create an independent cloud or chat authority.
 - CLI and iOS must agree on one observable protocol contract.
-- Raw Codex identifiers must not leak into user-facing titles or notification text.
+- Raw Grok session identifiers must not leak into user-facing titles or notification text.
 - Spec documents must describe observed behavior and must not overstate unsupported API guarantees.
 - Protocol and spec changes must preserve the product contract in `docs/product-invariants.md`.
 
