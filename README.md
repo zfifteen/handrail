@@ -1,25 +1,47 @@
 # Handrail
 
-## Revival (2026-06-19)
+**Supervise Grok Build from your iPhone — locally, on your own Mac.**
 
-Handrail is being revived on branch `revive/grok-build` as a **Grok Build** companion (replacing Codex Desktop). Phases 0–4 complete. **Start here:** [docs/REVIVAL.md](docs/REVIVAL.md) and [docs/PHASE4_FINDINGS.md](docs/PHASE4_FINDINGS.md).
+Handrail is a free, local-first companion for the Grok Build CLI. It pairs your iPhone with a small CLI on your Mac so you can list sessions, read transcripts, send follow-ups, approve tool requests, and stop running work — without a cloud relay, account, or subscription.
 
----
+Handrail is not affiliated with xAI.
 
-Handrail is a free, local-first iOS remote control for Grok Build sessions on your own Mac.
+## Overview
 
-It has two parts:
+Handrail has two components:
 
-- `handrail`, a desktop command that starts a local WebSocket server and exposes Grok Build session state to iOS.
-- `Handrail`, a SwiftUI iOS app that pairs with the CLI, shows Grok chats, continues sessions through the Mac, surfaces tool approvals, and requests stops.
+| Component | Role |
+|-----------|------|
+| **handrail** (CLI) | Runs on your Mac. Starts a local WebSocket server, reads Grok session state from `~/.grok/sessions`, and drives Grok through the ACP stdio protocol. |
+| **Handrail** (iOS) | SwiftUI app for iPhone and iPad. Pairs over your LAN, mirrors chat state from the Mac, and sends commands back to the CLI. |
 
-Works with the official Grok Build CLI. Not affiliated with xAI.
+Grok Build remains the authority for execution. Handrail supervises it; it does not replace the Grok CLI or edit files directly from iOS.
 
-## What Handrail Is Not
+## Features
 
-Handrail is not a cloud coding workspace, a generic SSH terminal, an account system, a paid product, or a multi-agent control plane. It does not support Claude, Gemini, OpenCode, or other agents. It does not edit files directly. Grok Build runs locally and Handrail supervises it.
+- **Pair once, stay local** — QR pairing over Wi‑Fi/LAN; no Handrail account or cloud backend.
+- **Session list and detail** — Titles, status, transcripts (`User:` / `Grok:` / `Tool:`), and project context from live Grok sessions.
+- **Continue and start chats** — Send prompts from iOS; the Mac runs Grok via ACP.
+- **Tool approvals** — Surface `session/request_permission` requests with summary and file context; approve or deny from the phone.
+- **Stop in flight** — Request interruption of a running turn from iOS.
+- **Notifications** — Optional local alerts for completion, failure, and approval-required states (APNs optional on the Mac side).
 
-## CLI Install
+## Requirements
+
+**Mac**
+
+- Node.js 20+
+- Grok Build CLI installed and authenticated (`grok login`)
+- Same network as your iPhone (or routable LAN)
+
+**iPhone / iPad**
+
+- Xcode 16+ to build from source
+- Camera for QR pairing (physical device recommended)
+
+## Quick start
+
+### 1. Install the CLI
 
 ```sh
 cd cli
@@ -28,84 +50,93 @@ npm run build
 npm link
 ```
 
-Handrail controls Grok Build through the Grok CLI's ACP stdio protocol. It spawns Handrail-owned `grok agent --no-leader stdio` children for new turns when needed.
+### 2. Pair your phone
 
-## Run the Server and Pair
-
-On your Mac:
+On the Mac:
 
 ```sh
 handrail pair
 ```
 
-The command creates or reuses a pairing token in `~/.handrail/state.json`, prints a QR code, and starts the local WebSocket server on port `8787` if it is not already running.
+This writes pairing state to `~/.handrail/state.json`, prints a QR code, and starts the WebSocket server (default port `8787`).
 
-On iOS, open Handrail, tap the QR scanner, and scan the code. The QR payload is JSON containing the protocol version, local host, port, pairing token, and machine name.
+On iOS, open Handrail, scan the QR code, and confirm the connection. The payload includes protocol version, host, port, pairing token, and machine name.
 
-## Work With Chats
+### 3. Supervise sessions
 
-With `handrail pair` or `handrail serve` running:
-
-```sh
-handrail chats
-```
-
-The iOS app reads Grok sessions from `~/.grok/sessions`. Chat IDs use the `grok:<session-id>` prefix.
-
-Other CLI commands:
+With the server running (`handrail pair` or `handrail serve`):
 
 ```sh
-handrail serve
-handrail chats
-handrail stop <chat-id>
-handrail unpair
+handrail chats          # list grok:<session-id> chats
+handrail stop <chat-id> # request stop for a running session
 ```
 
-## Run the iOS App
+Open the iOS app to browse sessions, view transcripts, continue idle chats, and handle approvals.
 
-Open:
+### 4. Build the iOS app
 
 ```sh
-ios/Handrail/Handrail.xcodeproj
+open ios/Handrail/Handrail.xcodeproj
 ```
 
-Select the `Handrail` scheme and run on an iPhone simulator or device. QR scanning requires a camera, so pairing by scan is intended for a physical device.
+Select the **Handrail** scheme and run on a simulator or device.
 
-## Security Model
+## CLI reference
 
-Handrail is local-first:
+| Command | Description |
+|---------|-------------|
+| `handrail pair` | Create or reuse pairing token, show QR, start server |
+| `handrail serve` | Start server without QR flow |
+| `handrail chats` | Print session list from Grok state |
+| `handrail stop <id>` | Interrupt a running Grok turn |
+| `handrail unpair` | Clear local pairing state |
 
-- Pairing token required.
-- No cloud relay.
-- No account.
-- No payment code.
-- Code stays on the user's machine.
-- CLI executes Grok locally.
-- iOS receives chat output, changed file names, and git diffs.
-- Local network access is required for the MVP.
+Chat IDs use the `grok:<session-id>` prefix, sourced from `~/.grok/sessions`.
 
-The token is stored in `~/.handrail/state.json` on the Mac and in Keychain on iOS. iOS stores only non-secret paired-machine metadata in UserDefaults.
+## Architecture
 
-## Approval Behavior
+```text
+iPhone / iPad  ── ws:// (LAN) ──►  handrail CLI  ── ACP stdio ──►  grok agent
+                                         │
+                                         ├── ~/.grok/sessions/**/summary.json
+                                         ├── updates.jsonl (transcripts)
+                                         └── active_sessions.json (live status)
+```
 
-For Handrail-started Grok Build turns, the CLI listens for ACP `session/request_permission` requests. It exposes the tool call id to iOS as `approvalId`, emits `approval_required`, and sends approve or deny decisions back to the same ACP request.
+The CLI speaks JSON over WebSocket to iOS and JSON-RPC over stdio to Grok. Protocol details: [docs/spec/handrail-websocket-protocol.md](docs/spec/handrail-websocket-protocol.md) and [docs/spec/grok-build-adapter.md](docs/spec/grok-build-adapter.md).
 
-The iOS app shows the approval summary and available file context. Approval routing must use the real Grok ACP request id; Handrail does not infer approvals from transcript text.
+## Security and privacy
 
-## Limitations
+Handrail is designed for trusted local networks:
 
-- Live approval-response release evidence is still required before App Store copy or screenshots claim approval workflows.
-- The WebSocket server is plain local-network `ws://`.
-- Grok automations are not supported in v1 (empty automation list).
-- Physical device install may require a working USB/Wi-Fi debugging tunnel.
-- The iOS app stores the pairing token in Keychain and paired-machine metadata in UserDefaults.
-- Handrail does not maintain an independent chat store.
-- There is no background daemon, cloud relay, account sync, or generic terminal.
+- **Authentication** — Per-device pairing token (Keychain on iOS; `~/.handrail/state.json` on Mac).
+- **Transport** — `ws://` on LAN (not TLS). Protect the network you use.
+- **Data** — Chat content stays on your machines. Handrail does not operate a sync or analytics backend.
 
-## Tests
+Full policy: [docs/privacy-policy.md](docs/privacy-policy.md)
+
+## Development
 
 ```sh
 cd cli
-npm test
-npm run e2e   # live WebSocket probe; requires handrail serve
+npm test                 # unit tests (60)
+npm run spike            # Grok adapter feasibility probes
+npm run e2e              # live WebSocket probe; requires handrail serve
 ```
+
+Agent and contributor conventions: [AGENTS.md](AGENTS.md). Migration and engineering history: [docs/REVIVAL.md](docs/REVIVAL.md).
+
+## Scope and limitations
+
+Handrail intentionally does **not** provide a cloud IDE, generic SSH terminal, multi-agent control plane, or support for non-Grok agents. Automations are not available in the current release.
+
+Other constraints worth knowing before production use:
+
+- WebSocket traffic is unencrypted (`ws://`).
+- Approval workflows need live device validation before App Store claims.
+- Push notifications require APNs configuration on the Mac (`HANDRAIL_APNS_*` env vars).
+- Handrail does not maintain a separate chat database; Grok session files are the source of truth.
+
+## License
+
+Handrail is free, local-first software for personal use with Grok Build on your own hardware.
